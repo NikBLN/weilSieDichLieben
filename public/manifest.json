@@ -1,0 +1,25 @@
+{
+  "short_name": "weilSieDichLieben",
+  "name": "Deine inoffizielle (aber ganz persönliche) BVG Anzeigetafel",
+  "icons": [
+    {
+      "src": "BVG.svg",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "BVG.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "BVG.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
