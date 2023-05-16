@@ -1,7 +1,8 @@
-import { AutoComplete } from "antd";
+import { AutoComplete, message } from "antd";
 import React, { useDeferredValue, useEffect, useState } from "react";
 
 const StationFinder = (props) => {
+  const [messageApi, contextHolder] = message.useMessage();
   const [options, setOptions] = useState([]);
   const [value, setValue] = useState();
   const deferredOptions = useDeferredValue(options);
@@ -20,6 +21,13 @@ const StationFinder = (props) => {
     }
   }, [queryStr]);
 
+  const success = () => {
+    messageApi.open({
+      type: "success",
+      content: "Station erfolgreich hinzugefügt!",
+    });
+  };
+
   const prepareOptionsData = (data) => {
     setOptions(
       data.map((dataSet) => {
@@ -30,26 +38,39 @@ const StationFinder = (props) => {
             props.selectedStations.filter(
               (station) => station.id === dataSet.id
             ).length > 0,
+          when: null,
+          results: 4,
+          suburban: true,
+          subway: true,
+          tram: true,
+          bus: true,
+          ferry: true,
+          express: true,
+          regional: true,
         };
       })
     );
   };
 
   return (
-    <AutoComplete
-      value={value}
-      style={{ width: 200 }}
-      options={deferredOptions}
-      onSelect={(_, option) => {
-        props.onSelect(option);
-        setValue("");
-        setOptions([]);
-      }}
-      onSearch={(text) => {
-        setQueryStr(text);
-        setValue(text);
-      }}
-    />
+    <>
+      {contextHolder}
+      <AutoComplete
+        value={value}
+        style={{ width: 200 }}
+        options={deferredOptions}
+        onSelect={(_, option) => {
+          props.onSelect(option);
+          setValue("");
+          setOptions([]);
+          success();
+        }}
+        onSearch={(text) => {
+          setQueryStr(text);
+          setValue(text);
+        }}
+      />
+    </>
   );
 };
 
