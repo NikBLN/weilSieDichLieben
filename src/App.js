@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Settings from "./Components/Settings";
-import { HeartFilled } from "@ant-design/icons";
+import Icon from "@ant-design/icons";
+import bvgIcon from "./images/BVG.png";
 import DepartureDisplay from "./Components/DepartureDisplay";
 
 function App() {
@@ -97,7 +98,11 @@ function App() {
             width: "33.33%",
           }}
         >
-          <HeartFilled style={{ color: "#f0d722", fontSize: "36px" }} />
+          <Icon
+            component={() => (
+              <img src={bvgIcon} style={{ height: "48px" }} alt="Icon" />
+            )}
+          />
         </div>
         <div
           style={{
