@@ -60,6 +60,7 @@ function App() {
   return (
     <div
       style={{
+        overflow: "hidden",
         display: "flex",
         flexDirection: "column",
         height: "100vh",

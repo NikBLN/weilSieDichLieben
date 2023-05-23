@@ -5,7 +5,10 @@ const CloseButtonTopRight = (props) => {
   return (
     <div
       onClick={() => {
-        props.setSettingsAreVisible(false);
+        props.setSettingsClass("animate__animated animate__backOutLeft");
+        setTimeout(() => {
+          props.setSettingsAreVisible(false);
+        }, 500);
       }}
       style={{
         position: "absolute",

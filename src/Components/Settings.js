@@ -4,9 +4,13 @@ import SettingsModal from "./SettingsModal";
 import { Button, Card, Row, Col, Switch, InputNumber } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import CloseButtonTopRight from "./CloseButtonTopRight";
+import "animate.css";
 
 const Settings = (props) => {
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
+  const [settingsClass, setSettingsClass] = useState(
+    "animate__animated animate__backInRight"
+  );
 
   const onPropChange = (checked, dataSet, type) => {
     const selectedStationsCopy = [...props.selectedStations];
@@ -21,6 +25,7 @@ const Settings = (props) => {
 
   return (
     <div
+      className={settingsClass}
       style={{
         height: "100%",
         backgroundColor: "lightgray",
@@ -31,6 +36,7 @@ const Settings = (props) => {
       }}
     >
       <CloseButtonTopRight
+        setSettingsClass={setSettingsClass}
         setSettingsAreVisible={props.setSettingsAreVisible}
       />
       <Row gutter={[16, 16]}>
