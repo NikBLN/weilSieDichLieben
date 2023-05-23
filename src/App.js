@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import Settings from "./Components/Settings";
-import Icon, { SettingOutlined } from "@ant-design/icons";
+import Icon, { SettingOutlined, ArrowRightOutlined } from "@ant-design/icons";
 import bvgIcon from "./images/BVG.png";
 import DepartureDisplay from "./Components/DepartureDisplay";
 
 function App() {
   const [selectedStations, setSelectedStations] = useState([]);
   const [settingsAreVisible, setSettingsAreVisible] = useState(false);
+  const [settingsClass, setSettingsClass] = useState(
+    "animate__animated animate__backInRight"
+  );
 
   useEffect(() => {
     fetchStationsFromCookie();
@@ -91,12 +94,42 @@ function App() {
             width: "33.33%",
           }}
         >
-          <SettingOutlined
-            onClick={() => {
-              setSettingsAreVisible(true);
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              cursor: "pointer",
             }}
-            style={{ fontSize: "32px", color: "#f0d722" }}
-          />
+            onClick={() => {
+              setSettingsClass(
+                settingsAreVisible
+                  ? "animate__animated animate__backOutRight"
+                  : "animate__animated animate__backInRight"
+              );
+              setTimeout(
+                () => {
+                  setSettingsAreVisible(!settingsAreVisible);
+                },
+                settingsAreVisible ? 500 : 0
+              );
+            }}
+          >
+            <div
+              style={{
+                marginRight: "8px",
+                color: "#f0d722",
+              }}
+            >
+              {!settingsAreVisible ? "Einstellungen" : "Zurück"}
+            </div>
+            {!settingsAreVisible ? (
+              <SettingOutlined style={{ fontSize: "32px", color: "#f0d722" }} />
+            ) : (
+              <ArrowRightOutlined
+                style={{ fontSize: "32px", color: "#f0d722" }}
+              />
+            )}
+          </div>
         </div>
       </div>
       {!settingsAreVisible && selectedStations.length === 0 && (
@@ -115,12 +148,13 @@ function App() {
         </div>
       )}
       {!settingsAreVisible && selectedStations.length > 0 && (
-        <div style={{ padding: "8px" }}>
+        <div style={{ padding: "8px", overflow: "auto" }}>
           <DepartureDisplay selectedStations={selectedStations} />
         </div>
       )}
       {settingsAreVisible && (
         <Settings
+          settingsClass={settingsClass}
           setSettingsAreVisible={setSettingsAreVisible}
           selectedStations={selectedStations}
           onStationSelect={onStationSelect}
