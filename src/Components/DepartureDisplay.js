@@ -7,6 +7,7 @@ const DepartureDisplay = (props) => {
   const [columnData, setColumnData] = useState([]);
   const departureDataRef = useRef([]);
   const fetchCounter = useRef(0);
+  const fetchIsInProgress = useRef(false);
 
   useEffect(() => {
     let interval;
@@ -21,38 +22,44 @@ const DepartureDisplay = (props) => {
     return () => {
       clearInterval(interval);
     };
-  }, [props.selectedStations, props.departureAmount, props.departureWhen]);
+  }, [props.selectedStations]);
 
   const fetchDataForSelectedStations = () => {
+    if (fetchIsInProgress.current) return;
+
+    fetchIsInProgress.current = true;
     departureDataRef.current = [];
     fetchCounter.current = 0;
     for (let i = 0; i < props.selectedStations.length; i++) {
       const selectedStation = props.selectedStations[i];
-      fetchDeparturesAtStop(selectedStation.id);
+      fetchDeparturesAtStop(selectedStation);
     }
   };
 
-  const fetchDeparturesAtStop = (stationId) => {
+  const fetchDeparturesAtStop = (station) => {
+    const stationId = station.id;
     const now = new Date();
     const later = new Date(
-      now.getTime() + (props.departureWhen ? props.departureWhen : 0) * 60000
+      now.getTime() + (station.when != null ? station.when : 0) * 60000
     );
     const formattedTime = later.toLocaleTimeString("de-DE", {
       hour12: false,
     });
-    const baseFetchUrl = `https://v6.bvg.transport.rest/stops/STATIONID/departures?when=${formattedTime}&results=${
-      props.departureAmount ? props.departureAmount : 0
-    }`;
-    const fetchUrl = baseFetchUrl.replace("STATIONID", stationId);
-    fetch(fetchUrl)
+    const url = `https://v6.bvg.transport.rest/stops/${stationId}/departures?when=${formattedTime}&results=${station.results}&suburban=${station.suburban}&subway=${station.subway}&tram=${station.tram}&bus=${station.bus}&ferry=${station.ferry}&express=${station.express}&regional=${station.regional}`;
+
+    fetch(url)
       .then((res) => res.json())
       .then((res) => {
-        fetchCounter.current += 1;
-        departureDataRef.current.push(res);
-        if (fetchCounter.current === props.selectedStations.length) {
+        if (fetchCounter.current < props.selectedStations.length) {
+          departureDataRef.current.push(res);
+          fetchCounter.current += 1;
+
           // answer for all stations received -> set column data
-          const data = getColumnData(departureDataRef.current);
-          setColumnData(data);
+          if (fetchCounter.current === props.selectedStations.length) {
+            const columnData = getColumnData(departureDataRef.current);
+            setColumnData(columnData);
+            fetchIsInProgress.current = false;
+          }
         }
       });
   };
