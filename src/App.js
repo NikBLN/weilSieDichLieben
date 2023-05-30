@@ -27,7 +27,8 @@ function App() {
   }, []);
 
   const checkIfApiIsAvailable = () => {
-    fetch("https://v6.bvg.transport.rest/")
+    // check if API is available by fetching a stop
+    fetch("https://v6.db.transport.rest/stops/8011113/departures")
       .then((response) => {
         if (response.status === 200) {
           setApiIsAvailable(true);
