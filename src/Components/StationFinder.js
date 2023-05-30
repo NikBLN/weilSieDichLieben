@@ -8,7 +8,7 @@ const StationFinder = (props) => {
   const deferredOptions = useDeferredValue(options);
   const [queryStr, setQueryStr] = useState("");
   const baseFetchUrl =
-    "https://v6.bvg.transport.rest/locations?poi=false&addresses=false&query=";
+    "https://v6.db.transport.rest/locations?poi=false&addresses=false&query=";
 
   useEffect(() => {
     const fetchUrl = baseFetchUrl + queryStr;

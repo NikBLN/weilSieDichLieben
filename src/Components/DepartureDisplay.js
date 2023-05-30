@@ -45,7 +45,7 @@ const DepartureDisplay = (props) => {
     const formattedTime = later.toLocaleTimeString("de-DE", {
       hour12: false,
     });
-    const url = `https://v6.bvg.transport.rest/stops/${stationId}/departures?when=${formattedTime}&results=${station.results}&suburban=${station.suburban}&subway=${station.subway}&tram=${station.tram}&bus=${station.bus}&ferry=${station.ferry}&express=${station.express}&regional=${station.regional}`;
+    const url = `https://v6.db.transport.rest/stops/${stationId}/departures?when=${formattedTime}&results=${station.results}&suburban=${station.suburban}&subway=${station.subway}&tram=${station.tram}&bus=${station.bus}&ferry=${station.ferry}&express=${station.express}&regional=${station.regional}`;
 
     fetch(url)
       .then((res) => res.json())

@@ -3,7 +3,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import SettingsModal from "./SettingsModal";
 import { Button, Card, Row, Col, Switch, InputNumber } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
-import CloseButtonTopRight from "./CloseButtonTopRight";
+import "animate.css";
 
 const Settings = (props) => {
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
@@ -21,7 +21,9 @@ const Settings = (props) => {
 
   return (
     <div
+      className={props.settingsClass}
       style={{
+        overflow: "auto",
         height: "100%",
         backgroundColor: "lightgray",
         margin: "16px",
@@ -30,9 +32,6 @@ const Settings = (props) => {
         position: "relative",
       }}
     >
-      <CloseButtonTopRight
-        setSettingsAreVisible={props.setSettingsAreVisible}
-      />
       <Row gutter={[16, 16]}>
         {props.selectedStations.map((station) => {
           return (
