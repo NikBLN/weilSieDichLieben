@@ -83,6 +83,7 @@ const DepartureDisplay = (props) => {
           direction: departure.direction,
           departureName: departure.stop.name,
           when: diffInMinutes,
+          remarks: departure.remarks,
         });
       }
     }
