@@ -10,10 +10,36 @@ function App() {
   const [settingsClass, setSettingsClass] = useState(
     "animate__animated animate__backInRight"
   );
+  const [apiIsAvailable, setApiIsAvailable] = useState(false);
 
   useEffect(() => {
+    checkIfApiIsAvailable();
+
+    const apiAvailableInterval = setInterval(() => {
+      checkIfApiIsAvailable();
+    }, 300000);
+
     fetchStationsFromCookie();
+
+    return () => {
+      clearInterval(apiAvailableInterval);
+    };
   }, []);
+
+  const checkIfApiIsAvailable = () => {
+    fetch("https://v6.bvg.transport.rest/")
+      .then((response) => {
+        if (response.status === 200) {
+          setApiIsAvailable(true);
+        } else {
+          setApiIsAvailable(false);
+        }
+      })
+      .catch((error) => {
+        console.error("Error checking API availability:", error);
+        setApiIsAvailable(false);
+      });
+  };
 
   const fetchStationsFromCookie = () => {
     const cookieSelectedStations = document.cookie.replace(
@@ -71,7 +97,17 @@ function App() {
       }}
     >
       <div style={{ display: "flex", padding: "8px" }}>
-        <div style={{ width: "33.33%" }}></div>
+        <div
+          style={{
+            width: "33.33%",
+            marginRight: "8px",
+            color: "#f0d722",
+          }}
+        >
+          {apiIsAvailable
+            ? ""
+            : "Es scheint aktuell ein Problem mit der Datenschnittstelle zu geben, weshalb die Website nicht wie gewohnt funktioniert. Wir müssen uns leider gedulden."}
+        </div>
         <div
           style={{
             display: "flex",
