@@ -36,6 +36,8 @@ function App() {
   useEffect(() => {
     if (selectedStations.length > 0) {
       buildUrlOutOfSelectedStations(selectedStations);
+    } else {
+      setExportUrl("");
     }
   }, [selectedStations]);
 
@@ -243,32 +245,34 @@ function App() {
             width: "33.33%",
           }}
         >
-          <Popover
-            title="Einstellungen exportieren"
-            content={
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <div>
-                  <Input value={exportUrl} />
+          <div>
+            <Popover
+              title="Einstellungen exportieren"
+              content={
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <div>
+                    <Input value={exportUrl} />
+                  </div>
+                  <div
+                    onClick={copyExportUrlToClipboard}
+                    style={{ marginLeft: "8px", cursor: "pointer" }}
+                  >
+                    <CopyOutlined style={{ fontSize: "24px" }} />
+                  </div>
                 </div>
-                <div
-                  onClick={copyExportUrlToClipboard}
-                  style={{ marginLeft: "8px", cursor: "pointer" }}
-                >
-                  <CopyOutlined style={{ fontSize: "24px" }} />
-                </div>
-              </div>
-            }
-            trigger="click"
-          >
-            <ExportOutlined
-              rotate={270}
-              style={{
-                fontSize: "32px",
-                color: "#f0d722",
-                marginRight: "24px",
-              }}
-            />
-          </Popover>
+              }
+              trigger="click"
+            >
+              <ExportOutlined
+                rotate={270}
+                style={{
+                  fontSize: "32px",
+                  color: "#f0d722",
+                  marginRight: "24px",
+                }}
+              />
+            </Popover>
+          </div>
           <div
             style={{
               display: "flex",
