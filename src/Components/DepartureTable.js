@@ -3,7 +3,7 @@ import React from "react";
 import Marquee from "react-fast-marquee";
 
 const DepartureTable = (props) => {
-  const FONTSIZE = "28px";
+  const FONTSIZE = props.fontSize + "px";
   const FONTFAMILYNAME = "DotMatrix";
 
   const sortedDataSource = props.dataSource.sort((a, b) => {

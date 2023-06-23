@@ -5,10 +5,13 @@ import Icon, {
   ArrowRightOutlined,
   ExportOutlined,
   CopyOutlined,
+  FontSizeOutlined,
+  PlusOutlined,
+  MinusOutlined,
 } from "@ant-design/icons";
 import bvgIcon from "./images/BVG.png";
 import DepartureDisplay from "./Components/DepartureDisplay";
-import { Input, Popover, message } from "antd";
+import { Button, Input, Popover, message } from "antd";
 
 function App() {
   const [messageApi, contextHolder] = message.useMessage();
@@ -19,6 +22,7 @@ function App() {
   );
   const [apiIsAvailable, setApiIsAvailable] = useState(false);
   const [exportUrl, setExportUrl] = useState("");
+  const [fontSize, setFontSize] = useState(16);
 
   useEffect(() => {
     checkIfApiIsAvailable();
@@ -48,6 +52,7 @@ function App() {
     } else {
       // fetch data from cookie
       fetchStationsFromCookie();
+      fetchFontSizeFromCookie();
     }
   };
 
@@ -65,6 +70,7 @@ function App() {
     urlParams.delete("value");
     urlParams.delete("when");
     urlParams.delete("results");
+    urlParams.delete("fontSize");
 
     stationData.forEach((station) => {
       urlParams.append("id", station.id);
@@ -78,6 +84,7 @@ function App() {
       urlParams.append("value", station.value);
       urlParams.append("when", station.when);
       urlParams.append("results", station.results);
+      urlParams.append("fontSize", fontSize);
     });
 
     setExportUrl(`${window.location.origin}?${urlParams.toString()}`);
@@ -102,6 +109,9 @@ function App() {
     const value = urlParams.getAll("value");
     const when = urlParams.getAll("when");
     const results = urlParams.getAll("results");
+
+    const fontSize = urlParams.get("fontSize");
+    setFontSize(fontSize);
 
     const fromUrlRetrievedStations = id.map((_, index) => {
       return {
@@ -138,6 +148,24 @@ function App() {
       });
   };
 
+  const fetchFontSizeFromCookie = () => {
+    const cookieFontSize = document.cookie.replace(
+      /(?:(?:^|.*;\s*)fontSize\s*=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+    if (cookieFontSize) {
+      setFontSize(parseInt(cookieFontSize));
+    }
+  };
+
+  const saveFontSizeInCookie = (cookieName, data) => {
+    const cookieFontSize = `${cookieName}=${JSON.stringify(
+      data
+    )};path=/;expires=${new Date(Date.now() + 31536000000).toUTCString()}`;
+    console.log(cookieFontSize);
+    document.cookie = cookieFontSize;
+  };
+
   const fetchStationsFromCookie = () => {
     const cookieSelectedStations = document.cookie.replace(
       /(?:(?:^|.*;\s*)bvgDepatureSelectedStations\s*=\s*([^;]*).*$)|^.*$/,
@@ -148,7 +176,7 @@ function App() {
     }
   };
 
-  const saveDataInCookie = (cookieName, data) => {
+  const saveStationsInCookie = (cookieName, data) => {
     const cookieString = `${cookieName}=${JSON.stringify(
       data
     )};path=/;expires=${new Date(Date.now() + 31536000000).toUTCString()}`;
@@ -160,7 +188,7 @@ function App() {
     selectedStationsCopy.push(dataSet);
     setSelectedStations(selectedStationsCopy);
 
-    saveDataInCookie("bvgDepatureSelectedStations", selectedStationsCopy);
+    saveStationsInCookie("bvgDepatureSelectedStations", selectedStationsCopy);
   };
 
   const onStationEdit = (dataSet) => {
@@ -171,7 +199,7 @@ function App() {
     selectedStationsCopy[index] = dataSet;
     setSelectedStations(selectedStationsCopy);
 
-    saveDataInCookie("bvgDepatureSelectedStations", selectedStationsCopy);
+    saveStationsInCookie("bvgDepatureSelectedStations", selectedStationsCopy);
   };
 
   const removeStation = (station) => {
@@ -180,7 +208,10 @@ function App() {
     );
     setSelectedStations(updatedSelectedStations);
 
-    saveDataInCookie("bvgDepatureSelectedStations", updatedSelectedStations);
+    saveStationsInCookie(
+      "bvgDepatureSelectedStations",
+      updatedSelectedStations
+    );
   };
 
   const copyExportUrlToClipboard = () => {
@@ -198,6 +229,66 @@ function App() {
           content: `Export-URL konnte nicht in die Zwischenablage kopiert werden! (${error}})`,
         });
       });
+  };
+
+  const renderTopSettingsIcon = () => {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          cursor: "pointer",
+        }}
+        onClick={() => {
+          setSettingsClass(
+            settingsAreVisible
+              ? "animate__animated animate__backOutRight"
+              : "animate__animated animate__backInRight"
+          );
+          setTimeout(
+            () => {
+              setSettingsAreVisible(!settingsAreVisible);
+            },
+            settingsAreVisible ? 500 : 0
+          );
+        }}
+      >
+        {!settingsAreVisible ? (
+          <SettingOutlined style={{ fontSize: "32px", color: "#f0d722" }} />
+        ) : (
+          <ArrowRightOutlined style={{ fontSize: "32px", color: "#f0d722" }} />
+        )}
+      </div>
+    );
+  };
+
+  const renderMidSettingsIcon = () => {
+    return (
+      <div
+        style={{
+          color: "#f0d722",
+          display: "flex",
+          alignItems: "center",
+          cursor: "pointer",
+        }}
+        onClick={() => {
+          setSettingsClass(
+            settingsAreVisible
+              ? "animate__animated animate__backOutRight"
+              : "animate__animated animate__backInRight"
+          );
+          setTimeout(
+            () => {
+              setSettingsAreVisible(!settingsAreVisible);
+            },
+            settingsAreVisible ? 500 : 0
+          );
+        }}
+      >
+        <div style={{ marginRight: "8px" }}>Stationen konfigurieren:</div>
+        <SettingOutlined style={{ fontSize: "32px", color: "#f0d722" }} />
+      </div>
+    );
   };
 
   return (
@@ -247,6 +338,48 @@ function App() {
         >
           <div>
             <Popover
+              title="Schriftgröße Anzeigetafel"
+              trigger="click"
+              content={
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-evenly",
+                  }}
+                >
+                  <div>
+                    <Button
+                      onClick={() => {
+                        setFontSize((prev) => prev + 2);
+                        saveFontSizeInCookie("fontSize", fontSize + 2);
+                      }}
+                      icon={<PlusOutlined />}
+                    />
+                  </div>
+                  <div>
+                    <Button
+                      onClick={() => {
+                        setFontSize((prev) => prev - 2);
+                        saveFontSizeInCookie("fontSize", fontSize - 2);
+                      }}
+                      icon={<MinusOutlined />}
+                    />
+                  </div>
+                </div>
+              }
+            >
+              <FontSizeOutlined
+                style={{
+                  fontSize: "32px",
+                  color: "#f0d722",
+                  marginRight: "24px",
+                }}
+              />
+            </Popover>
+          </div>
+          <div>
+            <Popover
               title="Einstellungen exportieren"
               content={
                 <div style={{ display: "flex", alignItems: "center" }}>
@@ -273,42 +406,7 @@ function App() {
               />
             </Popover>
           </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              cursor: "pointer",
-            }}
-            onClick={() => {
-              setSettingsClass(
-                settingsAreVisible
-                  ? "animate__animated animate__backOutRight"
-                  : "animate__animated animate__backInRight"
-              );
-              setTimeout(
-                () => {
-                  setSettingsAreVisible(!settingsAreVisible);
-                },
-                settingsAreVisible ? 500 : 0
-              );
-            }}
-          >
-            <div
-              style={{
-                marginRight: "8px",
-                color: "#f0d722",
-              }}
-            >
-              {!settingsAreVisible ? "Einstellungen" : "Zurück"}
-            </div>
-            {!settingsAreVisible ? (
-              <SettingOutlined style={{ fontSize: "32px", color: "#f0d722" }} />
-            ) : (
-              <ArrowRightOutlined
-                style={{ fontSize: "32px", color: "#f0d722" }}
-              />
-            )}
-          </div>
+          {renderTopSettingsIcon()}
         </div>
       </div>
       {!settingsAreVisible && selectedStations.length === 0 && (
@@ -316,19 +414,20 @@ function App() {
           style={{
             display: "flex",
             flexDirection: "column",
-            color: "#f0d722",
             height: "100%",
             justifyContent: "center",
             alignItems: "center",
-            fontSize: "26px",
           }}
         >
-          Hallo! Klicke auf das Zahnrad oben rechts um zu beginnen.
+          {renderMidSettingsIcon()}
         </div>
       )}
       {!settingsAreVisible && selectedStations.length > 0 && (
         <div style={{ padding: "8px", overflow: "auto" }}>
-          <DepartureDisplay selectedStations={selectedStations} />
+          <DepartureDisplay
+            fontSize={fontSize}
+            selectedStations={selectedStations}
+          />
         </div>
       )}
       {settingsAreVisible && (
