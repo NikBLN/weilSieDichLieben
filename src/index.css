@@ -15,3 +15,8 @@ code {
 antd-custom-cell {
   background-color: aqua;
 }
+
+@font-face {
+  font-family: "DotMatrix";
+  src: url("/public/fonts/DotMatrix.ttf") format("truetype");
+}
