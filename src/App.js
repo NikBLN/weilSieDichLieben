@@ -111,7 +111,7 @@ function App() {
     const results = urlParams.getAll("results");
 
     const fontSize = urlParams.get("fontSize");
-    setFontSize(fontSize);
+    setFontSize(parseInt(fontSize));
 
     const fromUrlRetrievedStations = id.map((_, index) => {
       return {
@@ -162,7 +162,6 @@ function App() {
     const cookieFontSize = `${cookieName}=${JSON.stringify(
       data
     )};path=/;expires=${new Date(Date.now() + 31536000000).toUTCString()}`;
-    console.log(cookieFontSize);
     document.cookie = cookieFontSize;
   };
 
@@ -353,6 +352,7 @@ function App() {
                       onClick={() => {
                         setFontSize((prev) => prev + 2);
                         saveFontSizeInCookie("fontSize", fontSize + 2);
+                        buildUrlOutOfSelectedStations(selectedStations);
                       }}
                       icon={<PlusOutlined />}
                     />
@@ -362,6 +362,7 @@ function App() {
                       onClick={() => {
                         setFontSize((prev) => prev - 2);
                         saveFontSizeInCookie("fontSize", fontSize - 2);
+                        buildUrlOutOfSelectedStations(selectedStations);
                       }}
                       icon={<MinusOutlined />}
                     />
