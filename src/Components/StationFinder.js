@@ -38,7 +38,7 @@ const StationFinder = (props) => {
             props.selectedStations.filter(
               (station) => station.id === dataSet.id
             ).length > 0,
-          when: null,
+          when: 0,
           results: 4,
           suburban: true,
           subway: true,

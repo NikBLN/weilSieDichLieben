@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import SettingsModal from "./SettingsModal";
 import { Button, Card, Row, Col, Switch, InputNumber } from "antd";
@@ -7,6 +7,20 @@ import "animate.css";
 
 const Settings = (props) => {
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      removeQueryParams();
+    };
+  }, []);
+
+  const removeQueryParams = () => {
+    window.history.replaceState(
+      {},
+      document.title,
+      window.location.pathname + window.location.hash
+    );
+  };
 
   const onPropChange = (checked, dataSet, type) => {
     const selectedStationsCopy = [...props.selectedStations];
