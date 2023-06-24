@@ -29,19 +29,19 @@ const DepartureTable = (props) => {
         </Col>
         <Col
           style={{ fontSize: FONTSIZE, fontFamily: FONTFAMILYNAME }}
-          span={8}
+          span={9}
         >
           Ziel
         </Col>
         <Col
           style={{ fontSize: FONTSIZE, fontFamily: FONTFAMILYNAME }}
-          span={8}
+          span={9}
         >
           Abfahrt von
         </Col>
         <Col
           style={{ fontSize: FONTSIZE, fontFamily: FONTFAMILYNAME }}
-          span={4}
+          span={2}
         >
           Abfahrt in
         </Col>
@@ -86,7 +86,7 @@ const DepartureTable = (props) => {
                   fontSize: FONTSIZE,
                   fontFamily: FONTFAMILYNAME,
                 }}
-                span={8}
+                span={9}
               >
                 {data.direction}
               </Col>
@@ -96,7 +96,7 @@ const DepartureTable = (props) => {
                   fontSize: FONTSIZE,
                   fontFamily: FONTFAMILYNAME,
                 }}
-                span={8}
+                span={9}
               >
                 {data.departureName}
               </Col>
@@ -106,7 +106,7 @@ const DepartureTable = (props) => {
                   fontSize: FONTSIZE,
                   fontFamily: FONTFAMILYNAME,
                 }}
-                span={4}
+                span={2}
               >
                 {data.when > 0 ? `${data.when} min` : "Jetzt"}
               </Col>

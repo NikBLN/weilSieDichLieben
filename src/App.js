@@ -8,10 +8,21 @@ import Icon, {
   FontSizeOutlined,
   PlusOutlined,
   MinusOutlined,
+  InfoCircleOutlined,
+  EuroOutlined,
 } from "@ant-design/icons";
 import bvgIcon from "./images/BVG.png";
+import payPalQrCode from "./images/PayPalQrCode.png";
 import DepartureDisplay from "./Components/DepartureDisplay";
-import { Button, Input, Popover, message } from "antd";
+import {
+  Button,
+  Input,
+  Modal,
+  Popover,
+  message,
+  Typography,
+  Space,
+} from "antd";
 
 function App() {
   const [messageApi, contextHolder] = message.useMessage();
@@ -23,6 +34,9 @@ function App() {
   const [apiIsAvailable, setApiIsAvailable] = useState(false);
   const [exportUrl, setExportUrl] = useState("");
   const [fontSize, setFontSize] = useState(16);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
+
+  const { Title, Text } = Typography;
 
   useEffect(() => {
     checkIfApiIsAvailable();
@@ -290,6 +304,261 @@ function App() {
     );
   };
 
+  const renderHeaderLeftSideContent = () => {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          width: "33.33%",
+          marginRight: "8px",
+          color: "#f0d722",
+        }}
+      >
+        <InfoCircleOutlined
+          onClick={() => {
+            setInfoModalVisible(true);
+          }}
+          style={{
+            fontSize: "32px",
+            color: "#f0d722",
+            marginRight: "24px",
+          }}
+        />
+        <Popover
+          placement="bottomLeft"
+          title="Support this project with a donation <3"
+          content={
+            <Space
+              style={{ width: "500px", height: "300px", overflow: "auto" }}
+              direction="vertical"
+              size={1}
+            >
+              <a href="https://www.paypal.com/donate/?hosted_button_id=R96455XKT9X8G">
+                <Button style={{ marginBottom: "8px" }} type="primary">
+                  Donate with PayPal
+                </Button>
+              </a>
+              <Icon
+                component={() => (
+                  <img
+                    src={payPalQrCode}
+                    style={{ height: "100px" }}
+                    alt="Icon"
+                  />
+                )}
+              />
+              <Text strong>Why should you consider donating?</Text>
+              <Text>
+                By donating, you'll be supporting my work and helping me cover
+                the costs of hosting the website.
+              </Text>
+              <Text strong>What do you get in return?</Text>
+              <Text>
+                During the donation process, you can request to be acknowledged
+                as a supporter on this website. Your name, Twitter handle,
+                Instagram handle, or other information will be displayed at the
+                bottom of the website for all users to see!
+              </Text>
+              <Text>
+                I believe in providing this website to everyone for free and
+                without ads, so there won't be any additional premium features
+                aside from this cool departure board.
+              </Text>
+              <Text strong>
+                Will I be the only one receiving the donation money?
+              </Text>
+              <Text>
+                No, I will donate 30% of the donation (after PayPal fees) to{" "}
+                {<a href="https://github.com/derhuerst">Jannis</a>} for
+                providing the data for this website. Without him, this project
+                would not have been possible!
+              </Text>
+            </Space>
+          }
+          trigger="click"
+        >
+          <EuroOutlined
+            style={{
+              fontSize: "32px",
+              color: "#f0d722",
+              marginRight: "24px",
+            }}
+          />
+        </Popover>
+        <Modal
+          title="Informationen und Impressum"
+          open={infoModalVisible}
+          footer={null}
+          onCancel={() => {
+            setInfoModalVisible(false);
+          }}
+        >
+          <div
+            style={{
+              height: "250px",
+              overflow: "auto",
+            }}
+          >
+            <Title level={5}>Bereitstellung der Daten</Title>
+            <Space direction="vertical" size={1}>
+              <Text>
+                <a href="https://www.transport.rest">
+                  transport.rest transit APIs
+                </a>
+              </Text>
+              <Text>
+                Thank you {<a href="https://github.com/derhuerst">Jannis</a>}{" "}
+                for providing and maintaining this awesome API! Feel free to
+                check out and support his project.
+              </Text>
+            </Space>
+            <Title level={5}>Allgemeines</Title>
+            <Space direction="vertical" size={1}>
+              <Text strong>
+                Diese Website ist ein privates Projekt und wird nicht von der
+                BVG betrieben.
+              </Text>
+            </Space>
+            <Title level={5}>Angaben gemäß § 5 TMG</Title>
+            <Space direction="vertical" size={1}>
+              <Text>Nikolas Tsombanis</Text>
+              <Text>Blumenthalstr. 3</Text>
+              <Text>12103 Berlin</Text>
+            </Space>
+            <Title level={5}>Kontakt</Title>
+            <Space direction="vertical" size={1}>
+              <Text>
+                <a href="mailto:weilsiedichlieben@posteo.de">
+                  weilsiedichlieben@posteo.de
+                </a>
+              </Text>
+            </Space>
+            <Title level={5}>
+              Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV
+            </Title>
+            <Space direction="vertical" size={1}>
+              <Text>Nikolas Tsombanis</Text>
+              <Text>Blumenthalstr. 3</Text>
+              <Text>12103 Berlin</Text>
+            </Space>
+          </div>
+        </Modal>
+        {apiIsAvailable
+          ? ""
+          : "Es scheint aktuell ein Problem mit der Datenschnittstelle zu geben, weshalb die Website nicht wie gewohnt funktioniert. Wir müssen uns leider gedulden."}
+      </div>
+    );
+  };
+
+  const renderHeaderMidContent = () => {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "33.33%",
+        }}
+      >
+        <Icon
+          component={() => (
+            <img src={bvgIcon} style={{ height: "48px" }} alt="Icon" />
+          )}
+        />
+      </div>
+    );
+  };
+
+  const renderHeaderRightSideContent = () => {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          width: "33.33%",
+        }}
+      >
+        <div>
+          <Popover
+            title="Schriftgröße Anzeigetafel"
+            trigger="click"
+            content={
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-evenly",
+                }}
+              >
+                <div>
+                  <Button
+                    onClick={() => {
+                      setFontSize((prev) => prev + 2);
+                      saveFontSizeInCookie("fontSize", fontSize + 2);
+                      buildUrlOutOfSelectedStations(selectedStations);
+                    }}
+                    icon={<PlusOutlined />}
+                  />
+                </div>
+                <div>
+                  <Button
+                    onClick={() => {
+                      setFontSize((prev) => prev - 2);
+                      saveFontSizeInCookie("fontSize", fontSize - 2);
+                      buildUrlOutOfSelectedStations(selectedStations);
+                    }}
+                    icon={<MinusOutlined />}
+                  />
+                </div>
+              </div>
+            }
+          >
+            <FontSizeOutlined
+              style={{
+                fontSize: "32px",
+                color: "#f0d722",
+                marginRight: "24px",
+              }}
+            />
+          </Popover>
+        </div>
+        <div>
+          <Popover
+            placement="bottomRight"
+            title="Einstellungen exportieren"
+            content={
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div>
+                  <Input value={exportUrl} />
+                </div>
+                <div
+                  onClick={copyExportUrlToClipboard}
+                  style={{ marginLeft: "8px", cursor: "pointer" }}
+                >
+                  <CopyOutlined style={{ fontSize: "24px" }} />
+                </div>
+              </div>
+            }
+            trigger="click"
+          >
+            <ExportOutlined
+              rotate={270}
+              style={{
+                fontSize: "32px",
+                color: "#f0d722",
+                marginRight: "24px",
+              }}
+            />
+          </Popover>
+        </div>
+        {renderTopSettingsIcon()}
+      </div>
+    );
+  };
+
   return (
     <div
       style={{
@@ -300,115 +569,14 @@ function App() {
         backgroundColor: "black",
       }}
     >
-      {contextHolder}
+      {
+        // contextHolder is needed for the antd messages
+        contextHolder
+      }
       <div style={{ display: "flex", padding: "8px" }}>
-        <div
-          style={{
-            width: "33.33%",
-            marginRight: "8px",
-            color: "#f0d722",
-          }}
-        >
-          {apiIsAvailable
-            ? ""
-            : "Es scheint aktuell ein Problem mit der Datenschnittstelle zu geben, weshalb die Website nicht wie gewohnt funktioniert. Wir müssen uns leider gedulden."}
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "33.33%",
-          }}
-        >
-          <Icon
-            component={() => (
-              <img src={bvgIcon} style={{ height: "48px" }} alt="Icon" />
-            )}
-          />
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            width: "33.33%",
-          }}
-        >
-          <div>
-            <Popover
-              title="Schriftgröße Anzeigetafel"
-              trigger="click"
-              content={
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-evenly",
-                  }}
-                >
-                  <div>
-                    <Button
-                      onClick={() => {
-                        setFontSize((prev) => prev + 2);
-                        saveFontSizeInCookie("fontSize", fontSize + 2);
-                        buildUrlOutOfSelectedStations(selectedStations);
-                      }}
-                      icon={<PlusOutlined />}
-                    />
-                  </div>
-                  <div>
-                    <Button
-                      onClick={() => {
-                        setFontSize((prev) => prev - 2);
-                        saveFontSizeInCookie("fontSize", fontSize - 2);
-                        buildUrlOutOfSelectedStations(selectedStations);
-                      }}
-                      icon={<MinusOutlined />}
-                    />
-                  </div>
-                </div>
-              }
-            >
-              <FontSizeOutlined
-                style={{
-                  fontSize: "32px",
-                  color: "#f0d722",
-                  marginRight: "24px",
-                }}
-              />
-            </Popover>
-          </div>
-          <div>
-            <Popover
-              title="Einstellungen exportieren"
-              content={
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <div>
-                    <Input value={exportUrl} />
-                  </div>
-                  <div
-                    onClick={copyExportUrlToClipboard}
-                    style={{ marginLeft: "8px", cursor: "pointer" }}
-                  >
-                    <CopyOutlined style={{ fontSize: "24px" }} />
-                  </div>
-                </div>
-              }
-              trigger="click"
-            >
-              <ExportOutlined
-                rotate={270}
-                style={{
-                  fontSize: "32px",
-                  color: "#f0d722",
-                  marginRight: "24px",
-                }}
-              />
-            </Popover>
-          </div>
-          {renderTopSettingsIcon()}
-        </div>
+        {renderHeaderLeftSideContent()}
+        {renderHeaderMidContent()}
+        {renderHeaderRightSideContent()}
       </div>
       {!settingsAreVisible && selectedStations.length === 0 && (
         <div
