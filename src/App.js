@@ -167,8 +167,12 @@ function App() {
       /(?:(?:^|.*;\s*)fontSize\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
     );
-    if (cookieFontSize) {
+
+    // legacy support for users who dont have the fontSize cookie
+    if (cookieFontSize !== "null") {
       setFontSize(parseInt(cookieFontSize));
+    } else {
+      setFontSize(16);
     }
   };
 
