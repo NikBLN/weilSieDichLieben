@@ -364,7 +364,9 @@ function App() {
                 During the donation process, you can request to be acknowledged
                 as a supporter on this website. Your name, Twitter handle,
                 Instagram handle, or other information will be displayed at the
-                bottom of the website for all users to see!
+                bottom of the website for all users to see! I'm updating the
+                donations manually each day, so please be patient if your name
+                doesn't show up immediately.
               </Text>
               <Text>
                 I believe in providing this website to everyone for free and
