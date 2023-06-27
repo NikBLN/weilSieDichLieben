@@ -23,6 +23,7 @@ import {
   Typography,
   Space,
 } from "antd";
+import DonationDisplay from "./Components/DonationDisplay";
 
 function App() {
   const [messageApi, contextHolder] = message.useMessage();
@@ -613,6 +614,7 @@ function App() {
           removeStation={removeStation}
         />
       )}
+      <DonationDisplay fontSize={fontSize} />
     </div>
   );
 }
