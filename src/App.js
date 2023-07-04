@@ -170,7 +170,7 @@ function App() {
     );
 
     // legacy support for users who dont have the fontSize cookie
-    if (cookieFontSize !== "null") {
+    if (cookieFontSize !== "null" && cookieFontSize !== "") {
       setFontSize(parseInt(cookieFontSize));
     } else {
       setFontSize(16);
