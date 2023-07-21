@@ -1,1 +1,6 @@
-export const donations = ["Matthew K."];
+export const donations = [
+  "Matthew K.",
+  "Joseph H.",
+  "Wassimulator",
+  "Jonas M.",
+];
