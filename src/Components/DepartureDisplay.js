@@ -119,7 +119,11 @@ const DepartureDisplay = (props) => {
 
   return (
     <div>
-      <DepartureTable columns={columns} dataSource={columnData} />
+      <DepartureTable
+        fontSize={props.fontSize}
+        columns={columns}
+        dataSource={columnData}
+      />
     </div>
   );
 };
