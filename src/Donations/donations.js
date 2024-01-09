@@ -6,4 +6,6 @@ export const donations = [
   "Martin N.",
   "Florian W.",
   "Abhishek V.",
+  "Johanna Q.",
+  "Bella N.",
 ];
