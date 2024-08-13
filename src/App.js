@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import Settings from "./Components/Settings";
 import Icon, {
@@ -25,7 +26,7 @@ import {
 } from "antd";
 import DonationDisplay from "./Components/DonationDisplay";
 
-function App() {
+const App = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [selectedStations, setSelectedStations] = useState([]);
   const [settingsAreVisible, setSettingsAreVisible] = useState(false);
@@ -619,6 +620,6 @@ function App() {
       <DonationDisplay fontSize={fontSize} />
     </div>
   );
-}
+};
 
 export default App;
