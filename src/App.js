@@ -11,6 +11,7 @@ import Icon, {
   MinusOutlined,
   InfoCircleOutlined,
   EuroOutlined,
+  GithubOutlined,
 } from "@ant-design/icons";
 import bvgIcon from "./images/BVG.png";
 import payPalQrCode from "./images/PayPalQrCode.png";
@@ -322,6 +323,64 @@ const App = () => {
           color: "#f0d722",
         }}
       >
+        <Modal
+          title="Informationen und Impressum"
+          open={infoModalVisible}
+          footer={null}
+          onCancel={() => {
+            setInfoModalVisible(false);
+          }}
+        >
+          <div
+            style={{
+              height: "250px",
+              overflow: "auto",
+            }}
+          >
+            <Title level={5}>Bereitstellung der Daten</Title>
+            <Space direction="vertical" size={1}>
+              <Text>
+                <a href="https://www.transport.rest">
+                  transport.rest transit APIs
+                </a>
+              </Text>
+              <Text>
+                Thank you {<a href="https://github.com/derhuerst">Jannis</a>}{" "}
+                for providing and maintaining this awesome API! Feel free to
+                check out and support his project.
+              </Text>
+            </Space>
+            <Title level={5}>Allgemeines</Title>
+            <Space direction="vertical" size={1}>
+              <Text strong>
+                Diese Website ist ein privates Projekt und wird nicht von der
+                BVG betrieben.
+              </Text>
+            </Space>
+            <Title level={5}>Angaben gemäß § 5 TMG</Title>
+            <Space direction="vertical" size={1}>
+              <Text>Nikolas Tsombanis</Text>
+              <Text>Blumenthalstr. 3</Text>
+              <Text>12103 Berlin</Text>
+            </Space>
+            <Title level={5}>Kontakt</Title>
+            <Space direction="vertical" size={1}>
+              <Text>
+                <a href="mailto:weilsiedichlieben@posteo.de">
+                  weilsiedichlieben@posteo.de
+                </a>
+              </Text>
+            </Space>
+            <Title level={5}>
+              Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV
+            </Title>
+            <Space direction="vertical" size={1}>
+              <Text>Nikolas Tsombanis</Text>
+              <Text>Blumenthalstr. 3</Text>
+              <Text>12103 Berlin</Text>
+            </Space>
+          </div>
+        </Modal>
         <InfoCircleOutlined
           onClick={() => {
             setInfoModalVisible(true);
@@ -395,64 +454,45 @@ const App = () => {
             }}
           />
         </Popover>
-        <Modal
-          title="Informationen und Impressum"
-          open={infoModalVisible}
-          footer={null}
-          onCancel={() => {
-            setInfoModalVisible(false);
-          }}
-        >
-          <div
-            style={{
-              height: "250px",
-              overflow: "auto",
-            }}
-          >
-            <Title level={5}>Bereitstellung der Daten</Title>
-            <Space direction="vertical" size={1}>
-              <Text>
-                <a href="https://www.transport.rest">
-                  transport.rest transit APIs
-                </a>
-              </Text>
-              <Text>
-                Thank you {<a href="https://github.com/derhuerst">Jannis</a>}{" "}
-                for providing and maintaining this awesome API! Feel free to
-                check out and support his project.
-              </Text>
-            </Space>
-            <Title level={5}>Allgemeines</Title>
-            <Space direction="vertical" size={1}>
+        <Popover
+          placement="bottomLeft"
+          title="Check out this project on Github."
+          content={
+            <Space
+              style={{ width: "500px", overflow: "auto" }}
+              direction="vertical"
+              size={1}
+            >
+              <a
+                href="https://github.com/NikBLN/weilSieDichLieben"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Button style={{ marginBottom: "8px" }} type="primary">
+                  Visit Github
+                </Button>
+              </a>
               <Text strong>
-                Diese Website ist ein privates Projekt und wird nicht von der
-                BVG betrieben.
+                If you are a developer, feel free to check out the repo of this
+                project on Github.
+              </Text>
+              <Text strong>
+                I'm always happy if you have a great feature idea and contribute
+                to this open source project!
               </Text>
             </Space>
-            <Title level={5}>Angaben gemäß § 5 TMG</Title>
-            <Space direction="vertical" size={1}>
-              <Text>Nikolas Tsombanis</Text>
-              <Text>Blumenthalstr. 3</Text>
-              <Text>12103 Berlin</Text>
-            </Space>
-            <Title level={5}>Kontakt</Title>
-            <Space direction="vertical" size={1}>
-              <Text>
-                <a href="mailto:weilsiedichlieben@posteo.de">
-                  weilsiedichlieben@posteo.de
-                </a>
-              </Text>
-            </Space>
-            <Title level={5}>
-              Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV
-            </Title>
-            <Space direction="vertical" size={1}>
-              <Text>Nikolas Tsombanis</Text>
-              <Text>Blumenthalstr. 3</Text>
-              <Text>12103 Berlin</Text>
-            </Space>
-          </div>
-        </Modal>
+          }
+          trigger="click"
+        >
+          <GithubOutlined
+            style={{
+              fontSize: "32px",
+              color: "#f0d722",
+              marginRight: "24px",
+            }}
+          />
+        </Popover>
+
         {apiIsAvailable
           ? ""
           : "Es scheint aktuell ein Problem mit der Datenschnittstelle zu geben, weshalb die Website nicht wie gewohnt funktioniert. Wir müssen uns leider gedulden."}
