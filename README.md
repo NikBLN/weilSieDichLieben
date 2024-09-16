@@ -8,7 +8,7 @@ I had this idea the other day that I wanted my own personal BVG Anzeigetafel in 
 ## Getting started
 Just visit www.weilSieDichLieben.de with any browser, configure your stations and you're good to go. On iOS/iPad OS you can also add the page to the Homescreen via the "Share" Button, which gives you this nice fullscreen mode as seen on the pictures below.
 
-## Does it work only in Berlin, Germany?
+## Is this service limited to Berlin, Germany?
 No, it's not. The application uses the transport.rest API, which provides data for the entire country of Germany. The website's design is simply themed to match the public transport style of Berlin, but the functionality extends nationwide.
 
 ## Notes
