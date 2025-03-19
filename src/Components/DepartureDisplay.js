@@ -72,10 +72,10 @@ const DepartureDisplay = (props) => {
       for (let j = 0; j < stationData.departures.length; j++) {
         const departure = stationData.departures[j];
         const now = new Date();
-        const whenDate = new Date(departure.when);
-        const diffInMinutes = Math.floor(
-          (whenDate.getTime() - now.getTime()) / 60000
-        );
+        const whenDate = departure.when ? new Date(departure.when) : null;
+        const diffInMinutes = whenDate
+          ? Math.floor((whenDate.getTime() - now.getTime()) / 60000)
+          : null;
 
         columnData.push({
           key: `${departure.stop.id}_${j}`,

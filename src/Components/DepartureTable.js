@@ -108,7 +108,11 @@ const DepartureTable = (props) => {
                 }}
                 span={2}
               >
-                {data.when > 0 ? `${data.when} min` : "Jetzt"}
+                {data.when == null
+                  ? "Fällt aus"
+                  : data.when > 0
+                  ? `${data.when} min`
+                  : "Jetzt"}
               </Col>
             </Row>
             {remarkText !== "" && (
