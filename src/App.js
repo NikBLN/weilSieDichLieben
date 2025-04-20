@@ -703,7 +703,7 @@ const App = () => {
         </div>
       )}
       {!settingsAreVisible && selectedStations.length > 0 && (
-        <div style={{ padding: "8px", overflow: "auto" }}>
+        <div style={{ padding: "8px", overflow: "auto", paddingBottom: "60px" }}>
           <DepartureDisplay
             fontSize={fontSize}
             selectedStations={selectedStations}
@@ -727,6 +727,10 @@ const App = () => {
       )}
       <div 
         style={{ 
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
           transform: uiVisible ? "translateY(0)" : "translateY(100%)",
           transition: "transform 0.3s ease-in-out"
         }}
