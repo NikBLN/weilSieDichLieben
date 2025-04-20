@@ -46,6 +46,7 @@ const App = () => {
   const { Title, Text } = Typography;
 
   useEffect(() => {
+    // Init the app
     checkIfApiIsAvailable();
     const apiAvailableInterval = setInterval(() => {
       checkIfApiIsAvailable();
@@ -62,6 +63,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    // Handle export URL generation
     if (selectedStations.length > 0) {
       buildUrlOutOfSelectedStations(selectedStations);
     } else {
@@ -70,6 +72,7 @@ const App = () => {
   }, [selectedStations]);
 
   useEffect(() => {
+    // Handle auto-hide functionality
     const handleMouseMove = () => {
       if (autoHideEnabled && !settingsAreVisible) {
         setUiVisible(true);
@@ -221,7 +224,7 @@ const App = () => {
       "$1"
     );
 
-    if (cookieAutoHide !== "" && cookieAutoHide != null) {
+    if (cookieAutoHide != null && cookieAutoHide !== "") {
       setAutoHideEnabled(JSON.parse(cookieAutoHide));
     }
   };
@@ -683,48 +686,59 @@ const App = () => {
           padding: "8px",
           transform: uiVisible ? "translateY(0)" : "translateY(-100%)",
           transition: "transform 0.3s ease-in-out",
+          position: "absolute",
+          width: "100%",
+          backgroundColor: "black",
+          zIndex: 1,
+          boxSizing: "border-box"
         }}
       >
         {renderHeaderLeftSideContent()}
         {renderHeaderMidContent()}
         {renderHeaderRightSideContent()}
       </div>
-      {!settingsAreVisible && selectedStations.length === 0 && (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            height: "100%",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          {renderMidSettingsIcon()}
-        </div>
-      )}
-      {!settingsAreVisible && selectedStations.length > 0 && (
-        <div style={{ padding: "8px", overflow: "auto", paddingBottom: "60px" }}>
-          <DepartureDisplay
-            fontSize={fontSize}
+      <div style={{ 
+        flex: 1, 
+        marginTop: uiVisible ? "64px" : 0,
+        transition: "margin-top 0.3s ease-in-out"
+      }}>
+        {!settingsAreVisible && selectedStations.length === 0 && (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              height: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {renderMidSettingsIcon()}
+          </div>
+        )}
+        {!settingsAreVisible && selectedStations.length > 0 && (
+          <div style={{ padding: "8px", overflow: "auto", paddingBottom: "60px" }}>
+            <DepartureDisplay
+              fontSize={fontSize}
+              selectedStations={selectedStations}
+              remarksVisibility={remarksVisibility}
+            />
+          </div>
+        )}
+        {settingsAreVisible && (
+          <Settings
+            settingsClass={settingsClass}
+            setSettingsAreVisible={setSettingsAreVisible}
             selectedStations={selectedStations}
+            onStationSelect={onStationSelect}
+            onStationEdit={onStationEdit}
+            removeStation={removeStation}
             remarksVisibility={remarksVisibility}
+            onRemarksVisibilityChange={onRemarksVisibilityChange}
+            autoHideEnabled={autoHideEnabled}
+            onAutoHideChange={onAutoHideChange}
           />
-        </div>
-      )}
-      {settingsAreVisible && (
-        <Settings
-          settingsClass={settingsClass}
-          setSettingsAreVisible={setSettingsAreVisible}
-          selectedStations={selectedStations}
-          onStationSelect={onStationSelect}
-          onStationEdit={onStationEdit}
-          removeStation={removeStation}
-          remarksVisibility={remarksVisibility}
-          onRemarksVisibilityChange={onRemarksVisibilityChange}
-          autoHideEnabled={autoHideEnabled}
-          onAutoHideChange={onAutoHideChange}
-        />
-      )}
+        )}
+      </div>
       <div 
         style={{ 
           position: "fixed",
