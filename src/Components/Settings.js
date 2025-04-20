@@ -294,6 +294,17 @@ const Settings = (props) => {
               checked={props.remarksVisibility}
             />
           </div>
+          <div style={{ display: "flex", marginBottom: "8px" }}>
+            <div style={{ marginRight: "8px" }}>
+              Header/Footer automatisch ausblenden:
+            </div>
+            <Switch
+              onChange={(checked) => {
+                props.onAutoHideChange(checked);
+              }}
+              checked={props.autoHideEnabled}
+            />
+          </div>
         </Card>
       </div>
     </div>

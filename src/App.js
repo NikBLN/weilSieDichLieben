@@ -39,6 +39,9 @@ const App = () => {
   const [fontSize, setFontSize] = useState(16);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [remarksVisibility, setRemarksVisibility] = useState(true);
+  const [autoHideEnabled, setAutoHideEnabled] = useState(false);
+  const [uiVisible, setUiVisible] = useState(true);
+  const autoHideTimeoutRef = React.useRef(null);
 
   const { Title, Text } = Typography;
 
@@ -49,6 +52,9 @@ const App = () => {
     }, 300000);
 
     fetchStationData();
+    fetchAutoHideFromCookie();
+    fetchFontSizeFromCookie();
+    fetchRemarksVisibilityFromCookie();
 
     return () => {
       clearInterval(apiAvailableInterval);
@@ -62,6 +68,37 @@ const App = () => {
       setExportUrl("");
     }
   }, [selectedStations]);
+
+  useEffect(() => {
+    const handleMouseMove = () => {
+      if (autoHideEnabled && !settingsAreVisible) {
+        setUiVisible(true);
+        if (autoHideTimeoutRef.current) {
+          clearTimeout(autoHideTimeoutRef.current);
+        }
+        autoHideTimeoutRef.current = setTimeout(() => {
+          if (!settingsAreVisible) {
+            setUiVisible(false);
+          }
+        }, 2000);
+      }
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+
+    if (autoHideEnabled && !settingsAreVisible) {
+      autoHideTimeoutRef.current = setTimeout(() => {
+        setUiVisible(false);
+      }, 2000);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      if (autoHideTimeoutRef.current) {
+        clearTimeout(autoHideTimeoutRef.current);
+      }
+    };
+  }, [autoHideEnabled, settingsAreVisible]);
 
   const fetchStationData = () => {
     if (urlHasParams()) {
@@ -175,6 +212,25 @@ const App = () => {
 
     if (cookieRemarksVisibility != null && cookieRemarksVisibility !== "") {
       setRemarksVisibility(JSON.parse(cookieRemarksVisibility));
+    }
+  };
+
+  const fetchAutoHideFromCookie = () => {
+    const cookieAutoHide = document.cookie.replace(
+      /(?:(?:^|.*;\s*)autoHide\s*=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+
+    if (cookieAutoHide !== "" && cookieAutoHide != null) {
+      setAutoHideEnabled(JSON.parse(cookieAutoHide));
+    }
+  };
+
+  const onAutoHideChange = (value) => {
+    setAutoHideEnabled(value);
+    saveDataInCookie("autoHide", value);
+    if (!value) {
+      setUiVisible(true);
     }
   };
 
@@ -620,11 +676,15 @@ const App = () => {
         backgroundColor: "black",
       }}
     >
-      {
-        // contextHolder is needed for the antd messages
-        contextHolder
-      }
-      <div style={{ display: "flex", padding: "8px" }}>
+      {contextHolder}
+      <div 
+        style={{ 
+          display: "flex", 
+          padding: "8px",
+          transform: uiVisible ? "translateY(0)" : "translateY(-100%)",
+          transition: "transform 0.3s ease-in-out",
+        }}
+      >
         {renderHeaderLeftSideContent()}
         {renderHeaderMidContent()}
         {renderHeaderRightSideContent()}
@@ -661,9 +721,18 @@ const App = () => {
           removeStation={removeStation}
           remarksVisibility={remarksVisibility}
           onRemarksVisibilityChange={onRemarksVisibilityChange}
+          autoHideEnabled={autoHideEnabled}
+          onAutoHideChange={onAutoHideChange}
         />
       )}
-      <DonationDisplay fontSize={fontSize} />
+      <div 
+        style={{ 
+          transform: uiVisible ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 0.3s ease-in-out"
+        }}
+      >
+        <DonationDisplay fontSize={fontSize} />
+      </div>
     </div>
   );
 };
