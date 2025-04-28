@@ -305,6 +305,17 @@ const Settings = (props) => {
               checked={props.autoHideEnabled}
             />
           </div>
+          <div style={{ display: "flex", marginBottom: "8px" }}>
+            <div style={{ marginRight: "8px" }}>
+              "Abfahrt von" Spalte ausblenden:
+            </div>
+            <Switch
+              onChange={(checked) => {
+                props.onHideThirdColumnChange(checked);
+              }}
+              checked={props.hideThirdColumn}
+            />
+          </div>
         </Card>
       </div>
     </div>

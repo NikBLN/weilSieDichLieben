@@ -124,6 +124,7 @@ const DepartureDisplay = (props) => {
         columns={columns}
         dataSource={columnData}
         remarksVisibility={props.remarksVisibility}
+        hideThirdColumn={props.hideThirdColumn}
       />
     </div>
   );

@@ -39,6 +39,7 @@ const App = () => {
   const [fontSize, setFontSize] = useState(16);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [remarksVisibility, setRemarksVisibility] = useState(true);
+  const [hideThirdColumn, setHideThirdColumn] = useState(false);
   const [autoHideEnabled, setAutoHideEnabled] = useState(false);
   const [uiVisible, setUiVisible] = useState(true);
   const autoHideTimeoutRef = React.useRef(null);
@@ -56,6 +57,7 @@ const App = () => {
     fetchAutoHideFromCookie();
     fetchFontSizeFromCookie();
     fetchRemarksVisibilityFromCookie();
+    fetchHideThirdColumnFromCookie();
 
     return () => {
       clearInterval(apiAvailableInterval);
@@ -218,6 +220,17 @@ const App = () => {
     }
   };
 
+  const fetchHideThirdColumnFromCookie = () => {
+    const cookieHideThirdColumn = document.cookie.replace(
+      /(?:(?:^|.*;\s*)hideThirdColumn\s*=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+
+    if (cookieHideThirdColumn != null && cookieHideThirdColumn !== "") {
+      setHideThirdColumn(JSON.parse(cookieHideThirdColumn));
+    }
+  };
+
   const fetchAutoHideFromCookie = () => {
     const cookieAutoHide = document.cookie.replace(
       /(?:(?:^|.*;\s*)autoHide\s*=\s*([^;]*).*$)|^.*$/,
@@ -240,6 +253,11 @@ const App = () => {
   const onRemarksVisibilityChange = (value) => {
     setRemarksVisibility(value);
     saveDataInCookie("remarksVisibility", value);
+  };
+
+  const onHideThirdColumnChange = (value) => {
+    setHideThirdColumn(value);
+    saveDataInCookie("hideThirdColumn", value);
   };
 
   const fetchFontSizeFromCookie = () => {
@@ -721,6 +739,7 @@ const App = () => {
               fontSize={fontSize}
               selectedStations={selectedStations}
               remarksVisibility={remarksVisibility}
+              hideThirdColumn={hideThirdColumn}
             />
           </div>
         )}
@@ -736,6 +755,8 @@ const App = () => {
             onRemarksVisibilityChange={onRemarksVisibilityChange}
             autoHideEnabled={autoHideEnabled}
             onAutoHideChange={onAutoHideChange}
+            hideThirdColumn={hideThirdColumn}
+            onHideThirdColumnChange={onHideThirdColumnChange}
           />
         )}
       </div>

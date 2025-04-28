@@ -99,14 +99,16 @@ const DepartureTable = (props) => {
         <Col style={styles.columnName} span={4}>
           Linie
         </Col>
-        <Col style={styles.columnName} span={9}>
+        <Col style={styles.columnName} span={props.hideThirdColumn ? 18 : 9}>
           Ziel
         </Col>
-        <Col style={styles.columnName} span={9}>
-          Abfahrt von
-        </Col>
+        {!props.hideThirdColumn && (
+          <Col style={styles.columnName} span={9}>
+            Abfahrt von
+          </Col>
+        )}
         <Col style={styles.columnName} span={2}>
-          Abfahrt in
+          Abfahrt
         </Col>
       </Row>
 
@@ -122,12 +124,14 @@ const DepartureTable = (props) => {
               <Col style={styles.column} span={4}>
                 {data.lineName}
               </Col>
-              <Col style={styles.column} span={9}>
+              <Col style={styles.column} span={props.hideThirdColumn ? 18 : 9}>
                 {data.direction}
               </Col>
-              <Col style={styles.column} span={9}>
-                {data.departureName}
-              </Col>
+              {!props.hideThirdColumn && (
+                <Col style={styles.column} span={9}>
+                  {data.departureName}
+                </Col>
+              )}
               <Col style={styles.column} span={2}>
                 {data.when == null
                   ? "Fällt aus"
