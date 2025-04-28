@@ -108,7 +108,7 @@ const DepartureTable = (props) => {
           </Col>
         )}
         <Col style={styles.columnName} span={2}>
-          Abfahrt
+          Abfahrt in
         </Col>
       </Row>
 
