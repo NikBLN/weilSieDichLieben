@@ -25,7 +25,7 @@ const StationFinder = (props) => {
   const success = () => {
     messageApi.open({
       type: "success",
-      content: "Station erfolgreich hinzugefügt!",
+      content: "Stationen erfolgreich geändert.",
     });
   };
 
@@ -57,7 +57,9 @@ const StationFinder = (props) => {
     <>
       {contextHolder}
       <AutoComplete
-        value={value}
+        placeholder="Station suchen"
+        allowClear
+        value={props.initialValue != null ? props.initialValue : value}
         style={{ width: 200 }}
         options={deferredOptions}
         onSelect={(_, option) => {
@@ -69,6 +71,12 @@ const StationFinder = (props) => {
         onSearch={(text) => {
           setQueryStr(text);
           setValue(text);
+        }}
+        onClear={() => {
+          setQueryStr("");
+          setValue("");
+          setOptions([]);
+          props.onSelect(null);
         }}
       />
     </>

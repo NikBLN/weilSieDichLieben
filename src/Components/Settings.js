@@ -4,6 +4,7 @@ import SettingsModal from "./SettingsModal";
 import { Button, Card, Row, Col, Switch, InputNumber } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import "animate.css";
+import StationFinder from "./StationFinder";
 
 const Settings = (props) => {
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
@@ -204,7 +205,33 @@ const Settings = (props) => {
                           width: "150px",
                         }}
                       >
-                        Zeitpuffer (z.B. Fußweg zur Station):
+                        Zeige Abfahrten in Richtung von:
+                      </div>
+                      <StationFinder
+                        initialValue={station.destination?.name}
+                        onSelect={(value) => {
+                          onPropChange(
+                            value != null
+                              ? {
+                                  id: value.id,
+                                  name: value.value,
+                                }
+                              : null,
+                            station,
+                            "destination"
+                          );
+                        }}
+                        selectedStations={props.selectedStations}
+                      />
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <div
+                        style={{
+                          marginRight: "8px",
+                          width: "150px",
+                        }}
+                      >
+                        Zeige nur Abfahrten in mindestens x Minuten:
                       </div>
                       <InputNumber
                         value={station.when}

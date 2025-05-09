@@ -69,7 +69,7 @@ const App = () => {
     } else {
       setExportUrl("");
     }
-  }, [selectedStations]);
+  }, [selectedStations, fontSize, remarksVisibility, autoHideEnabled]);
 
   useEffect(() => {
     // Handle auto-hide functionality
@@ -87,7 +87,8 @@ const App = () => {
       }
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
+    buildUrlOutOfSelectedStations(selectedStations);
+    document.addEventListener("mousemove", handleMouseMove);
 
     if (autoHideEnabled && !settingsAreVisible) {
       autoHideTimeoutRef.current = setTimeout(() => {
@@ -96,7 +97,7 @@ const App = () => {
     }
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener("mousemove", handleMouseMove);
       if (autoHideTimeoutRef.current) {
         clearTimeout(autoHideTimeoutRef.current);
       }
@@ -116,7 +117,7 @@ const App = () => {
   };
 
   const buildUrlOutOfSelectedStations = (stationData) => {
-    // this function build a url for export out of the stationData
+    // this function builds a url for export out of the stationData
     const urlParams = new URLSearchParams(window.location.search);
     urlParams.delete("id");
     urlParams.delete("bus");
@@ -130,6 +131,10 @@ const App = () => {
     urlParams.delete("when");
     urlParams.delete("results");
     urlParams.delete("fontSize");
+    urlParams.delete("remarksVisibility");
+    urlParams.delete("autoHide");
+    urlParams.delete("destinationId");
+    urlParams.delete("destinationName");
 
     stationData.forEach((station) => {
       urlParams.append("id", station.id);
@@ -144,6 +149,16 @@ const App = () => {
       urlParams.append("when", station.when);
       urlParams.append("results", station.results);
       urlParams.append("fontSize", fontSize);
+      urlParams.append("remarksVisibility", remarksVisibility);
+      urlParams.append("autoHide", autoHideEnabled);
+
+      if (
+        station.destination?.id != null &&
+        station.destination?.name != null
+      ) {
+        urlParams.append("destinationId", station.destination.id);
+        urlParams.append("destinationName", station.destination.name);
+      }
     });
 
     setExportUrl(`${window.location.origin}?${urlParams.toString()}`);
@@ -168,6 +183,8 @@ const App = () => {
     const value = urlParams.getAll("value");
     const when = urlParams.getAll("when");
     const results = urlParams.getAll("results");
+    const destinationId = urlParams.getAll("destinationId");
+    const destinationName = urlParams.getAll("destinationName");
 
     const fontSize = urlParams.get("fontSize");
     setFontSize(parseInt(fontSize));
@@ -185,6 +202,13 @@ const App = () => {
         value: value[index],
         when: when[index] === "null" ? null : when[index],
         results: results[index],
+        destination:
+          destinationId[index] != null && destinationName[index] != null
+            ? {
+                id: destinationId[index],
+                name: destinationName[index],
+              }
+            : null,
       };
     });
 
@@ -427,8 +451,6 @@ const App = () => {
             <Title level={5}>Angaben gemäß § 5 TMG</Title>
             <Space direction="vertical" size={1}>
               <Text>Nikolas Tsombanis</Text>
-              <Text>Blumenthalstr. 3</Text>
-              <Text>12103 Berlin</Text>
             </Space>
             <Title level={5}>Kontakt</Title>
             <Space direction="vertical" size={1}>
@@ -443,8 +465,6 @@ const App = () => {
             </Title>
             <Space direction="vertical" size={1}>
               <Text>Nikolas Tsombanis</Text>
-              <Text>Blumenthalstr. 3</Text>
-              <Text>12103 Berlin</Text>
             </Space>
           </div>
         </Modal>
@@ -523,30 +543,27 @@ const App = () => {
         </Popover>
         <Popover
           placement="bottomLeft"
-          title="Check out this project on Github."
+          title="Check out this project on GitHub"
           content={
             <Space
               style={{ width: "500px", overflow: "auto" }}
               direction="vertical"
               size={1}
             >
+              <Text>
+                If you are a developer, feel free to check out the repo of this
+                project on GitHub. I'm always happy if you have a great feature
+                idea and contribute to this open source project!
+              </Text>
               <a
                 href="https://github.com/NikBLN/weilSieDichLieben"
                 target="_blank"
                 rel="noreferrer"
               >
-                <Button style={{ marginBottom: "8px" }} type="primary">
-                  Visit Github
+                <Button style={{ marginTop: "8px" }} type="primary">
+                  Visit GitHub
                 </Button>
               </a>
-              <Text strong>
-                If you are a developer, feel free to check out the repo of this
-                project on Github.
-              </Text>
-              <Text strong>
-                I'm always happy if you have a great feature idea and contribute
-                to this open source project!
-              </Text>
             </Space>
           }
           trigger="click"
@@ -610,7 +627,6 @@ const App = () => {
                   onClick={() => {
                     setFontSize((prev) => prev + 2);
                     saveDataInCookie("fontSize", fontSize + 2);
-                    buildUrlOutOfSelectedStations(selectedStations);
                   }}
                   icon={<PlusOutlined />}
                 />
@@ -619,7 +635,6 @@ const App = () => {
                   onClick={() => {
                     setFontSize((prev) => prev - 2);
                     saveDataInCookie("fontSize", fontSize - 2);
-                    buildUrlOutOfSelectedStations(selectedStations);
                   }}
                   icon={<MinusOutlined />}
                 />
@@ -680,9 +695,9 @@ const App = () => {
       }}
     >
       {contextHolder}
-      <div 
-        style={{ 
-          display: "flex", 
+      <div
+        style={{
+          display: "flex",
           padding: "8px",
           transform: uiVisible ? "translateY(0)" : "translateY(-100%)",
           transition: "transform 0.3s ease-in-out",
@@ -690,18 +705,20 @@ const App = () => {
           width: "100%",
           backgroundColor: "black",
           zIndex: 1,
-          boxSizing: "border-box"
+          boxSizing: "border-box",
         }}
       >
         {renderHeaderLeftSideContent()}
         {renderHeaderMidContent()}
         {renderHeaderRightSideContent()}
       </div>
-      <div style={{ 
-        flex: 1, 
-        marginTop: uiVisible ? "64px" : 0,
-        transition: "margin-top 0.3s ease-in-out"
-      }}>
+      <div
+        style={{
+          flex: 1,
+          marginTop: uiVisible ? "64px" : 0,
+          transition: "margin-top 0.3s ease-in-out",
+        }}
+      >
         {!settingsAreVisible && selectedStations.length === 0 && (
           <div
             style={{
@@ -716,7 +733,9 @@ const App = () => {
           </div>
         )}
         {!settingsAreVisible && selectedStations.length > 0 && (
-          <div style={{ padding: "8px", overflow: "auto", paddingBottom: "60px" }}>
+          <div
+            style={{ padding: "8px", overflow: "auto", paddingBottom: "60px" }}
+          >
             <DepartureDisplay
               fontSize={fontSize}
               selectedStations={selectedStations}
@@ -739,14 +758,14 @@ const App = () => {
           />
         )}
       </div>
-      <div 
-        style={{ 
+      <div
+        style={{
           position: "fixed",
           bottom: 0,
           left: 0,
           right: 0,
           transform: uiVisible ? "translateY(0)" : "translateY(100%)",
-          transition: "transform 0.3s ease-in-out"
+          transition: "transform 0.3s ease-in-out",
         }}
       >
         <DonationDisplay fontSize={fontSize} />
