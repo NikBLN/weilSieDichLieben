@@ -24,6 +24,7 @@ import {
   message,
   Typography,
   Space,
+  notification,
 } from "antd";
 import DonationDisplay from "./Components/DonationDisplay";
 
@@ -56,6 +57,45 @@ const App = () => {
     fetchAutoHideFromCookie();
     fetchFontSizeFromCookie();
     fetchRemarksVisibilityFromCookie();
+
+    // Check notification version
+    fetch(
+      "https://raw.githubusercontent.com/NikBLN/weilSieDichLieben/main/notification-version.json"
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        const storedVersion =
+          document.cookie.replace(
+            /(?:(?:^|.*;\s*)notificationVersion\s*=\s*([^;]*).*$)|^.*$/,
+            "$1"
+          ) || "0";
+        if (data.version > parseInt(storedVersion)) {
+          notification.info({
+            message: data.title || "Neue Features verfügbar!",
+            description:
+              data.message ||
+              "In den Einstellungen (⚙️) sind ein paar neue Einstellungen dazugekommen. Schau doch mal vorbei!",
+            placement: "topRight",
+            duration: 0,
+            btn: (
+              <Button
+                size="small"
+                onClick={() => {
+                  document.cookie = `notificationVersion=${
+                    data.version
+                  };path=/;expires=${new Date(
+                    Date.now() + 31536000000
+                  ).toUTCString()}`;
+                  notification.destroy();
+                }}
+              >
+                Nicht mehr anzeigen
+              </Button>
+            ),
+          });
+        }
+      })
+      .catch(console.error);
 
     return () => {
       clearInterval(apiAvailableInterval);
