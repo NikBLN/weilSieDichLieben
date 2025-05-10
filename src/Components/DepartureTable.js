@@ -4,6 +4,7 @@ import Marquee from "react-fast-marquee";
 
 const DepartureTable = (props) => {
   const [isPaused, setIsPaused] = useState(false);
+  const [sortOrder, setSortOrder] = useState("off");
   const FONTSIZE = props.fontSize;
   const FONTFAMILYNAME = "DotMatrix";
 
@@ -33,6 +34,12 @@ const DepartureTable = (props) => {
       fontSize: FONTSIZE * 0.8,
       fontFamily: FONTFAMILYNAME,
       backgroundColor: "black",
+    },
+    columnNameClickable: {
+      fontSize: FONTSIZE,
+      fontFamily: FONTFAMILYNAME,
+      cursor: "pointer",
+      userSelect: "none",
     },
   };
 
@@ -81,7 +88,30 @@ const DepartureTable = (props) => {
     return remarks.map((remark) => remark.text).join(" *** ");
   };
 
-  const sortedDataSource = props.dataSource.sort((a, b) => a.when - b.when);
+  const handleSort = () => {
+    setSortOrder((current) => {
+      switch (current) {
+        case "off":
+          return "asc";
+        case "asc":
+          return "desc";
+        case "desc":
+          return "off";
+        default:
+          return "off";
+      }
+    });
+  };
+
+  const getSortedData = () => {
+    if (sortOrder === "off")
+      return props.dataSource.sort((a, b) => a.when - b.when);
+
+    return [...props.dataSource].sort((a, b) => {
+      const comparison = a.departureName.localeCompare(b.departureName);
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+  };
 
   return (
     <div style={{ padding: "16px", borderRadius: "8px" }}>
@@ -102,15 +132,15 @@ const DepartureTable = (props) => {
         <Col style={styles.columnName} span={9}>
           Ziel
         </Col>
-        <Col style={styles.columnName} span={9}>
-          Abfahrt von
+        <Col style={styles.columnNameClickable} span={9} onClick={handleSort}>
+          Abfahrt von {sortOrder !== "off" && (sortOrder === "asc" ? "↑" : "↓")}
         </Col>
         <Col style={styles.columnName} span={2}>
           Abfahrt in
         </Col>
       </Row>
 
-      {sortedDataSource.map((data) => {
+      {getSortedData().map((data) => {
         const remarkText = processRemarks(data.remarks);
 
         return (
