@@ -1,0 +1,83 @@
+const dictionary = {
+  de: {
+    line: "Linie",
+    destination: "Ziel",
+    departureName: "Abfahrt von",
+    when: "Abfahrt in",
+    now: "Jetzt",
+    fontSize: "Schriftgröße Anzeigetafel",
+    exportSettings: "Einstellungen exportieren",
+    donationText: "Vielen Dank für eure Spenden an das Projekt: ",
+    supportProjectTitle: "Unterstütze dieses Projekt mit einer Spende <3",
+    donateWithPaypal: "Mit PayPal spenden",
+    whyDonateH1: "Warum solltest du in Betracht ziehen zu spenden?",
+    whyDonateP1:
+      "Durch eine Spende unterstützt du meine Arbeit und hilfst mir, die Kosten für das Hosting der Website zu decken.",
+    whyDonateH2: "Was bekommst du dafür?",
+    whyDonateP2:
+      "Während des Spendenprozesses kannst du anfordern, als Unterstützer auf dieser Website anerkannt zu werden. Dein Name, Twitter-Handle, Instagram-Handle oder andere Informationen werden am Ende der Website angezeigt, damit alle Benutzer sie sehen können! Ich aktualisiere die Spenden manuell jeden Tag, also bitte sei geduldig, wenn dein Name nicht sofort angezeigt wird.",
+    whyDonateP3:
+      "Ich glaube daran, diese Website allen kostenlos und ohne Werbung zur Verfügung zu stellen, daher wird es keine zusätzlichen Premium-Funktionen geben, abgesehen von dieser coolen Anzeigetafel.",
+    whyDonateH3:
+      "Werde ich der einzige sein, der das Geld aus den Spenden erhält?",
+    whyDonateP4: `Nein, ich werde 30% der Spende (nach PayPal-Gebühren) an Jannis (https://github.com/derhuerst) für die Bereitstellung der Daten für diese Website spenden. Ohne ihn wäre dieses Projekt nicht möglich gewesen!`,
+    subway: "U-Bahn:",
+    ferry: "Fähre:",
+    showDeparturesInDirection: "Zeige Abfahrten in Richtung von:",
+    showDeparturesInMinutes: "Zeige nur Abfahrten in mindestens x Minuten:",
+    amountOfResults: "Anzahl der Ergebnisse:",
+    addStation: "Station hinzufügen",
+    generalSettings: "Allgemeine Einstellungen",
+    language: "Sprache:",
+    showRemarks: "Lauftext unter Abfahrten anzeigen:",
+    hideHeaderFooter: "Header/Footer automatisch ausblenden:",
+    searchStation: "Station suchen",
+    close: "Schließen",
+    provideStationName: "Bitte gib den Namen einer Station ein:",
+  },
+  en: {
+    line: "Line",
+    destination: "Destination",
+    departureName: "Departure from",
+    when: "Departure in",
+    now: "Now",
+    fontSize: "Font size display board",
+    exportSettings: "Export settings",
+    donationText: "Thank you for your donations to the project: ",
+    supportProjectTitle: "Support this project with a donation <3",
+    donateWithPaypal: "Donate with PayPal",
+    whyDonateH1: "Why should you consider donating?",
+    whyDonateP1:
+      "By donating, you'll be supporting my work and helping me cover the costs of hosting the website.",
+    whyDonateH2: "What do you get in return?",
+    whyDonateP2:
+      "During the donation process, you can request to be acknowledged as a supporter on this website. Your name, Twitter handle, Instagram handle, or other information will be displayed at the bottom of the website for all users to see! I'm updating the donations manually each day, so please be patient if your name doesn't show up immediately.",
+    whyDonateP3:
+      "I believe in providing this website to everyone for free and without ads, so there won't be any additional premium features aside from this cool departure board.",
+    whyDonateH3: "Will I be the only one receiving the donation money?",
+    whyDonateP4: `
+    No, I will donate 30% of the donation (after PayPal fees) to Jannis (https://github.com/derhuerst) for providing the data for this website. Without him, this project would not have been possible!`,
+    subway: "Subway:",
+    ferry: "Ferry:",
+    showDeparturesInDirection: "Show departures in the direction of:",
+    showDeparturesInMinutes: "Show only departures in at least x minutes:",
+    amountOfResults: "Number of results:",
+    addStation: "Add station",
+    generalSettings: "General settings",
+    language: "Language:",
+    showRemarks: "Show scrolling text under departures:",
+    hideHeaderFooter: "Automatically hide header/footer:",
+    searchStation: "Search station",
+    close: "Close",
+    provideStationName: "Please provide the name of a station:",
+  },
+};
+
+export function getTranslation(lang, key) {
+  if (dictionary[lang] && dictionary[lang][key]) {
+    return dictionary[lang][key];
+  } else {
+    console.warn(`Translation for ${key} in ${lang} not found.`);
+    return key; // Fallback to the key itself if translation is not found
+  }
+}

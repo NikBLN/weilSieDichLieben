@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Marquee from "react-fast-marquee";
+import { getTranslation } from "../dictionary";
 
 const DonationDisplay = (props) => {
   const [donationsList, setDonationsList] = useState([]);
@@ -28,7 +29,7 @@ const DonationDisplay = (props) => {
   }, []);
 
   const getDonationText = () => {
-    let donationText = "Thank you so much for donating to this project: ";
+    let donationText = getTranslation(props.language, "donationText");
     donationsList.forEach((donation, index) => {
       if (index === donationsList.length - 1) {
         donationText += donation;

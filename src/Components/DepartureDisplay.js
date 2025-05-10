@@ -104,12 +104,12 @@ const DepartureDisplay = (props) => {
       });
 
       if (destination) {
-        url = `https://v6.bvg.transport.rest/journeys?from=${stationId}&to=${destination.id}&departure=${formattedTime}&results=${results}&suburban=${suburban}&subway=${subway}&tram=${tram}&bus=${bus}&ferry=${ferry}&express=${express}&regional=${regional}`;
+        url = `https://v6.bvg.transport.rest/journeys?language=${props.language}&from=${stationId}&to=${destination.id}&departure=${formattedTime}&results=${results}&suburban=${suburban}&subway=${subway}&tram=${tram}&bus=${bus}&ferry=${ferry}&express=${express}&regional=${regional}`;
         response = await fetch(url);
         const data = await response.json();
         handleFetchResponse(convertJourneyResultToDepartureData(data.journeys));
       } else {
-        url = `https://v6.bvg.transport.rest/stops/${stationId}/departures?when=${formattedTime}&results=${results}&suburban=${suburban}&subway=${subway}&tram=${tram}&bus=${bus}&ferry=${ferry}&express=${express}&regional=${regional}`;
+        url = `https://v6.bvg.transport.rest/stops/${stationId}/departures?language=${props.language}&when=${formattedTime}&results=${results}&suburban=${suburban}&subway=${subway}&tram=${tram}&bus=${bus}&ferry=${ferry}&express=${express}&regional=${regional}`;
         response = await fetch(url);
         const data = await response.json();
         handleFetchResponse(data);
@@ -147,39 +147,13 @@ const DepartureDisplay = (props) => {
     return columnData;
   };
 
-  const columns = [
-    {
-      title: "Linie",
-      dataIndex: "lineName",
-      key: "lineName",
-    },
-    {
-      title: "Richtung",
-      dataIndex: "direction",
-      key: "direction",
-    },
-    {
-      title: "Abfahrt von",
-      dataIndex: "departureName",
-      key: "departureName",
-    },
-    {
-      title: "Abfahrt in",
-      dataIndex: "when",
-      key: "when",
-      defaultSortOrder: "ascend",
-      sorter: (a, b) => a.when - b.when,
-      render: (text) => <div>{text > 0 ? text : "Jetzt"}</div>,
-    },
-  ];
-
   return (
     <div>
       <DepartureTable
         fontSize={props.fontSize}
-        columns={columns}
         dataSource={columnData}
         remarksVisibility={props.remarksVisibility}
+        language={props.language}
       />
     </div>
   );

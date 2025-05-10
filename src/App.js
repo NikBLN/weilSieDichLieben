@@ -27,8 +27,10 @@ import {
   notification,
 } from "antd";
 import DonationDisplay from "./Components/DonationDisplay";
+import { getTranslation } from "./dictionary";
 
 const App = () => {
+  const [language, setLanguage] = useState("de");
   const [messageApi, contextHolder] = message.useMessage();
   const [selectedStations, setSelectedStations] = useState([]);
   const [settingsAreVisible, setSettingsAreVisible] = useState(false);
@@ -476,9 +478,9 @@ const App = () => {
                 </a>
               </Text>
               <Text>
-                Thank you {<a href="https://github.com/derhuerst">Jannis</a>}{" "}
-                for providing and maintaining this awesome API! Feel free to
-                check out and support his project.
+                Danke {<a href="https://github.com/derhuerst">Jannis</a>} für
+                das Betreiben und Bereitstellen der tollen API! Schaut doch mal
+                bei transport.rest vorbei!
               </Text>
             </Space>
             <Title level={5}>Allgemeines</Title>
@@ -520,7 +522,7 @@ const App = () => {
         />
         <Popover
           placement="bottomLeft"
-          title="Support this project with a donation <3"
+          title={getTranslation(language, "supportProjectTitle")}
           content={
             <Space
               style={{ width: "500px", height: "300px", overflow: "auto" }}
@@ -529,7 +531,7 @@ const App = () => {
             >
               <a href="https://www.paypal.com/donate/?hosted_button_id=R96455XKT9X8G">
                 <Button style={{ marginBottom: "8px" }} type="primary">
-                  Donate with PayPal
+                  {getTranslation(language, "donateWithPaypal")}
                 </Button>
               </a>
               <Icon
@@ -541,34 +543,13 @@ const App = () => {
                   />
                 )}
               />
-              <Text strong>Why should you consider donating?</Text>
-              <Text>
-                By donating, you'll be supporting my work and helping me cover
-                the costs of hosting the website.
-              </Text>
-              <Text strong>What do you get in return?</Text>
-              <Text>
-                During the donation process, you can request to be acknowledged
-                as a supporter on this website. Your name, Twitter handle,
-                Instagram handle, or other information will be displayed at the
-                bottom of the website for all users to see! I'm updating the
-                donations manually each day, so please be patient if your name
-                doesn't show up immediately.
-              </Text>
-              <Text>
-                I believe in providing this website to everyone for free and
-                without ads, so there won't be any additional premium features
-                aside from this cool departure board.
-              </Text>
-              <Text strong>
-                Will I be the only one receiving the donation money?
-              </Text>
-              <Text>
-                No, I will donate 30% of the donation (after PayPal fees) to{" "}
-                {<a href="https://github.com/derhuerst">Jannis</a>} for
-                providing the data for this website. Without him, this project
-                would not have been possible!
-              </Text>
+              <Text strong>{getTranslation(language, "whyDonateH1")}</Text>
+              <Text>{getTranslation(language, "whyDonateP1")}</Text>
+              <Text strong>{getTranslation(language, "whyDonateH2")}</Text>
+              <Text>{getTranslation(language, "whyDonateP2")}</Text>
+              <Text>{getTranslation(language, "whyDonateP3")}</Text>
+              <Text strong>{getTranslation(language, "whyDonateH3")}</Text>
+              <Text>{getTranslation(language, "whyDonateP4")}</Text>
             </Space>
           }
           trigger="click"
@@ -654,7 +635,7 @@ const App = () => {
       >
         <div>
           <Popover
-            title="Schriftgröße Anzeigetafel"
+            title={getTranslation(language, "fontSize")}
             trigger="click"
             content={
               <div
@@ -693,7 +674,7 @@ const App = () => {
         <div>
           <Popover
             placement="bottomRight"
-            title="Einstellungen exportieren"
+            title={getTranslation(language, "exportSettings")}
             content={
               <div style={{ display: "flex", alignItems: "center" }}>
                 <div>
@@ -780,6 +761,7 @@ const App = () => {
               fontSize={fontSize}
               selectedStations={selectedStations}
               remarksVisibility={remarksVisibility}
+              language={language}
             />
           </div>
         )}
@@ -795,6 +777,8 @@ const App = () => {
             onRemarksVisibilityChange={onRemarksVisibilityChange}
             autoHideEnabled={autoHideEnabled}
             onAutoHideChange={onAutoHideChange}
+            language={language}
+            setLanguage={setLanguage}
           />
         )}
       </div>
@@ -808,7 +792,7 @@ const App = () => {
           transition: "transform 0.3s ease-in-out",
         }}
       >
-        <DonationDisplay fontSize={fontSize} />
+        <DonationDisplay fontSize={fontSize} language={language} />
       </div>
     </div>
   );

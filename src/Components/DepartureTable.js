@@ -1,6 +1,7 @@
 import { Row, Col } from "antd";
 import React, { useState } from "react";
 import Marquee from "react-fast-marquee";
+import { getTranslation } from "../dictionary";
 
 const DepartureTable = (props) => {
   const [isPaused, setIsPaused] = useState(false);
@@ -127,16 +128,17 @@ const DepartureTable = (props) => {
 
       <Row style={styles.headerRow}>
         <Col style={styles.columnName} span={4}>
-          Linie
+          {getTranslation(props.language, "line")}
         </Col>
         <Col style={styles.columnName} span={9}>
-          Ziel
+          {getTranslation(props.language, "destination")}
         </Col>
         <Col style={styles.columnNameClickable} span={9} onClick={handleSort}>
-          Abfahrt von {sortOrder !== "off" && (sortOrder === "asc" ? "↑" : "↓")}
+          {getTranslation(props.language, "departureName")}{" "}
+          {sortOrder !== "off" && (sortOrder === "asc" ? "↑" : "↓")}
         </Col>
         <Col style={styles.columnName} span={2}>
-          Abfahrt in
+          {getTranslation(props.language, "when")}
         </Col>
       </Row>
 
@@ -163,7 +165,7 @@ const DepartureTable = (props) => {
                   ? "Fällt aus"
                   : data.when > 0
                   ? `${data.when} min`
-                  : "Jetzt"}
+                  : getTranslation(props.language, "now")}
               </Col>
             </Row>
 

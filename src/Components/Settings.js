@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import SettingsModal from "./SettingsModal";
-import { Button, Card, Row, Col, Switch, InputNumber } from "antd";
+import { Button, Card, Row, Col, Switch, InputNumber, Select } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import "animate.css";
 import StationFinder from "./StationFinder";
+import { getTranslation } from "../dictionary";
 
 const Settings = (props) => {
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
@@ -32,6 +33,18 @@ const Settings = (props) => {
     selectedStationsCopy[index] = { ...selectedStationsCopy[index] };
     selectedStationsCopy[index][type] = checked;
     props.onStationEdit(selectedStationsCopy[index]);
+  };
+
+  const getLanguageOptions = () => {
+    const languages = [
+      { value: "de", label: "Deutsch" },
+      { value: "en", label: "English" },
+    ];
+
+    return languages.map((lang) => ({
+      value: lang.value,
+      label: lang.label,
+    }));
   };
 
   return (
@@ -109,7 +122,7 @@ const Settings = (props) => {
                           width: "60px",
                         }}
                       >
-                        U-Bahn:
+                        {getTranslation(props.language, "subway")}
                       </div>
                       <Switch
                         onChange={(checked) => {
@@ -157,7 +170,7 @@ const Settings = (props) => {
                           width: "60px",
                         }}
                       >
-                        Fähre:
+                        {getTranslation(props.language, "ferry")}
                       </div>
                       <Switch
                         onChange={(checked) => {
@@ -205,9 +218,13 @@ const Settings = (props) => {
                           width: "150px",
                         }}
                       >
-                        Zeige Abfahrten in Richtung von:
+                        {getTranslation(
+                          props.language,
+                          "showDeparturesInDirection"
+                        )}
                       </div>
                       <StationFinder
+                        allowClear={true}
                         initialValue={station.destination?.name}
                         onSelect={(value) => {
                           onPropChange(
@@ -222,6 +239,7 @@ const Settings = (props) => {
                           );
                         }}
                         selectedStations={props.selectedStations}
+                        language={props.language}
                       />
                     </div>
                     <div style={{ display: "flex", alignItems: "center" }}>
@@ -231,7 +249,10 @@ const Settings = (props) => {
                           width: "150px",
                         }}
                       >
-                        Zeige nur Abfahrten in mindestens x Minuten:
+                        {getTranslation(
+                          props.language,
+                          "showDeparturesInMinutes"
+                        )}
                       </div>
                       <InputNumber
                         value={station.when}
@@ -247,7 +268,7 @@ const Settings = (props) => {
                           width: "150px",
                         }}
                       >
-                        Anzahl der Ergebnisse:
+                        {getTranslation(props.language, "amountOfResults")}
                       </div>
                       <InputNumber
                         value={station.results}
@@ -278,7 +299,7 @@ const Settings = (props) => {
               }}
               icon={<PlusOutlined />}
             >
-              Station hinzufügen
+              {getTranslation(props.language, "addStation")}
             </Button>
           </Col>
         </Row>
@@ -288,6 +309,7 @@ const Settings = (props) => {
           setSettingsModalVisible={setSettingsModalVisible}
           selectedStations={props.selectedStations}
           onStationSelect={props.onStationSelect}
+          language={props.language}
         />
       </div>
       <div
@@ -304,15 +326,38 @@ const Settings = (props) => {
             height: "100%",
           }}
           size="small"
-          title="Allgemeine Einstellungen"
+          title={getTranslation(props.language, "generalSettings")}
         >
+          <div
+            style={{
+              display: "flex",
+              marginBottom: "8px",
+              alignItems: "center",
+            }}
+          >
+            <div
+              style={{
+                marginRight: "8px",
+              }}
+            >
+              {getTranslation(props.language, "language")}
+            </div>
+            <Select
+              options={getLanguageOptions()}
+              value={props.language}
+              onChange={(value) => {
+                props.setLanguage(value);
+              }}
+              style={{ width: "120px" }}
+            />
+          </div>
           <div style={{ display: "flex", marginBottom: "8px" }}>
             <div
               style={{
                 marginRight: "8px",
               }}
             >
-              Lauftext unter Abfahrten anzeigen:
+              {getTranslation(props.language, "showRemarks")}
             </div>
             <Switch
               onChange={(checked) => {
@@ -323,7 +368,7 @@ const Settings = (props) => {
           </div>
           <div style={{ display: "flex", marginBottom: "8px" }}>
             <div style={{ marginRight: "8px" }}>
-              Header/Footer automatisch ausblenden:
+              {getTranslation(props.language, "hideHeaderFooter")}
             </div>
             <Switch
               onChange={(checked) => {

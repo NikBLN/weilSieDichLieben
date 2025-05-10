@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { AutoComplete, message } from "antd";
 import React, { useDeferredValue, useEffect, useState } from "react";
+import { getTranslation } from "../dictionary";
 
 const StationFinder = (props) => {
   const [messageApi, contextHolder] = message.useMessage();
@@ -57,8 +58,8 @@ const StationFinder = (props) => {
     <>
       {contextHolder}
       <AutoComplete
-        placeholder="Station suchen"
-        allowClear
+        placeholder={getTranslation(props.language, "searchStation")}
+        allowClear={props.allowClear}
         value={props.initialValue != null ? props.initialValue : value}
         style={{ width: 200 }}
         options={deferredOptions}
