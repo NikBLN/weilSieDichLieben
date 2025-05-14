@@ -42,6 +42,8 @@ const App = () => {
   const [fontSize, setFontSize] = useState(16);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [remarksVisibility, setRemarksVisibility] = useState(true);
+  const [standardRemarksVisibility, setStandardRemarksVisibility] =
+    useState(true);
   const [autoHideEnabled, setAutoHideEnabled] = useState(false);
   const [uiVisible, setUiVisible] = useState(true);
   const autoHideTimeoutRef = React.useRef(null);
@@ -59,6 +61,7 @@ const App = () => {
     fetchAutoHideFromCookie();
     fetchFontSizeFromCookie();
     fetchRemarksVisibilityFromCookie();
+    fetchStandardRemarksVisibilityFromCookie();
 
     // Check notification version
     fetch(
@@ -295,6 +298,20 @@ const App = () => {
     }
   };
 
+  const fetchStandardRemarksVisibilityFromCookie = () => {
+    const cookieStandardRemarksVisibility = document.cookie.replace(
+      /(?:(?:^|.*;\s*)standardRemarksVisibility\s*=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+
+    if (
+      cookieStandardRemarksVisibility != null &&
+      cookieStandardRemarksVisibility !== ""
+    ) {
+      setStandardRemarksVisibility(JSON.parse(cookieStandardRemarksVisibility));
+    }
+  };
+
   const onAutoHideChange = (value) => {
     setAutoHideEnabled(value);
     saveDataInCookie("autoHide", value);
@@ -306,6 +323,11 @@ const App = () => {
   const onRemarksVisibilityChange = (value) => {
     setRemarksVisibility(value);
     saveDataInCookie("remarksVisibility", value);
+  };
+
+  const onStandardRemarksVisibilityChange = (value) => {
+    setStandardRemarksVisibility(value);
+    saveDataInCookie("standardRemarksVisibility", value);
   };
 
   const fetchFontSizeFromCookie = () => {
@@ -761,6 +783,7 @@ const App = () => {
               fontSize={fontSize}
               selectedStations={selectedStations}
               remarksVisibility={remarksVisibility}
+              standardRemarksVisibility={standardRemarksVisibility}
               language={language}
             />
           </div>
@@ -775,6 +798,10 @@ const App = () => {
             removeStation={removeStation}
             remarksVisibility={remarksVisibility}
             onRemarksVisibilityChange={onRemarksVisibilityChange}
+            standardRemarksVisibility={standardRemarksVisibility}
+            onStandardRemarksVisibilityChange={
+              onStandardRemarksVisibilityChange
+            }
             autoHideEnabled={autoHideEnabled}
             onAutoHideChange={onAutoHideChange}
             language={language}

@@ -104,12 +104,12 @@ const DepartureDisplay = (props) => {
       });
 
       if (destination) {
-        url = `https://v6.bvg.transport.rest/journeys?language=${props.language}&from=${stationId}&to=${destination.id}&departure=${formattedTime}&results=${results}&suburban=${suburban}&subway=${subway}&tram=${tram}&bus=${bus}&ferry=${ferry}&express=${express}&regional=${regional}`;
+        url = `https://v6.bvg.transport.rest/journeys?language=${props.language}&from=${stationId}&to=${destination.id}&departure=${formattedTime}&results=${results}&suburban=${suburban}&subway=${subway}&tram=${tram}&bus=${bus}&ferry=${ferry}&express=${express}&regional=${regional}&remarks=${props.standardRemarksVisibility}`;
         response = await fetch(url);
         const data = await response.json();
         handleFetchResponse(convertJourneyResultToDepartureData(data.journeys));
       } else {
-        url = `https://v6.bvg.transport.rest/stops/${stationId}/departures?language=${props.language}&when=${formattedTime}&results=${results}&suburban=${suburban}&subway=${subway}&tram=${tram}&bus=${bus}&ferry=${ferry}&express=${express}&regional=${regional}`;
+        url = `https://v6.bvg.transport.rest/stops/${stationId}/departures?language=${props.language}&when=${formattedTime}&results=${results}&suburban=${suburban}&subway=${subway}&tram=${tram}&bus=${bus}&ferry=${ferry}&express=${express}&regional=${regional}&remarks=${props.standardRemarksVisibility}`;
         response = await fetch(url);
         const data = await response.json();
         handleFetchResponse(data);

@@ -30,6 +30,8 @@ const dictionary = {
     generalSettings: "Allgemeine Einstellungen",
     language: "Sprache:",
     showRemarks: "Lauftext unter Abfahrten anzeigen:",
+    showStandardRemarks:
+      "Standardinformationen anzeigen (z.B. Fahrradmitnahme):",
     hideHeaderFooter: "Header/Footer automatisch ausblenden:",
     searchStation: "Station suchen",
     close: "Schließen",
@@ -66,6 +68,7 @@ const dictionary = {
     generalSettings: "General settings",
     language: "Language:",
     showRemarks: "Show scrolling text under departures:",
+    showStandardRemarks: "Show standard information (e.g. bicycle conveyance):",
     hideHeaderFooter: "Automatically hide header/footer:",
     searchStation: "Search station",
     close: "Close",

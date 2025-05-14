@@ -390,6 +390,17 @@ const Settings = (props) => {
           </div>
           <div style={{ display: "flex", marginBottom: "8px" }}>
             <div style={{ marginRight: "8px" }}>
+              {getTranslation(props.language, "showStandardRemarks")}
+            </div>
+            <Switch
+              onChange={(checked) => {
+                props.onStandardRemarksVisibilityChange(checked);
+              }}
+              checked={props.standardRemarksVisibility}
+            />
+          </div>
+          <div style={{ display: "flex", marginBottom: "8px" }}>
+            <div style={{ marginRight: "8px" }}>
               {getTranslation(props.language, "hideHeaderFooter")}
             </div>
             <Switch
