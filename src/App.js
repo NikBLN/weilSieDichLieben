@@ -62,6 +62,7 @@ const App = () => {
     fetchFontSizeFromCookie();
     fetchRemarksVisibilityFromCookie();
     fetchStandardRemarksVisibilityFromCookie();
+    fetchLanguageFromCookie();
 
     // Check notification version
     fetch(
@@ -310,6 +311,22 @@ const App = () => {
     ) {
       setStandardRemarksVisibility(JSON.parse(cookieStandardRemarksVisibility));
     }
+  };
+
+  const fetchLanguageFromCookie = () => {
+    const cookieLanguage = document.cookie.replace(
+      /(?:(?:^|.*;\s*)language\s*=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+
+    if (cookieLanguage && cookieLanguage !== "") {
+      setLanguage(JSON.parse(cookieLanguage));
+    }
+  };
+
+  const onLanguageChange = (value) => {
+    setLanguage(value);
+    saveDataInCookie("language", value);
   };
 
   const onAutoHideChange = (value) => {
@@ -805,7 +822,7 @@ const App = () => {
             autoHideEnabled={autoHideEnabled}
             onAutoHideChange={onAutoHideChange}
             language={language}
-            setLanguage={setLanguage}
+            onLanguageChange={onLanguageChange}
           />
         )}
       </div>

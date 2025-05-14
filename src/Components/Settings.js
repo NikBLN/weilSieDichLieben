@@ -368,7 +368,7 @@ const Settings = (props) => {
               options={getLanguageOptions()}
               value={props.language}
               onChange={(value) => {
-                props.setLanguage(value);
+                props.onLanguageChange(value);
               }}
               style={{ width: "120px" }}
             />
