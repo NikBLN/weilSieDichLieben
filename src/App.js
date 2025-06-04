@@ -459,6 +459,11 @@ const App = () => {
     setTimeout(() => setIsPulsing(false), 1000);
   };
 
+  useEffect(() => {
+    const interval = setInterval(triggerPulse, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const copyExportUrlToClipboard = () => {
     navigator.clipboard
       .writeText(exportUrl)
@@ -856,7 +861,6 @@ const App = () => {
               remarksVisibility={remarksVisibility}
               standardRemarksVisibility={standardRemarksVisibility}
               language={language}
-              onDataRefresh={triggerPulse}
             />
           </div>
         )}

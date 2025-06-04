@@ -28,7 +28,6 @@ const DepartureDisplay = (props) => {
     if (fetchIsInProgress.current) return;
 
     fetchIsInProgress.current = true;
-    if (props.onDataRefresh) props.onDataRefresh();
     departureDataRef.current = [];
     fetchCounter.current = 0;
     for (let i = 0; i < props.selectedStations.length; i++) {
