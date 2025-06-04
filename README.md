@@ -62,6 +62,14 @@ npm run build
 ```
 The output will be placed in the `build/` directory. The repository contains a GitHub Actions workflow that deploys this folder via FTP whenever changes are pushed to the `main` branch.
 
+### Testing
+This project uses **Jest** together with **React Testing Library**. To run the
+test suite execute:
+
+```bash
+npm test -- --watchAll=false
+```
+
 ## Development
 The React source code lives in the [`src`](./src) directory while static assets such as `index.html` reside in [`public`](./public). Feel free to open issues or pull requests if you want to contribute. Please read our [Code of Conduct](./CODE_OF_CONDUCT.md) before participating.
 
