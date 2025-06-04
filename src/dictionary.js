@@ -42,7 +42,8 @@ const dictionary = {
     declineCookies: "Cookies ablehnen",
     cookiesDeclinedInfo:
       "Du hast Cookies abgelehnt. Deine Einstellungen werden nicht gespeichert.",
-    resetCookieConsent: "Cookie-Zustimmung zurücksetzen",
+    resetCookieConsent: "Cookie-Zustimmung zurücksetzen:",
+    reset: "Zurücksetzen",
   },
   en: {
     line: "Line",
@@ -86,7 +87,8 @@ const dictionary = {
     declineCookies: "Decline cookies",
     cookiesDeclinedInfo:
       "You declined cookies. Your settings will not be stored.",
-    resetCookieConsent: "Reset cookie consent",
+    resetCookieConsent: "Reset cookie consent:",
+    reset: "Reset",
   },
 };
 

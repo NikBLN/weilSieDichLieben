@@ -334,8 +334,6 @@ const Settings = (props) => {
           height: "auto",
           minHeight: "100px",
           maxHeight: "200px",
-          overflowY: "auto",
-          overflowX: "hidden",
           backgroundColor: "lightgray",
           position: "sticky",
           bottom: 0,
@@ -346,6 +344,11 @@ const Settings = (props) => {
           style={{
             boxShadow: "3px 3px 10px 0px rgba(0,0,0,0.5)",
             height: "100%",
+          }}
+          bodyStyle={{
+            overflowY: "auto",
+            maxHeight: "calc(200px - 40px)",
+            paddingRight: "4px",
           }}
           size="small"
           title={getTranslation(props.language, "generalSettings")}
@@ -372,6 +375,24 @@ const Settings = (props) => {
               }}
               style={{ width: "120px" }}
             />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "8px",
+            }}
+          >
+            <div style={{ marginRight: "8px" }}>
+              {getTranslation(props.language, "resetCookieConsent")}
+            </div>
+            <Button
+              type="link"
+              onClick={props.onResetCookieConsent}
+              style={{ padding: 0 }}
+            >
+              {getTranslation(props.language, "reset")}
+            </Button>
           </div>
           <div style={{ display: "flex", marginBottom: "8px" }}>
             <div
@@ -409,11 +430,6 @@ const Settings = (props) => {
               }}
               checked={props.autoHideEnabled}
             />
-          </div>
-          <div style={{ display: "flex" }}>
-            <Button onClick={props.onResetCookieConsent}>
-              {getTranslation(props.language, "resetCookieConsent")}
-            </Button>
           </div>
         </Card>
       </div>
