@@ -53,7 +53,7 @@ const privacyContent = {
       </Paragraph>
       <Title level={5}>4. Werbung auf Reddit</Title>
       <Paragraph>
-        Zur Vermarktung der Website werden Anzeigen über die Plattform{" "}
+        Um die Website bekannter zu machen, werden Anzeigen über die Plattform{" "}
         <b>Reddit</b> geschaltet. Dabei kann Reddit (Betreiber: Reddit Inc.,
         USA) unter Umständen personenbezogene Daten wie Ihre IP-Adresse oder das
         Nutzerverhalten über Tracking-Technologien (z. B. Reddit Pixel)
