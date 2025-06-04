@@ -36,6 +36,8 @@ const dictionary = {
     searchStation: "Station suchen",
     close: "Schließen",
     provideStationName: "Bitte gib den Namen einer Station ein:",
+    privacyPolicy: "Datenschutzerklärung",
+    termsOfService: "Nutzungsbedingungen",
   },
   en: {
     line: "Line",
@@ -73,6 +75,8 @@ const dictionary = {
     searchStation: "Search station",
     close: "Close",
     provideStationName: "Please provide the name of a station:",
+    privacyPolicy: "Privacy Policy",
+    termsOfService: "Terms of Service",
   },
 };
 

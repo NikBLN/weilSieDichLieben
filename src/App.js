@@ -27,6 +27,7 @@ import {
   notification,
 } from "antd";
 import DonationDisplay from "./Components/DonationDisplay";
+import LegalModals from "./Components/LegalModals";
 import { getTranslation } from "./dictionary";
 
 const App = () => {
@@ -837,6 +838,7 @@ const App = () => {
         }}
       >
         <DonationDisplay fontSize={fontSize} language={language} />
+        <LegalModals language={language} />
       </div>
     </div>
   );
