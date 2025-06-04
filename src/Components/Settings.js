@@ -410,6 +410,11 @@ const Settings = (props) => {
               checked={props.autoHideEnabled}
             />
           </div>
+          <div style={{ display: "flex" }}>
+            <Button onClick={props.onResetCookieConsent}>
+              {getTranslation(props.language, "resetCookieConsent")}
+            </Button>
+          </div>
         </Card>
       </div>
     </div>

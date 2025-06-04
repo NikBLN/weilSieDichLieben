@@ -27,6 +27,7 @@ import {
   notification,
 } from "antd";
 import DonationDisplay from "./Components/DonationDisplay";
+import CookieBanner from "./Components/CookieBanner";
 import { getTranslation } from "./dictionary";
 
 const App = () => {
@@ -46,6 +47,15 @@ const App = () => {
     useState(true);
   const [autoHideEnabled, setAutoHideEnabled] = useState(false);
   const [uiVisible, setUiVisible] = useState(true);
+  const [cookieConsent, setCookieConsent] = useState(() => {
+    const stored = document.cookie.replace(
+      /(?:(?:^|.*;\s*)cookieConsent\s*=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+    if (stored === "true") return true;
+    if (stored === "false") return false;
+    return null;
+  });
   const autoHideTimeoutRef = React.useRef(null);
 
   const { Title, Text } = Typography;
@@ -70,11 +80,12 @@ const App = () => {
     )
       .then((response) => response.json())
       .then((data) => {
-        const storedVersion =
-          document.cookie.replace(
-            /(?:(?:^|.*;\s*)notificationVersion\s*=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          ) || "0";
+        const storedVersion = cookieConsent
+          ? document.cookie.replace(
+              /(?:(?:^|.*;\s*)notificationVersion\s*=\s*([^;]*).*$)|^.*$/,
+              "$1"
+            ) || "0"
+          : "0";
         if (data.version > parseInt(storedVersion)) {
           notification.info({
             message: data.title || "Neue Features verfügbar!",
@@ -87,11 +98,13 @@ const App = () => {
               <Button
                 size="small"
                 onClick={() => {
-                  document.cookie = `notificationVersion=${
-                    data.version
-                  };path=/;expires=${new Date(
-                    Date.now() + 31536000000
-                  ).toUTCString()}`;
+                  if (cookieConsent) {
+                    document.cookie = `notificationVersion=${
+                      data.version
+                    };path=/;expires=${new Date(
+                      Date.now() + 31536000000
+                    ).toUTCString()}`;
+                  }
                   notification.destroy();
                 }}
               >
@@ -106,7 +119,7 @@ const App = () => {
     return () => {
       clearInterval(apiAvailableInterval);
     };
-  }, []);
+  }, [cookieConsent]);
 
   useEffect(() => {
     // Handle export URL generation
@@ -150,15 +163,41 @@ const App = () => {
     };
   }, [autoHideEnabled, settingsAreVisible]);
 
+  const acceptCookies = () => {
+    document.cookie = `cookieConsent=true;path=/;expires=${new Date(
+      Date.now() + 31536000000
+    ).toUTCString()}`;
+    setCookieConsent(true);
+  };
+
+  const declineCookies = () => {
+    document.cookie = `cookieConsent=false;path=/;expires=${new Date(
+      Date.now() + 31536000000
+    ).toUTCString()}`;
+    setCookieConsent(false);
+    messageApi.open({
+      type: "warning",
+      content: getTranslation(language, "cookiesDeclinedInfo"),
+    });
+  };
+
+  const resetCookieConsent = () => {
+    document.cookie =
+      "cookieConsent=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    setCookieConsent(null);
+  };
+
   const fetchStationData = () => {
     if (urlHasParams()) {
       // fetch data from url
       getUrlParams();
     } else {
-      // fetch data from cookie
-      fetchStationsFromCookie();
-      fetchFontSizeFromCookie();
-      fetchRemarksVisibilityFromCookie();
+      // fetch data from cookie if allowed
+      if (cookieConsent) {
+        fetchStationsFromCookie();
+        fetchFontSizeFromCookie();
+        fetchRemarksVisibilityFromCookie();
+      }
     }
   };
 
@@ -278,6 +317,7 @@ const App = () => {
   };
 
   const fetchRemarksVisibilityFromCookie = () => {
+    if (!cookieConsent) return;
     const cookieRemarksVisibility = document.cookie.replace(
       /(?:(?:^|.*;\s*)remarksVisibility\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
@@ -289,6 +329,7 @@ const App = () => {
   };
 
   const fetchAutoHideFromCookie = () => {
+    if (!cookieConsent) return;
     const cookieAutoHide = document.cookie.replace(
       /(?:(?:^|.*;\s*)autoHide\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
@@ -300,6 +341,7 @@ const App = () => {
   };
 
   const fetchStandardRemarksVisibilityFromCookie = () => {
+    if (!cookieConsent) return;
     const cookieStandardRemarksVisibility = document.cookie.replace(
       /(?:(?:^|.*;\s*)standardRemarksVisibility\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
@@ -314,6 +356,7 @@ const App = () => {
   };
 
   const fetchLanguageFromCookie = () => {
+    if (!cookieConsent) return;
     const cookieLanguage = document.cookie.replace(
       /(?:(?:^|.*;\s*)language\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
@@ -348,6 +391,7 @@ const App = () => {
   };
 
   const fetchFontSizeFromCookie = () => {
+    if (!cookieConsent) return;
     const cookieFontSize = document.cookie.replace(
       /(?:(?:^|.*;\s*)fontSize\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
@@ -362,6 +406,7 @@ const App = () => {
   };
 
   const saveDataInCookie = (propertyName, value) => {
+    if (!cookieConsent) return;
     const cookieValue = `${propertyName}=${JSON.stringify(
       value
     )};path=/;expires=${new Date(Date.now() + 31536000000).toUTCString()}`;
@@ -369,6 +414,7 @@ const App = () => {
   };
 
   const fetchStationsFromCookie = () => {
+    if (!cookieConsent) return;
     const cookieSelectedStations = document.cookie.replace(
       /(?:(?:^|.*;\s*)bvgDepatureSelectedStations\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
@@ -823,6 +869,7 @@ const App = () => {
             onAutoHideChange={onAutoHideChange}
             language={language}
             onLanguageChange={onLanguageChange}
+            onResetCookieConsent={resetCookieConsent}
           />
         )}
       </div>
@@ -838,6 +885,12 @@ const App = () => {
       >
         <DonationDisplay fontSize={fontSize} language={language} />
       </div>
+      <CookieBanner
+        visible={cookieConsent === null}
+        onAccept={acceptCookies}
+        onDecline={declineCookies}
+        language={language}
+      />
     </div>
   );
 };
