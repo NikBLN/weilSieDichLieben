@@ -36,6 +36,8 @@ const dictionary = {
     searchStation: "Station suchen",
     close: "Schließen",
     provideStationName: "Bitte gib den Namen einer Station ein:",
+    privacyPolicy: "Datenschutzerklärung",
+    termsOfService: "Nutzungsbedingungen",
     cookieBannerText:
       "Diese Website verwendet Cookies, um deine Einstellungen zu speichern. Wenn du keine Cookies zulässt, funktionieren einige Funktionen nicht.",
     acceptCookies: "Cookies akzeptieren",
@@ -81,6 +83,8 @@ const dictionary = {
     searchStation: "Search station",
     close: "Close",
     provideStationName: "Please provide the name of a station:",
+    privacyPolicy: "Privacy Policy",
+    termsOfService: "Terms of Service",
     cookieBannerText:
       "This website uses cookies to store your settings. If you decline cookies some features will not work.",
     acceptCookies: "Accept cookies",
