@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 
 const berlinBounds = {
-  north: 52.7,
-  south: 52.3,
-  west: 13.0,
-  east: 13.8,
+  north: 53.0,
+  south: 52.0,
+  west: 12.8,
+  east: 14.0,
 };
 
 const RadarMap = ({ tripId }) => {
@@ -14,7 +14,7 @@ const RadarMap = ({ tripId }) => {
   useEffect(() => {
     if (!tripId) return;
     const { north, south, west, east } = berlinBounds;
-    const url = `https://v6.bvg.transport.rest/radar?north=${north}&west=${west}&south=${south}&east=${east}&results=200`;
+    const url = `https://v6.bvg.transport.rest/radar?north=${north}&west=${west}&south=${south}&east=${east}&results=200&duration=120`;
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
@@ -29,7 +29,7 @@ const RadarMap = ({ tripId }) => {
   if (!tripId) return <div>No position available.</div>;
 
   return (
-    <div style={{ height: '200px', width: '300px' }}>
+    <div style={{ height: '300px', width: '400px' }}>
       <MapContainer
         center={position || [52.52, 13.405]}
         zoom={13}
