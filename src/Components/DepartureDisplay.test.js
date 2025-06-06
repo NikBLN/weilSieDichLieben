@@ -19,6 +19,11 @@ beforeAll(() => {
 });
 import { render, waitFor } from '@testing-library/react';
 import DepartureDisplay from './DepartureDisplay';
+jest.mock('react-leaflet', () => ({
+  MapContainer: ({ children }) => <div>{children}</div>,
+  TileLayer: () => <div></div>,
+  Marker: () => <div></div>,
+}));
 
 const baseStation = {
   id: '1',

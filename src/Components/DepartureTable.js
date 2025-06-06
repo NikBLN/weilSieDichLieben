@@ -1,7 +1,9 @@
-import { Row, Col } from "antd";
+import { Row, Col, Popover } from "antd";
 import React, { useState } from "react";
 import Marquee from "react-fast-marquee";
 import { getTranslation } from "../dictionary";
+import { EnvironmentOutlined } from "@ant-design/icons";
+import RadarMap from "./RadarMap";
 
 const DepartureTable = (props) => {
   const [isPaused, setIsPaused] = useState(false);
@@ -174,6 +176,14 @@ const DepartureTable = (props) => {
                   : data.when > 0
                   ? `${data.when} min`
                   : getTranslation(props.language, "now")}
+                {data.tripId && (
+                  <Popover
+                    content={<RadarMap tripId={data.tripId} />}
+                    trigger="click"
+                  >
+                    <EnvironmentOutlined style={{ marginLeft: 4 }} />
+                  </Popover>
+                )}
               </Col>
             </Row>
 

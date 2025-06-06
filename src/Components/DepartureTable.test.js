@@ -1,5 +1,10 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import DepartureTable from './DepartureTable';
+jest.mock('react-leaflet', () => ({
+  MapContainer: ({ children }) => <div>{children}</div>,
+  TileLayer: () => <div></div>,
+  Marker: () => <div></div>,
+}));
 
 beforeAll(() => {
   if (!window.matchMedia) {
@@ -28,6 +33,7 @@ describe('DepartureTable sorting', () => {
       direction: 'Dir1',
       departureName: 'Station B',
       when: 3,
+      tripId: 'trip1'
     },
     {
       key: '2',
@@ -35,6 +41,7 @@ describe('DepartureTable sorting', () => {
       direction: 'Dir2',
       departureName: 'Station A',
       when: 5,
+      tripId: 'trip2'
     },
   ];
 
@@ -54,5 +61,11 @@ describe('DepartureTable sorting', () => {
     fireEvent.click(screen.getByText(/Departure from/i));
     const rowsDesc = screen.getAllByText(/Station/);
     expect(rowsDesc[0].textContent).toContain('Station B');
+  });
+
+  test('renders radar icon when tripId provided', () => {
+    render(<DepartureTable {...baseProps} dataSource={[...dataSource]} />);
+    const icons = screen.getAllByRole('img', { hidden: true });
+    expect(icons.length).toBeGreaterThan(0);
   });
 });
