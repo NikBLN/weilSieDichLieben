@@ -20,6 +20,13 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
   const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
+    if (stopLocation?.latitude && stopLocation?.longitude) {
+      setCenter([stopLocation.latitude, stopLocation.longitude]);
+      hasCentered.current = false;
+    }
+  }, [stopLocation]);
+
+  useEffect(() => {
     if (!stopLocation) return;
     const fetchData = async () => {
       try {
@@ -105,10 +112,12 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
 
   const markers = (vehicles || []).map((v, idx) => {
     const icon = L.divIcon({
-      html: vehicleIcons[v.line?.mode] || vehicleIcons.default,
+      html: `<div style="font-size:26px">${
+        vehicleIcons[v.line?.mode] || vehicleIcons.default
+      }</div>`,
       className: '',
-      iconSize: [39, 39],
-      iconAnchor: [19.5, 19.5],
+      iconSize: [26, 26],
+      iconAnchor: [13, 13],
     });
     return (
       <Marker

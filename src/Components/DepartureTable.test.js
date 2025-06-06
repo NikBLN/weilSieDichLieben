@@ -76,9 +76,9 @@ describe('DepartureTable sorting', () => {
     expect(rowsDesc[0].textContent).toContain('Station B');
   });
 
-  test('renders radar icon when tripId provided', () => {
+  test('station names become clickable when tripId provided', () => {
     render(<DepartureTable {...baseProps} dataSource={[...dataSource]} />);
-    const icons = screen.getAllByRole('img', { hidden: true });
-    expect(icons.length).toBeGreaterThan(0);
+    const clickable = screen.getByText('Station B');
+    expect(clickable.style.cursor).toBe('pointer');
   });
 });

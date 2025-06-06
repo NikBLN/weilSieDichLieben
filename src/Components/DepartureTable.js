@@ -169,15 +169,16 @@ const DepartureTable = (props) => {
                 {data.direction}
               </Col>
               <Col style={styles.column} span={9}>
-                {data.departureName}
-                {data.tripId && (
+                {data.tripId ? (
                   <Popover
                     content={<RadarMap stopLocation={data.stopLocation} lines={lineNames} />}
                     trigger="click"
                     overlayStyle={{ width: 520, backgroundColor: "lightGray" }}
                   >
-                    <RadarChartOutlined style={{ marginLeft: 4, color: "orange" }} />
+                    <span style={{ cursor: "pointer" }}>{data.departureName}</span>
                   </Popover>
+                ) : (
+                  data.departureName
                 )}
               </Col>
               <Col style={styles.column} span={2}>
