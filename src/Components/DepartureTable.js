@@ -2,7 +2,7 @@ import { Row, Col, Popover } from "antd";
 import React, { useState } from "react";
 import Marquee from "react-fast-marquee";
 import { getTranslation } from "../dictionary";
-import { EnvironmentOutlined } from "@ant-design/icons";
+import { HeatMapOutlined } from "@ant-design/icons";
 import RadarMap from "./RadarMap";
 
 const DepartureTable = (props) => {
@@ -176,7 +176,7 @@ const DepartureTable = (props) => {
                     trigger="click"
                     overlayStyle={{ width: 520 }}
                   >
-                    <EnvironmentOutlined style={{ marginLeft: 4 }} />
+                    <HeatMapOutlined style={{ marginLeft: 4, color: "orange" }} />
                   </Popover>
                 )}
               </Col>

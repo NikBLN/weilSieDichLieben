@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Tooltip, useMap } from 'react-leaflet';
+import { Progress } from 'antd';
 import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -27,6 +28,7 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
 
   useEffect(() => {
     if (!stopLocation) return;
+    setVehicles(null);
     const fetchData = async () => {
       try {
         const { latitude, longitude } = stopLocation;
@@ -62,6 +64,24 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
   };
 
   if (!stopLocation) return <div>No position available.</div>;
+  if (vehicles === null)
+    return (
+      <div
+        style={{
+          height: '300px',
+          width: '500px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <div style={{ color: 'white', marginBottom: 8 }}>
+          Loading Vehicle Positions...
+        </div>
+        <Progress percent={99} status="active" showInfo={false} style={{ width: '80%' }} />
+      </div>
+    );
   if (vehicles && vehicles.length === 0)
     return (
       <div
@@ -81,8 +101,8 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
     const icon = L.divIcon({
       html: vehicleIcons[v.line?.mode] || vehicleIcons.default,
       className: '',
-      iconSize: [20, 20],
-      iconAnchor: [10, 10],
+      iconSize: [26, 26],
+      iconAnchor: [13, 13],
     });
     return (
       <Marker
@@ -90,14 +110,21 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
         position={[v.location.latitude, v.location.longitude]}
         icon={icon}
       >
-        <Tooltip permanent direction="right" offset={[10, 0]}
-          >{v.line.name}</Tooltip>
+        <Tooltip
+          permanent
+          direction="right"
+          offset={[10, 0]}
+          className="vehicle-tooltip"
+        >
+          {`${v.line.name} (${v.direction})`}
+        </Tooltip>
       </Marker>
     );
   });
 
   return (
     <div style={{ height: '300px', width: '500px' }}>
+      <style>{`.vehicle-tooltip{background:black !important;color:#FFA500 !important;border:none !important;}`}</style>
       <MapContainer
         center={center}
         zoom={13}
