@@ -21,7 +21,11 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
 
   useEffect(() => {
     if (stopLocation?.latitude && stopLocation?.longitude) {
-      setCenter([stopLocation.latitude, stopLocation.longitude]);
+      const newCenter = [stopLocation.latitude, stopLocation.longitude];
+      setCenter(newCenter);
+      if (mapRef.current) {
+        mapRef.current.setView(newCenter);
+      }
       hasCentered.current = false;
     }
   }, [stopLocation]);
