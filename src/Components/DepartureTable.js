@@ -180,7 +180,7 @@ const DepartureTable = (props) => {
                   <Popover
                     content={<RadarMap tripId={data.tripId} stopId={data.stopId} />}
                     trigger="click"
-                    overlayStyle={{ width: 420 }}
+                    overlayStyle={{ width: 520 }}
                   >
                     <EnvironmentOutlined style={{ marginLeft: 4 }} />
                   </Popover>
