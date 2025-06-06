@@ -2,7 +2,7 @@ import { Row, Col, Popover } from "antd";
 import React, { useState } from "react";
 import Marquee from "react-fast-marquee";
 import { getTranslation } from "../dictionary";
-import { HeatMapOutlined } from "@ant-design/icons";
+import { RadarChartOutlined } from "@ant-design/icons";
 import RadarMap from "./RadarMap";
 
 const DepartureTable = (props) => {
@@ -174,9 +174,9 @@ const DepartureTable = (props) => {
                   <Popover
                     content={<RadarMap stopLocation={data.stopLocation} lines={lineNames} />}
                     trigger="click"
-                    overlayStyle={{ width: 520 }}
+                    overlayStyle={{ width: 520, backgroundColor: "lightGray" }}
                   >
-                    <HeatMapOutlined style={{ marginLeft: 4, color: "orange" }} />
+                    <RadarChartOutlined style={{ marginLeft: 4, color: "orange" }} />
                   </Popover>
                 )}
               </Col>

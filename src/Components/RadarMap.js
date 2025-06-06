@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Tooltip, useMap } from 'react-leaflet';
-import { Progress } from 'antd';
+import React, { useEffect, useRef, useState } from 'react';
+import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet';
+import { Spin } from 'antd';
 import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -12,28 +12,20 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-const RecenterMap = ({ center }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (center) {
-      map.setView(center);
-    }
-  }, [center, map]);
-  return null;
-};
-
 const RadarMap = ({ stopLocation, lines = [] }) => {
   const [vehicles, setVehicles] = useState(null);
   const [center, setCenter] = useState([52.52, 13.405]);
+  const mapRef = useRef(null);
+  const hasCentered = useRef(false);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
     if (!stopLocation) return;
-    setVehicles(null);
     const fetchData = async () => {
       try {
         const { latitude, longitude } = stopLocation;
         if (latitude && longitude) {
-          setCenter([latitude, longitude]);
+          if (initialLoad) setCenter([latitude, longitude]);
           const deltaLat = 2 / 111;
           const deltaLon = 2 / (111 * Math.cos((latitude * Math.PI) / 180));
           const north = latitude + deltaLat;
@@ -45,12 +37,22 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
           const data = await res.json();
           const matches = data.movements?.filter((m) => lines.includes(m.line?.name));
           setVehicles(matches || []);
+          if (!hasCentered.current && matches && matches.length > 0 && mapRef.current) {
+            mapRef.current.setView([
+              matches[0].location.latitude,
+              matches[0].location.longitude,
+            ]);
+            hasCentered.current = true;
+          }
         }
       } catch (err) {
         console.error(err);
         setVehicles([]);
+      } finally {
+        setInitialLoad(false);
       }
     };
+    if (initialLoad) setVehicles(null);
     fetchData();
   }, [stopLocation, lines]);
 
@@ -74,12 +76,13 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
+          backgroundColor: 'lightGray',
+          fontFamily: 'DotMatrix',
+          color: 'black',
         }}
       >
-        <div style={{ color: 'white', marginBottom: 8 }}>
-          Loading Vehicle Positions...
-        </div>
-        <Progress percent={99} status="active" showInfo={false} style={{ width: '80%' }} />
+        <span style={{ marginBottom: 8 }}>Loading vehicle data</span>
+        <Spin />
       </div>
     );
   if (vehicles && vehicles.length === 0)
@@ -91,6 +94,9 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
+          backgroundColor: 'lightGray',
+          fontFamily: 'DotMatrix',
+          color: 'black',
         }}
       >
         No vehicle found.
@@ -101,8 +107,8 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
     const icon = L.divIcon({
       html: vehicleIcons[v.line?.mode] || vehicleIcons.default,
       className: '',
-      iconSize: [26, 26],
-      iconAnchor: [13, 13],
+      iconSize: [39, 39],
+      iconAnchor: [19.5, 19.5],
     });
     return (
       <Marker
@@ -129,13 +135,13 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
         center={center}
         zoom={13}
         style={{ height: '100%', width: '100%' }}
+        ref={mapRef}
       >
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {markers}
-        <RecenterMap center={center} />
       </MapContainer>
     </div>
   );
