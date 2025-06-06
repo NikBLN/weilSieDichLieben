@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import L from 'leaflet';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 const berlinBounds = {
   north: 53.0,
@@ -21,12 +31,16 @@ const RadarMap = ({ tripId }) => {
         const match = data.movements?.find((m) => m.tripId === tripId);
         if (match) {
           setPosition([match.location.latitude, match.location.longitude]);
+        } else {
+          setPosition(undefined);
         }
       })
       .catch(console.error);
   }, [tripId]);
 
   if (!tripId) return <div>No position available.</div>;
+  if (position === undefined)
+    return <div style={{ height: '300px', width: '400px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>No vehicle found.</div>;
 
   return (
     <div style={{ height: '300px', width: '400px' }}>
