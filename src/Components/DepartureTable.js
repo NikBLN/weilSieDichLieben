@@ -8,6 +8,7 @@ import RadarMap from "./RadarMap";
 const DepartureTable = (props) => {
   const [isPaused, setIsPaused] = useState(false);
   const [sortOrder, setSortOrder] = useState("off");
+  const lineNames = Array.from(new Set(props.dataSource.map((d) => d.lineName)));
   const FONTSIZE = props.fontSize;
   const FONTFAMILYNAME = "DotMatrix";
 
@@ -169,6 +170,15 @@ const DepartureTable = (props) => {
               </Col>
               <Col style={styles.column} span={9}>
                 {data.departureName}
+                {data.tripId && (
+                  <Popover
+                    content={<RadarMap stopLocation={data.stopLocation} lines={lineNames} />}
+                    trigger="click"
+                    overlayStyle={{ width: 520 }}
+                  >
+                    <EnvironmentOutlined style={{ marginLeft: 4 }} />
+                  </Popover>
+                )}
               </Col>
               <Col style={styles.column} span={2}>
                 {data.when == null
@@ -176,15 +186,6 @@ const DepartureTable = (props) => {
                   : data.when > 0
                   ? `${data.when} min`
                   : getTranslation(props.language, "now")}
-                {data.tripId && (
-                  <Popover
-                    content={<RadarMap tripId={data.tripId} stopId={data.stopId} />}
-                    trigger="click"
-                    overlayStyle={{ width: 520 }}
-                  >
-                    <EnvironmentOutlined style={{ marginLeft: 4 }} />
-                  </Popover>
-                )}
               </Col>
             </Row>
 

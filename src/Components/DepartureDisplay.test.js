@@ -22,7 +22,8 @@ import DepartureDisplay from './DepartureDisplay';
 jest.mock('react-leaflet', () => ({
   MapContainer: ({ children }) => <div>{children}</div>,
   TileLayer: () => <div></div>,
-  Marker: () => <div></div>,
+  Marker: ({ children }) => <div>{children}</div>,
+  Tooltip: ({ children }) => <div>{children}</div>,
 }));
 
 const baseStation = {

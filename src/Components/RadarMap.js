@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -11,62 +11,46 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-const berlinBounds = {
-  north: 53.0,
-  south: 52.0,
-  west: 12.8,
-  east: 14.0,
-};
-
-const RecenterMap = ({ position }) => {
+const RecenterMap = ({ center }) => {
   const map = useMap();
   useEffect(() => {
-    if (position) {
-      map.setView(position);
+    if (center) {
+      map.setView(center);
     }
-  }, [position, map]);
+  }, [center, map]);
   return null;
 };
 
-const RadarMap = ({ tripId, stopId }) => {
-  const [position, setPosition] = useState(null);
+const RadarMap = ({ stopLocation, lines = [] }) => {
+  const [vehicles, setVehicles] = useState(null);
   const [center, setCenter] = useState([52.52, 13.405]);
-  const [mode, setMode] = useState(null);
 
   useEffect(() => {
-    if (!tripId || !stopId) return;
+    if (!stopLocation) return;
     const fetchData = async () => {
       try {
-        const stopRes = await fetch(`https://v6.bvg.transport.rest/stops/${stopId}`);
-        const stopData = await stopRes.json();
-        const { latitude, longitude } = stopData.location || {};
+        const { latitude, longitude } = stopLocation;
         if (latitude && longitude) {
           setCenter([latitude, longitude]);
-          const delta = 0.1;
-          const north = latitude + delta;
-          const south = latitude - delta;
-          const west = longitude - delta;
-          const east = longitude + delta;
+          const deltaLat = 2 / 111;
+          const deltaLon = 2 / (111 * Math.cos((latitude * Math.PI) / 180));
+          const north = latitude + deltaLat;
+          const south = latitude - deltaLat;
+          const west = longitude - deltaLon;
+          const east = longitude + deltaLon;
           const url = `https://v6.bvg.transport.rest/radar?north=${north}&west=${west}&south=${south}&east=${east}&results=500&duration=300`;
           const res = await fetch(url);
           const data = await res.json();
-          const match = data.movements?.find((m) => m.tripId === tripId);
-          if (match) {
-            setPosition([match.location.latitude, match.location.longitude]);
-            setMode(match.line?.mode || match.line?.product);
-          } else {
-            setPosition(undefined);
-            setMode(null);
-          }
+          const matches = data.movements?.filter((m) => lines.includes(m.line?.name));
+          setVehicles(matches || []);
         }
       } catch (err) {
         console.error(err);
-        setPosition(undefined);
-        setMode(null);
+        setVehicles([]);
       }
     };
     fetchData();
-  }, [tripId, stopId]);
+  }, [stopLocation, lines]);
 
   const vehicleIcons = {
     bus: '🚌',
@@ -77,8 +61,8 @@ const RadarMap = ({ tripId, stopId }) => {
     default: '🚍',
   };
 
-  if (!tripId) return <div>No position available.</div>;
-  if (position === undefined)
+  if (!stopLocation) return <div>No position available.</div>;
+  if (vehicles && vehicles.length === 0)
     return (
       <div
         style={{
@@ -93,17 +77,29 @@ const RadarMap = ({ tripId, stopId }) => {
       </div>
     );
 
-  const icon = L.divIcon({
-    html: vehicleIcons[mode] || vehicleIcons.default,
-    className: '',
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
+  const markers = (vehicles || []).map((v, idx) => {
+    const icon = L.divIcon({
+      html: vehicleIcons[v.line?.mode] || vehicleIcons.default,
+      className: '',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10],
+    });
+    return (
+      <Marker
+        key={idx}
+        position={[v.location.latitude, v.location.longitude]}
+        icon={icon}
+      >
+        <Tooltip permanent direction="right" offset={[10, 0]}
+          >{v.line.name}</Tooltip>
+      </Marker>
+    );
   });
 
   return (
     <div style={{ height: '300px', width: '500px' }}>
       <MapContainer
-        center={position || center}
+        center={center}
         zoom={13}
         style={{ height: '100%', width: '100%' }}
       >
@@ -111,8 +107,8 @@ const RadarMap = ({ tripId, stopId }) => {
           attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {position && <Marker position={position} icon={icon} />}
-        <RecenterMap position={position} />
+        {markers}
+        <RecenterMap center={center} />
       </MapContainer>
     </div>
   );
