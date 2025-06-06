@@ -49,6 +49,7 @@ const DepartureDisplay = (props) => {
         stop: {
           id: firstLeg.origin.id,
           name: firstLeg.origin.name,
+          location: firstLeg.origin.location,
         },
         line: {
           name: firstLeg.line.name,
@@ -142,6 +143,8 @@ const DepartureDisplay = (props) => {
           when: diffInMinutes,
           remarks: departure.remarks,
           tripId: departure.tripId || departure.trip?.id,
+          stopId: departure.stop.id,
+          stopLocation: departure.stop.location,
         });
       }
     }

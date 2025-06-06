@@ -19,6 +19,16 @@ beforeAll(() => {
   }
 });
 
+beforeEach(() => {
+  global.fetch = jest.fn(() =>
+    Promise.resolve({ json: () => Promise.resolve({}) })
+  );
+});
+
+afterEach(() => {
+  jest.resetAllMocks();
+});
+
 describe('DepartureTable sorting', () => {
   const baseProps = {
     fontSize: 16,
@@ -33,7 +43,8 @@ describe('DepartureTable sorting', () => {
       direction: 'Dir1',
       departureName: 'Station B',
       when: 3,
-      tripId: 'trip1'
+      tripId: 'trip1',
+      stopId: 'stop1'
     },
     {
       key: '2',
@@ -41,7 +52,8 @@ describe('DepartureTable sorting', () => {
       direction: 'Dir2',
       departureName: 'Station A',
       when: 5,
-      tripId: 'trip2'
+      tripId: 'trip2',
+      stopId: 'stop2'
     },
   ];
 

@@ -178,7 +178,7 @@ const DepartureTable = (props) => {
                   : getTranslation(props.language, "now")}
                 {data.tripId && (
                   <Popover
-                    content={<RadarMap tripId={data.tripId} />}
+                    content={<RadarMap tripId={data.tripId} stopId={data.stopId} />}
                     trigger="click"
                     overlayStyle={{ width: 420 }}
                   >
