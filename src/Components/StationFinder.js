@@ -26,7 +26,7 @@ const StationFinder = (props) => {
   const success = () => {
     messageApi.open({
       type: "success",
-      content: "Stationen erfolgreich geändert.",
+      content: getTranslation(props.language, "stationsSuccessfullyChanged"),
     });
   };
 

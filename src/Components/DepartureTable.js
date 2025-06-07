@@ -2,13 +2,15 @@ import { Row, Col, Popover } from "antd";
 import React, { useState } from "react";
 import Marquee from "react-fast-marquee";
 import { getTranslation } from "../dictionary";
-import { RadarChartOutlined } from "@ant-design/icons";
+import radarIcon from "../images/radar.png";
 import RadarMap from "./RadarMap";
 
 const DepartureTable = (props) => {
   const [isPaused, setIsPaused] = useState(false);
   const [sortOrder, setSortOrder] = useState("off");
-  const lineNames = Array.from(new Set(props.dataSource.map((d) => d.lineName)));
+  const lineNames = Array.from(
+    new Set(props.dataSource.map((d) => d.lineName))
+  );
   const FONTSIZE = props.fontSize;
   const FONTFAMILYNAME = "DotMatrix";
 
@@ -171,11 +173,35 @@ const DepartureTable = (props) => {
               <Col style={styles.column} span={9}>
                 {data.tripId ? (
                   <Popover
-                    content={<RadarMap stopLocation={data.stopLocation} lines={lineNames} />}
+                    content={
+                      <RadarMap
+                        stopLocation={data.stopLocation}
+                        lines={lineNames}
+                        language={props.language}
+                      />
+                    }
                     trigger="click"
-                    overlayStyle={{ width: 520, backgroundColor: "lightGray" }}
+                    placement="right"
+                    overlayStyle={{ width: 520, backgroundColor: "lightGray", borderRadius: "8px" }}
                   >
-                    <span style={{ cursor: "pointer" }}>{data.departureName}</span>
+                    <span
+                      style={{
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      {data.departureName}
+                      <img
+                        src={radarIcon}
+                        alt="radar"
+                        style={{
+                          width: FONTSIZE,
+                          height: FONTSIZE,
+                        }}
+                      />
+                    </span>
                   </Popover>
                 ) : (
                   data.departureName
@@ -183,9 +209,9 @@ const DepartureTable = (props) => {
               </Col>
               <Col style={styles.column} span={2}>
                 {data.when == null
-                  ? "Fällt aus"
+                  ? getTranslation(props.language, "cancelled")
                   : data.when > 0
-                  ? `${data.when} min`
+                  ? `${data.when} ${getTranslation(props.language, "minutes")}`
                   : getTranslation(props.language, "now")}
               </Col>
             </Row>

@@ -37,8 +37,8 @@ const Settings = (props) => {
 
   const getLanguageOptions = () => {
     const languages = [
-      { value: "de", label: "Deutsch" },
-      { value: "en", label: "English" },
+      { value: "de", label: getTranslation(props.language, "german") },
+      { value: "en", label: getTranslation(props.language, "english") },
     ];
 
     return languages.map((lang) => ({
@@ -121,7 +121,7 @@ const Settings = (props) => {
                           width: "60px",
                         }}
                       >
-                        S-Bahn:
+                        {getTranslation(props.language, "sBahn")}
                       </div>
                       <Switch
                         onChange={(checked) => {
@@ -153,7 +153,7 @@ const Settings = (props) => {
                           width: "60px",
                         }}
                       >
-                        Tram:
+                        {getTranslation(props.language, "tram")}
                       </div>
                       <Switch
                         onChange={(checked) => {
@@ -169,7 +169,7 @@ const Settings = (props) => {
                           width: "60px",
                         }}
                       >
-                        Bus:
+                        {getTranslation(props.language, "bus")}
                       </div>
                       <Switch
                         onChange={(checked) => {
@@ -201,7 +201,7 @@ const Settings = (props) => {
                           width: "60px",
                         }}
                       >
-                        IC/ICE:
+                        {getTranslation(props.language, "icIce")}
                       </div>
                       <Switch
                         onChange={(checked) => {
@@ -217,7 +217,7 @@ const Settings = (props) => {
                           width: "60px",
                         }}
                       >
-                        RB/RE:
+                        {getTranslation(props.language, "rbRe")}
                       </div>
                       <Switch
                         onChange={(checked) => {

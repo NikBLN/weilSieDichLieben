@@ -5,6 +5,7 @@ import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { getTranslation } from '../dictionary';
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -12,7 +13,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-const RadarMap = ({ stopLocation, lines = [] }) => {
+const RadarMap = ({ stopLocation, lines = [], language = 'de' }) => {
   const [vehicles, setVehicles] = useState(null);
   const [center, setCenter] = useState([52.52, 13.405]);
   const mapRef = useRef(null);
@@ -48,13 +49,6 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
           const data = await res.json();
           const matches = data.movements?.filter((m) => lines.includes(m.line?.name));
           setVehicles(matches || []);
-          if (!hasCentered.current && matches && matches.length > 0 && mapRef.current) {
-            mapRef.current.setView([
-              matches[0].location.latitude,
-              matches[0].location.longitude,
-            ]);
-            hasCentered.current = true;
-          }
         }
       } catch (err) {
         console.error(err);
@@ -68,15 +62,17 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
   }, [stopLocation, lines]);
 
   const vehicleIcons = {
-    bus: '🚌',
-    tram: '🚊',
+    suburban: '🚆',
     subway: '🚇',
+    tram: '🚊',
+    bus: '🚌',
     ferry: '⛴️',
-    train: '🚆',
+    express: '🚄',
+    regional: '🚂',
     default: '🚍',
   };
 
-  if (!stopLocation) return <div>No position available.</div>;
+  if (!stopLocation) return <div>{getTranslation(language, 'noPositionAvailable')}</div>;
   if (vehicles === null)
     return (
       <div
@@ -92,7 +88,7 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
           color: 'black',
         }}
       >
-        <span style={{ marginBottom: 8 }}>Loading vehicle data</span>
+        <span style={{ marginBottom: 8 }}>{getTranslation(language, 'loadingVehicleData')}</span>
         <Spin />
       </div>
     );
@@ -110,14 +106,14 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
           color: 'black',
         }}
       >
-        No vehicle found.
+        {getTranslation(language, 'noVehicleFound')}
       </div>
     );
 
   const markers = (vehicles || []).map((v, idx) => {
     const icon = L.divIcon({
       html: `<div style="font-size:26px">${
-        vehicleIcons[v.line?.mode] || vehicleIcons.default
+        vehicleIcons[v.line?.product] || vehicleIcons.default
       }</div>`,
       className: '',
       iconSize: [26, 26],
@@ -146,7 +142,7 @@ const RadarMap = ({ stopLocation, lines = [] }) => {
       <style>{`.vehicle-tooltip{background:black !important;color:#FFA500 !important;border:none !important;}`}</style>
       <MapContainer
         center={center}
-        zoom={13}
+        zoom={15}
         style={{ height: '100%', width: '100%' }}
         ref={mapRef}
       >
