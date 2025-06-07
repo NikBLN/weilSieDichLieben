@@ -8,9 +8,6 @@ import RadarMap from "./RadarMap";
 const DepartureTable = (props) => {
   const [isPaused, setIsPaused] = useState(false);
   const [sortOrder, setSortOrder] = useState("off");
-  const lineNames = Array.from(
-    new Set(props.dataSource.map((d) => d.lineName))
-  );
   const FONTSIZE = props.fontSize;
   const FONTFAMILYNAME = "DotMatrix";
 
@@ -176,7 +173,7 @@ const DepartureTable = (props) => {
                     content={
                       <RadarMap
                         stopLocation={data.stopLocation}
-                        lines={lineNames}
+                        dataSource={props.dataSource}
                         language={props.language}
                       />
                     }

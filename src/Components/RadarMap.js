@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet';
-import { Spin } from 'antd';
-import L from 'leaflet';
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import { getTranslation } from '../dictionary';
+import { useEffect, useRef, useState } from "react";
+import { MapContainer, TileLayer, Marker, Tooltip } from "react-leaflet";
+import { Spin } from "antd";
+import L from "leaflet";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { getTranslation } from "../dictionary";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -13,12 +13,27 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-const RadarMap = ({ stopLocation, lines = [], language = 'de' }) => {
+// Constants for geographic calculations (2km radius)
+const KM_TO_DEGREES_LAT = 2 / 111; // 1 degree latitude ≈ 111km
+const RADAR_SEARCH_RADIUS_KM = 2;
+const API_RESULTS_LIMIT = 100;
+
+// Shared container styles
+const CONTAINER_STYLE = {
+  height: "300px",
+  width: "500px",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  backgroundColor: "lightGray",
+  fontFamily: "DotMatrix",
+  color: "black",
+};
+
+const RadarMap = ({ stopLocation, dataSource = [], language = "de" }) => {
   const [vehicles, setVehicles] = useState(null);
   const [center, setCenter] = useState([52.52, 13.405]);
   const mapRef = useRef(null);
-  const hasCentered = useRef(false);
-  const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
     if (stopLocation?.latitude && stopLocation?.longitude) {
@@ -27,95 +42,82 @@ const RadarMap = ({ stopLocation, lines = [], language = 'de' }) => {
       if (mapRef.current) {
         mapRef.current.setView(newCenter);
       }
-      hasCentered.current = false;
     }
   }, [stopLocation]);
 
   useEffect(() => {
-    if (!stopLocation) return;
+    if (!stopLocation?.latitude || !stopLocation?.longitude) return;
+
     const fetchData = async () => {
       try {
         const { latitude, longitude } = stopLocation;
-        if (latitude && longitude) {
-          if (initialLoad) setCenter([latitude, longitude]);
-          const deltaLat = 2 / 111;
-          const deltaLon = 2 / (111 * Math.cos((latitude * Math.PI) / 180));
-          const north = latitude + deltaLat;
-          const south = latitude - deltaLat;
-          const west = longitude - deltaLon;
-          const east = longitude + deltaLon;
-          const url = `https://v6.bvg.transport.rest/radar?north=${north}&west=${west}&south=${south}&east=${east}&results=500&duration=300`;
-          const res = await fetch(url);
-          const data = await res.json();
-          const matches = data.movements?.filter((m) => lines.includes(m.line?.name));
-          setVehicles(matches || []);
-        }
+        const deltaLat = KM_TO_DEGREES_LAT;
+        const deltaLon =
+          RADAR_SEARCH_RADIUS_KM / (111 * Math.cos((latitude * Math.PI) / 180));
+        const north = latitude + deltaLat;
+        const south = latitude - deltaLat;
+        const west = longitude - deltaLon;
+        const east = longitude + deltaLon;
+
+        const url = `https://v6.bvg.transport.rest/radar?north=${north}&west=${west}&south=${south}&east=${east}&results=${API_RESULTS_LIMIT}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        // Get line names for the clicked station from dataSource
+        const stationLineNames = dataSource
+          .filter((d) => d.stopLocation?.id === stopLocation.id)
+          .map((d) => d.lineName);
+
+        const matches = data.movements?.filter((m) =>
+          stationLineNames.includes(m.line?.name)
+        );
+        setVehicles(matches || []);
       } catch (err) {
         console.error(err);
         setVehicles([]);
-      } finally {
-        setInitialLoad(false);
       }
     };
-    if (initialLoad) setVehicles(null);
+
     fetchData();
-  }, [stopLocation, lines]);
+  }, [stopLocation, dataSource]);
 
   const vehicleIcons = {
-    suburban: '🚆',
-    subway: '🚇',
-    tram: '🚊',
-    bus: '🚌',
-    ferry: '⛴️',
-    express: '🚄',
-    regional: '🚂',
-    default: '🚍',
+    suburban: "🚆",
+    subway: "🚇",
+    tram: "🚊",
+    bus: "🚌",
+    ferry: "⛴️",
+    express: "🚄",
+    regional: "🚂",
+    default: "🚍",
   };
 
-  if (!stopLocation) return <div>{getTranslation(language, 'noPositionAvailable')}</div>;
-  if (vehicles === null)
+  if (!stopLocation)
+    return <div>{getTranslation(language, "noPositionAvailable")}</div>;
+  if (vehicles === null) {
     return (
-      <div
-        style={{
-          height: '300px',
-          width: '500px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'lightGray',
-          fontFamily: 'DotMatrix',
-          color: 'black',
-        }}
-      >
-        <span style={{ marginBottom: 8 }}>{getTranslation(language, 'loadingVehicleData')}</span>
+      <div style={{ ...CONTAINER_STYLE, flexDirection: "column" }}>
+        <span style={{ marginBottom: 8 }}>
+          {getTranslation(language, "loadingVehicleData")}
+        </span>
         <Spin />
       </div>
     );
-  if (vehicles && vehicles.length === 0)
+  }
+
+  if (vehicles.length === 0) {
     return (
-      <div
-        style={{
-          height: '300px',
-          width: '500px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'lightGray',
-          fontFamily: 'DotMatrix',
-          color: 'black',
-        }}
-      >
-        {getTranslation(language, 'noVehicleFound')}
+      <div style={CONTAINER_STYLE}>
+        {getTranslation(language, "noVehicleFound")}
       </div>
     );
+  }
 
-  const markers = (vehicles || []).map((v, idx) => {
+  const markers = vehicles.map((v, idx) => {
     const icon = L.divIcon({
       html: `<div style="font-size:26px">${
         vehicleIcons[v.line?.product] || vehicleIcons.default
       }</div>`,
-      className: '',
+      className: "",
       iconSize: [26, 26],
       iconAnchor: [13, 13],
     });
@@ -138,12 +140,12 @@ const RadarMap = ({ stopLocation, lines = [], language = 'de' }) => {
   });
 
   return (
-    <div style={{ height: '300px', width: '500px' }}>
+    <div style={{ height: "300px", width: "500px" }}>
       <style>{`.vehicle-tooltip{background:black !important;color:#FFA500 !important;border:none !important;}`}</style>
       <MapContainer
         center={center}
         zoom={15}
-        style={{ height: '100%', width: '100%' }}
+        style={{ height: "100%", width: "100%" }}
         ref={mapRef}
       >
         <TileLayer
