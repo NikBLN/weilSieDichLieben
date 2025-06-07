@@ -25,7 +25,7 @@ const DepartureTable = (props) => {
       backgroundColor: "lightGray",
       padding: "8px",
       position: "sticky",
-      top: 0,
+      top: -8,
       zIndex: 5,
     },
     dataRow: {
@@ -122,8 +122,6 @@ const DepartureTable = (props) => {
         padding: "16px",
         paddingTop: "0px",
         borderRadius: "8px",
-        maxHeight: "80vh",
-        overflowY: "auto",
       }}
     >
       <style>
