@@ -60,7 +60,7 @@ const StationFinder = (props) => {
       <AutoComplete
         placeholder={getTranslation(props.language, "searchStation")}
         allowClear={props.allowClear}
-        value={props.initialValue != null ? props.initialValue : value}
+        value={value || props.initialValue || ""}
         style={{ width: 200 }}
         options={deferredOptions}
         onSelect={(_, option) => {
@@ -72,6 +72,10 @@ const StationFinder = (props) => {
         onSearch={(text) => {
           setQueryStr(text);
           setValue(text);
+          // If user is typing and we have an initial value, clear the selection
+          if (props.initialValue && text !== props.initialValue) {
+            props.onSelect(null);
+          }
         }}
         onClear={() => {
           setQueryStr("");
