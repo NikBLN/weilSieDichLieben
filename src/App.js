@@ -89,11 +89,16 @@ const App = () => {
             ) || "0"
           : "0";
         if (data.version > parseInt(storedVersion)) {
+          const title = typeof data.title === 'object' 
+            ? (data.title[language] || data.title.de || "Neue Features verfügbar!")
+            : (data.title || "Neue Features verfügbar!");
+          const message = typeof data.message === 'object'
+            ? (data.message[language] || data.message.de || "In den Einstellungen (⚙️) sind ein paar neue Einstellungen dazugekommen. Schau doch mal vorbei!")
+            : (data.message || "In den Einstellungen (⚙️) sind ein paar neue Einstellungen dazugekommen. Schau doch mal vorbei!");
+          
           notification.info({
-            message: data.title || "Neue Features verfügbar!",
-            description:
-              data.message ||
-              "In den Einstellungen (⚙️) sind ein paar neue Einstellungen dazugekommen. Schau doch mal vorbei!",
+            message: title,
+            description: message,
             placement: "topRight",
             duration: 0,
             btn: (
