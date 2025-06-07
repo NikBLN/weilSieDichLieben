@@ -89,13 +89,20 @@ const App = () => {
             ) || "0"
           : "0";
         if (data.version > parseInt(storedVersion)) {
-          const title = typeof data.title === 'object' 
-            ? (data.title[language] || data.title.de || "Neue Features verfügbar!")
-            : (data.title || "Neue Features verfügbar!");
-          const message = typeof data.message === 'object'
-            ? (data.message[language] || data.message.de || "In den Einstellungen (⚙️) sind ein paar neue Einstellungen dazugekommen. Schau doch mal vorbei!")
-            : (data.message || "In den Einstellungen (⚙️) sind ein paar neue Einstellungen dazugekommen. Schau doch mal vorbei!");
-          
+          const title =
+            typeof data.title === "object"
+              ? data.title[language] ||
+                data.title.de ||
+                "Neue Features verfügbar!"
+              : data.title || "Neue Features verfügbar!";
+          const message =
+            typeof data.message === "object"
+              ? data.message[language] ||
+                data.message.de ||
+                "In den Einstellungen (⚙️) sind ein paar neue Einstellungen dazugekommen. Schau doch mal vorbei!"
+              : data.message ||
+                "In den Einstellungen (⚙️) sind ein paar neue Einstellungen dazugekommen. Schau doch mal vorbei!";
+
           notification.info({
             message: title,
             description: message,
@@ -858,7 +865,12 @@ const App = () => {
         )}
         {!settingsAreVisible && selectedStations.length > 0 && (
           <div
-            style={{ padding: "8px", overflow: "auto", paddingBottom: "60px" }}
+            style={{ 
+              padding: "8px", 
+              overflow: "auto", 
+              height: `calc(100vh - ${uiVisible ? '64px' : '0px'} - ${fontSize + 56}px)`,
+              boxSizing: "border-box"
+            }}
           >
             <DepartureDisplay
               fontSize={fontSize}
