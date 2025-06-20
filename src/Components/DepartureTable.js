@@ -138,10 +138,10 @@ const DepartureTable = (props) => {
         <Col style={styles.columnName} span={4}>
           {getTranslation(props.language, "line")}
         </Col>
-        <Col style={styles.columnName} span={props.hideThirdColumn ? 18 : 9}>
+        <Col style={styles.columnName} span={props.hideDepartureCol ? 18 : 9}>
           {getTranslation(props.language, "destination")}
         </Col>
-        {!props.hideThirdColumn && (
+        {!props.hideDepartureCol && (
           <Col style={styles.columnNameClickable} span={9} onClick={handleSort}>
             {getTranslation(props.language, "departureName")}{" "}
           {sortOrder !== "off" && (sortOrder === "asc" ? "↑" : "↓")}
@@ -164,10 +164,10 @@ const DepartureTable = (props) => {
               <Col style={styles.column} span={4}>
                 {data.lineName}
               </Col>
-              <Col style={styles.column} span={props.hideThirdColumn ? 18 : 9}>
+              <Col style={styles.column} span={props.hideDepartureCol ? 18 : 9}>
                 {data.direction}
               </Col>
-              {!props.hideThirdColumn && (
+              {!props.hideDepartureCol && (
                 <Col style={styles.column} span={9}>
                   {data.tripId ? (
                   <Popover

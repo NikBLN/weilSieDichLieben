@@ -437,9 +437,9 @@ const Settings = (props) => {
             </div>
             <Switch
               onChange={(checked) => {
-                props.onHideThirdColumnChange(checked);
+                props.onHideDepartureColChange(checked);
               }}
-              checked={props.hideThirdColumn}
+              checked={props.hideDepartureCol}
             />
           </div>
         </Card>

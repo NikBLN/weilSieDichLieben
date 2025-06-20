@@ -158,7 +158,7 @@ const DepartureDisplay = (props) => {
         fontSize={props.fontSize}
         dataSource={columnData}
         remarksVisibility={props.remarksVisibility}
-        hideThirdColumn={props.hideThirdColumn}
+        hideDepartureCol={props.hideDepartureCol}
         language={props.language}
       />
     </div>

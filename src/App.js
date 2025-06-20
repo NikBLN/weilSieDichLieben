@@ -44,7 +44,7 @@ const App = () => {
   const [fontSize, setFontSize] = useState(16);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [remarksVisibility, setRemarksVisibility] = useState(true);
-  const [hideThirdColumn, setHideThirdColumn] = useState(false);
+  const [hideDepartureCol, setHideDepartureCol] = useState(false);
   const [standardRemarksVisibility, setStandardRemarksVisibility] =
     useState(true);
   const [autoHideEnabled, setAutoHideEnabled] = useState(false);
@@ -74,7 +74,7 @@ const App = () => {
     fetchAutoHideFromCookie();
     fetchFontSizeFromCookie();
     fetchRemarksVisibilityFromCookie();
-    fetchHideThirdColumnFromCookie();
+    fetchHideDepartureColFromCookie();
     fetchStandardRemarksVisibilityFromCookie();
     fetchLanguageFromCookie();
 
@@ -344,14 +344,14 @@ const App = () => {
     }
   };
 
-  const fetchHideThirdColumnFromCookie = () => {
-    const cookieHideThirdColumn = document.cookie.replace(
-      /(?:(?:^|.*;\s*)hideThirdColumn\s*=\s*([^;]*).*$)|^.*$/,
+  const fetchHideDepartureColFromCookie = () => {
+    const cookieHideDepartureCol = document.cookie.replace(
+      /(?:(?:^|.*;\s*)hideDepartureCol\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
     );
 
-    if (cookieHideThirdColumn != null && cookieHideThirdColumn !== "") {
-      setHideThirdColumn(JSON.parse(cookieHideThirdColumn));
+    if (cookieHideDepartureCol != null && cookieHideDepartureCol !== "") {
+      setHideDepartureCol(JSON.parse(cookieHideDepartureCol));
     }
   };
 
@@ -412,9 +412,9 @@ const App = () => {
     saveDataInCookie("remarksVisibility", value);
   };
 
-  const onHideThirdColumnChange = (value) => {
-    setHideThirdColumn(value);
-    saveDataInCookie("hideThirdColumn", value);
+  const onHideDepartureColChange = (value) => {
+    setHideDepartureCol(value);
+    saveDataInCookie("hideDepartureCol", value);
   };
 
   const onStandardRemarksVisibilityChange = (value) => {
@@ -894,7 +894,7 @@ const App = () => {
               fontSize={fontSize}
               selectedStations={selectedStations}
               remarksVisibility={remarksVisibility}
-              hideThirdColumn={hideThirdColumn}
+              hideDepartureCol={hideDepartureCol}
               standardRemarksVisibility={standardRemarksVisibility}
               language={language}
             />
@@ -916,8 +916,8 @@ const App = () => {
             }
             autoHideEnabled={autoHideEnabled}
             onAutoHideChange={onAutoHideChange}
-            hideThirdColumn={hideThirdColumn}
-            onHideThirdColumnChange={onHideThirdColumnChange}
+            hideDepartureCol={hideDepartureCol}
+            onHideDepartureColChange={onHideDepartureColChange}
             language={language}
             onLanguageChange={onLanguageChange}
             onResetCookieConsent={resetCookieConsent}
