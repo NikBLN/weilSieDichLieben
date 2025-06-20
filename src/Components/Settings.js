@@ -433,7 +433,7 @@ const Settings = (props) => {
           </div>
           <div style={{ display: "flex", marginBottom: "8px" }}>
             <div style={{ marginRight: "8px" }}>
-              "Abfahrt von" Spalte ausblenden:
+              {getTranslation(props.language, "hideDepartureFromColumn")}
             </div>
             <Switch
               onChange={(checked) => {

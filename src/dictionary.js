@@ -59,6 +59,7 @@ const dictionary = {
     noVehicleFound: "Kein Fahrzeug gefunden.",
     cancelled: "Fällt aus",
     minutes: "min",
+    hideDepartureFromColumn: "\"Abfahrt von\" Spalte ausblenden:"
   },
   en: {
     line: "Line",
@@ -119,6 +120,7 @@ const dictionary = {
     noVehicleFound: "No vehicle found.",
     cancelled: "Cancelled",
     minutes: "min",
+    hideDepartureFromColumn: "Hide \"Departure from\" column:"
   },
 };
 
