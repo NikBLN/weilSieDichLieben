@@ -1,9 +1,13 @@
-import { Row, Col } from "antd";
+import { Row, Col, Popover } from "antd";
 import React, { useState } from "react";
 import Marquee from "react-fast-marquee";
+import { getTranslation } from "../dictionary";
+import radarIcon from "../images/radar.png";
+import RadarMap from "./RadarMap";
 
 const DepartureTable = (props) => {
   const [isPaused, setIsPaused] = useState(false);
+  const [sortOrder, setSortOrder] = useState("off");
   const FONTSIZE = props.fontSize;
   const FONTFAMILYNAME = "DotMatrix";
 
@@ -21,7 +25,7 @@ const DepartureTable = (props) => {
       backgroundColor: "lightGray",
       padding: "8px",
       position: "sticky",
-      top: "-8px",
+      top: -8,
       zIndex: 5,
     },
     dataRow: {
@@ -33,6 +37,12 @@ const DepartureTable = (props) => {
       fontSize: FONTSIZE * 0.8,
       fontFamily: FONTFAMILYNAME,
       backgroundColor: "black",
+    },
+    columnNameClickable: {
+      fontSize: FONTSIZE,
+      fontFamily: FONTFAMILYNAME,
+      cursor: "pointer",
+      userSelect: "none",
     },
   };
 
@@ -81,10 +91,39 @@ const DepartureTable = (props) => {
     return remarks.map((remark) => remark.text).join(" *** ");
   };
 
-  const sortedDataSource = props.dataSource.sort((a, b) => a.when - b.when);
+  const handleSort = () => {
+    setSortOrder((current) => {
+      switch (current) {
+        case "off":
+          return "asc";
+        case "asc":
+          return "desc";
+        case "desc":
+          return "off";
+        default:
+          return "off";
+      }
+    });
+  };
+
+  const getSortedData = () => {
+    if (sortOrder === "off")
+      return props.dataSource.sort((a, b) => a.when - b.when);
+
+    return [...props.dataSource].sort((a, b) => {
+      const comparison = a.departureName.localeCompare(b.departureName);
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+  };
 
   return (
-    <div style={{ padding: "16px", borderRadius: "8px" }}>
+    <div
+      style={{
+        padding: "16px",
+        paddingTop: "0px",
+        borderRadius: "8px",
+      }}
+    >
       <style>
         {`
           .remark-link, .remark-link:visited, .remark-link:hover, .remark-link:active {
@@ -97,22 +136,23 @@ const DepartureTable = (props) => {
 
       <Row style={styles.headerRow}>
         <Col style={styles.columnName} span={4}>
-          Linie
+          {getTranslation(props.language, "line")}
         </Col>
         <Col style={styles.columnName} span={props.hideThirdColumn ? 18 : 9}>
-          Ziel
+          {getTranslation(props.language, "destination")}
         </Col>
         {!props.hideThirdColumn && (
-          <Col style={styles.columnName} span={9}>
-            Abfahrt von
+          <Col style={styles.columnNameClickable} span={9} onClick={handleSort}>
+            {getTranslation(props.language, "departureName")}{" "}
+          {sortOrder !== "off" && (sortOrder === "asc" ? "↑" : "↓")}
           </Col>
         )}
         <Col style={styles.columnName} span={2}>
-          Abfahrt in
+          {getTranslation(props.language, "when")}
         </Col>
       </Row>
 
-      {sortedDataSource.map((data) => {
+      {getSortedData().map((data) => {
         const remarkText = processRemarks(data.remarks);
 
         return (
@@ -129,15 +169,49 @@ const DepartureTable = (props) => {
               </Col>
               {!props.hideThirdColumn && (
                 <Col style={styles.column} span={9}>
-                  {data.departureName}
-                </Col>
+                  {data.tripId ? (
+                  <Popover
+                    content={
+                      <RadarMap
+                        stopLocation={data.stopLocation}
+                        dataSource={props.dataSource}
+                        language={props.language}
+                      />
+                    }
+                    trigger="click"
+                    placement="right"
+                    overlayStyle={{ width: 520, backgroundColor: "lightGray", borderRadius: "8px" }}
+                  >
+                    <span
+                      style={{
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      {data.departureName}
+                        <img
+                        src={radarIcon}
+                        alt="radar"
+                        style={{
+                          width: FONTSIZE,
+                          height: FONTSIZE,
+                        }}
+                      />
+                    </span>
+                  </Popover>
+                ) : (
+                  data.departureName
+                )}
+              </Col>
               )}
               <Col style={styles.column} span={2}>
                 {data.when == null
-                  ? "Fällt aus"
+                  ? getTranslation(props.language, "cancelled")
                   : data.when > 0
-                  ? `${data.when} min`
-                  : "Jetzt"}
+                  ? `${data.when} ${getTranslation(props.language, "minutes")}`
+                  : getTranslation(props.language, "now")}
               </Col>
             </Row>
 

@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { AutoComplete, message } from "antd";
 import React, { useDeferredValue, useEffect, useState } from "react";
+import { getTranslation } from "../dictionary";
 
 const StationFinder = (props) => {
   const [messageApi, contextHolder] = message.useMessage();
@@ -25,7 +26,7 @@ const StationFinder = (props) => {
   const success = () => {
     messageApi.open({
       type: "success",
-      content: "Station erfolgreich hinzugefügt!",
+      content: getTranslation(props.language, "stationsSuccessfullyChanged"),
     });
   };
 
@@ -57,7 +58,9 @@ const StationFinder = (props) => {
     <>
       {contextHolder}
       <AutoComplete
-        value={value}
+        placeholder={getTranslation(props.language, "searchStation")}
+        allowClear={props.allowClear}
+        value={value || props.initialValue || ""}
         style={{ width: 200 }}
         options={deferredOptions}
         onSelect={(_, option) => {
@@ -69,6 +72,16 @@ const StationFinder = (props) => {
         onSearch={(text) => {
           setQueryStr(text);
           setValue(text);
+          // If user is typing and we have an initial value, clear the selection
+          if (props.initialValue && text !== props.initialValue) {
+            props.onSelect(null);
+          }
+        }}
+        onClear={() => {
+          setQueryStr("");
+          setValue("");
+          setOptions([]);
+          props.onSelect(null);
         }}
       />
     </>

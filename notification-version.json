@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "title": {
+    "de": "Fahrzeug-Radar ist da! 🚊📡",
+    "en": "Vehicle Radar is here! 🚊📡"
+  },
+  "message": {
+    "de": "Du kannst jetzt die Position der Fahrzeuge sehen! Klicke einfach auf einen Stationsnamen in der Abfahrtstafel und entdecke die neue Radar-Funktion.",
+    "en": "You can now see the position of vehicles! Simply click on a station name in the departure table and discover the new radar feature."
+  }
+}

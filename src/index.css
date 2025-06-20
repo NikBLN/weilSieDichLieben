@@ -20,3 +20,19 @@ antd-custom-cell {
   font-family: "DotMatrix";
   src: url("/public/fonts/DotMatrix.ttf") format("truetype");
 }
+
+.pulse-animation {
+  animation: pulseAnimation 1s ease-in-out;
+}
+
+@keyframes pulseAnimation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

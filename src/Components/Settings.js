@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import SettingsModal from "./SettingsModal";
-import { Button, Card, Row, Col, Switch, InputNumber } from "antd";
+import { Button, Card, Row, Col, Switch, InputNumber, Select } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import "animate.css";
+import StationFinder from "./StationFinder";
+import { getTranslation } from "../dictionary";
 
 const Settings = (props) => {
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
@@ -33,11 +35,23 @@ const Settings = (props) => {
     props.onStationEdit(selectedStationsCopy[index]);
   };
 
+  const getLanguageOptions = () => {
+    const languages = [
+      { value: "de", label: getTranslation(props.language, "german") },
+      { value: "en", label: getTranslation(props.language, "english") },
+    ];
+
+    return languages.map((lang) => ({
+      value: lang.value,
+      label: lang.label,
+    }));
+  };
+
   return (
     <div
       className={props.settingsClass}
       style={{
-        height: "calc(100% - 128px)",
+        height: "calc(100vh - 144px)",
         backgroundColor: "lightgray",
         margin: "16px",
         marginBottom: "0px",
@@ -45,32 +59,47 @@ const Settings = (props) => {
         position: "relative",
         display: "flex",
         flexDirection: "column",
+        overflow: "hidden",
       }}
     >
       <div
         style={{
-          height: "70%",
+          flex: "1",
           padding: "16px",
           paddingBottom: "16px",
           overflowY: "auto",
           overflowX: "hidden",
         }}
       >
-        <Row gutter={[16, 16]}>
+        <Row gutter={[16, 16]} wrap={true} style={{ margin: 0 }}>
           {props.selectedStations.map((station) => {
             return (
-              <Col key={station.id}>
+              <Col key={station.id} xs={24} sm={12} md={8} lg={6}>
                 <Card
                   style={{ boxShadow: "3px 3px 10px 0px rgba(0,0,0,0.5)" }}
                   size="small"
                   title={
-                    <div style={{ display: "flex" }}>
-                      <div style={{ marginRight: "8px" }}>{station.value}</div>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          marginRight: "8px",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {station.value}
+                      </div>
                       <div
                         onClick={() => {
                           props.removeStation(station);
                         }}
-                        style={{ cursor: "pointer" }}
+                        style={{ cursor: "pointer", flexShrink: 0 }}
                       >
                         <DeleteOutlined
                           style={{ color: "red", fontSize: "16px" }}
@@ -92,7 +121,7 @@ const Settings = (props) => {
                           width: "60px",
                         }}
                       >
-                        S-Bahn:
+                        {getTranslation(props.language, "sBahn")}
                       </div>
                       <Switch
                         onChange={(checked) => {
@@ -108,7 +137,7 @@ const Settings = (props) => {
                           width: "60px",
                         }}
                       >
-                        U-Bahn:
+                        {getTranslation(props.language, "subway")}
                       </div>
                       <Switch
                         onChange={(checked) => {
@@ -124,7 +153,7 @@ const Settings = (props) => {
                           width: "60px",
                         }}
                       >
-                        Tram:
+                        {getTranslation(props.language, "tram")}
                       </div>
                       <Switch
                         onChange={(checked) => {
@@ -140,7 +169,7 @@ const Settings = (props) => {
                           width: "60px",
                         }}
                       >
-                        Bus:
+                        {getTranslation(props.language, "bus")}
                       </div>
                       <Switch
                         onChange={(checked) => {
@@ -156,7 +185,7 @@ const Settings = (props) => {
                           width: "60px",
                         }}
                       >
-                        Fähre:
+                        {getTranslation(props.language, "ferry")}
                       </div>
                       <Switch
                         onChange={(checked) => {
@@ -172,7 +201,7 @@ const Settings = (props) => {
                           width: "60px",
                         }}
                       >
-                        IC/ICE:
+                        {getTranslation(props.language, "icIce")}
                       </div>
                       <Switch
                         onChange={(checked) => {
@@ -188,7 +217,7 @@ const Settings = (props) => {
                           width: "60px",
                         }}
                       >
-                        RB/RE:
+                        {getTranslation(props.language, "rbRe")}
                       </div>
                       <Switch
                         onChange={(checked) => {
@@ -204,7 +233,41 @@ const Settings = (props) => {
                           width: "150px",
                         }}
                       >
-                        Zeitpuffer (z.B. Fußweg zur Station):
+                        {getTranslation(
+                          props.language,
+                          "showDeparturesInDirection"
+                        )}
+                      </div>
+                      <StationFinder
+                        allowClear={true}
+                        initialValue={station.destination?.name}
+                        onSelect={(value) => {
+                          onPropChange(
+                            value != null
+                              ? {
+                                  id: value.id,
+                                  name: value.value,
+                                }
+                              : null,
+                            station,
+                            "destination"
+                          );
+                        }}
+                        selectedStations={props.selectedStations}
+                        language={props.language}
+                      />
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <div
+                        style={{
+                          marginRight: "8px",
+                          width: "150px",
+                        }}
+                      >
+                        {getTranslation(
+                          props.language,
+                          "showDeparturesInMinutes"
+                        )}
                       </div>
                       <InputNumber
                         value={station.when}
@@ -220,7 +283,7 @@ const Settings = (props) => {
                           width: "150px",
                         }}
                       >
-                        Anzahl der Ergebnisse:
+                        {getTranslation(props.language, "amountOfResults")}
                       </div>
                       <InputNumber
                         value={station.results}
@@ -251,7 +314,7 @@ const Settings = (props) => {
               }}
               icon={<PlusOutlined />}
             >
-              Station hinzufügen
+              {getTranslation(props.language, "addStation")}
             </Button>
           </Col>
         </Row>
@@ -261,14 +324,20 @@ const Settings = (props) => {
           setSettingsModalVisible={setSettingsModalVisible}
           selectedStations={props.selectedStations}
           onStationSelect={props.onStationSelect}
+          language={props.language}
         />
       </div>
       <div
         style={{
-          height: "30%",
-          overflowY: "auto",
-          overflowX: "hidden",
           padding: "16px",
+          flexShrink: 0,
+          height: "auto",
+          minHeight: "100px",
+          maxHeight: "200px",
+          backgroundColor: "lightgray",
+          position: "sticky",
+          bottom: 0,
+          zIndex: 1,
         }}
       >
         <Card
@@ -276,16 +345,62 @@ const Settings = (props) => {
             boxShadow: "3px 3px 10px 0px rgba(0,0,0,0.5)",
             height: "100%",
           }}
+          bodyStyle={{
+            overflowY: "auto",
+            maxHeight: "calc(200px - 40px)",
+            paddingRight: "4px",
+          }}
           size="small"
-          title="Allgemeine Einstellungen"
+          title={getTranslation(props.language, "generalSettings")}
         >
+          <div
+            style={{
+              display: "flex",
+              marginBottom: "8px",
+              alignItems: "center",
+            }}
+          >
+            <div
+              style={{
+                marginRight: "8px",
+              }}
+            >
+              {getTranslation(props.language, "language")}
+            </div>
+            <Select
+              options={getLanguageOptions()}
+              value={props.language}
+              onChange={(value) => {
+                props.onLanguageChange(value);
+              }}
+              style={{ width: "120px" }}
+            />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "8px",
+            }}
+          >
+            <div style={{ marginRight: "8px" }}>
+              {getTranslation(props.language, "resetCookieConsent")}
+            </div>
+            <Button
+              type="link"
+              onClick={props.onResetCookieConsent}
+              style={{ padding: 0 }}
+            >
+              {getTranslation(props.language, "reset")}
+            </Button>
+          </div>
           <div style={{ display: "flex", marginBottom: "8px" }}>
             <div
               style={{
                 marginRight: "8px",
               }}
             >
-              Lauftext unter Abfahrten anzeigen:
+              {getTranslation(props.language, "showRemarks")}
             </div>
             <Switch
               onChange={(checked) => {
@@ -296,7 +411,18 @@ const Settings = (props) => {
           </div>
           <div style={{ display: "flex", marginBottom: "8px" }}>
             <div style={{ marginRight: "8px" }}>
-              Header/Footer automatisch ausblenden:
+              {getTranslation(props.language, "showStandardRemarks")}
+            </div>
+            <Switch
+              onChange={(checked) => {
+                props.onStandardRemarksVisibilityChange(checked);
+              }}
+              checked={props.standardRemarksVisibility}
+            />
+          </div>
+          <div style={{ display: "flex", marginBottom: "8px" }}>
+            <div style={{ marginRight: "8px" }}>
+              {getTranslation(props.language, "hideHeaderFooter")}
             </div>
             <Switch
               onChange={(checked) => {

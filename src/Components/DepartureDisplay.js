@@ -36,32 +36,90 @@ const DepartureDisplay = (props) => {
     }
   };
 
-  const fetchDeparturesAtStop = (station) => {
-    const stationId = station.id;
-    const now = new Date();
-    const later = new Date(
-      now.getTime() + (station.when != null ? station.when : 0) * 60000
-    );
-    const formattedTime = later.toLocaleTimeString("de-DE", {
-      hour12: false,
-    });
-    const url = `https://v6.bvg.transport.rest/stops/${stationId}/departures?when=${formattedTime}&results=${station.results}&suburban=${station.suburban}&subway=${station.subway}&tram=${station.tram}&bus=${station.bus}&ferry=${station.ferry}&express=${station.express}&regional=${station.regional}`;
+  const convertJourneyResultToDepartureData = (journeys) => {
+    const departures = [];
+    for (let i = 0; i < journeys.length; i++) {
+      const journey = journeys[i];
+      const legs = journey.legs;
+      if (legs == null || legs.length === 0) continue;
 
-    fetch(url)
-      .then((res) => res.json())
-      .then((res) => {
-        if (fetchCounter.current < props.selectedStations.length) {
-          departureDataRef.current.push(res);
-          fetchCounter.current += 1;
+      const firstLeg = legs?.[0];
 
-          // answer for all stations received -> set column data
-          if (fetchCounter.current === props.selectedStations.length) {
-            const columnData = getColumnData(departureDataRef.current);
-            setColumnData(columnData);
-            fetchIsInProgress.current = false;
-          }
-        }
+      const departure = {
+        stop: {
+          id: firstLeg.origin.id,
+          name: firstLeg.origin.name,
+          location: firstLeg.origin.location,
+        },
+        line: {
+          name: firstLeg.line.name,
+        },
+        tripId: firstLeg.tripId || firstLeg.trip?.id,
+        direction: firstLeg.direction,
+        when: firstLeg.departure,
+        remarks: firstLeg.remarks,
+      };
+
+      departures.push(departure);
+    }
+
+    return {
+      departures: departures,
+    };
+  };
+
+  const handleFetchResponse = (res) => {
+    if (fetchCounter.current >= props.selectedStations.length) return;
+
+    fetchCounter.current += 1;
+    departureDataRef.current.push(res);
+
+    if (fetchCounter.current === props.selectedStations.length) {
+      const columnData = getColumnData(departureDataRef.current);
+      setColumnData(columnData);
+      fetchIsInProgress.current = false;
+    }
+  };
+
+  const fetchDeparturesAtStop = async (station) => {
+    const {
+      id: stationId,
+      destination,
+      when = 0,
+      results,
+      suburban,
+      subway,
+      tram,
+      bus,
+      ferry,
+      express,
+      regional,
+    } = station;
+
+    try {
+      let url;
+      let response;
+      const now = new Date();
+      const later = new Date(now.getTime() + when * 60000);
+      const formattedTime = later.toLocaleTimeString("de-DE", {
+        hour12: false,
       });
+
+      if (destination) {
+        url = `https://v6.bvg.transport.rest/journeys?language=${props.language}&from=${stationId}&to=${destination.id}&departure=${formattedTime}&results=${results}&suburban=${suburban}&subway=${subway}&tram=${tram}&bus=${bus}&ferry=${ferry}&express=${express}&regional=${regional}&remarks=${props.standardRemarksVisibility}`;
+        response = await fetch(url);
+        const data = await response.json();
+        handleFetchResponse(convertJourneyResultToDepartureData(data.journeys));
+      } else {
+        url = `https://v6.bvg.transport.rest/stops/${stationId}/departures?language=${props.language}&when=${formattedTime}&results=${results}&suburban=${suburban}&subway=${subway}&tram=${tram}&bus=${bus}&ferry=${ferry}&express=${express}&regional=${regional}&remarks=${props.standardRemarksVisibility}`;
+        response = await fetch(url);
+        const data = await response.json();
+        handleFetchResponse(data);
+      }
+    } catch (error) {
+      console.error("Error fetching departures:", error);
+      fetchIsInProgress.current = false;
+    }
   };
 
   const getColumnData = (data) => {
@@ -84,6 +142,9 @@ const DepartureDisplay = (props) => {
           departureName: departure.stop.name,
           when: diffInMinutes,
           remarks: departure.remarks,
+          tripId: departure.tripId || departure.trip?.id,
+          stopId: departure.stop.id,
+          stopLocation: departure.stop.location,
         });
       }
     }
@@ -91,40 +152,14 @@ const DepartureDisplay = (props) => {
     return columnData;
   };
 
-  const columns = [
-    {
-      title: "Linie",
-      dataIndex: "lineName",
-      key: "lineName",
-    },
-    {
-      title: "Richtung",
-      dataIndex: "direction",
-      key: "direction",
-    },
-    {
-      title: "Abfahrt von",
-      dataIndex: "departureName",
-      key: "departureName",
-    },
-    {
-      title: "Abfahrt in",
-      dataIndex: "when",
-      key: "when",
-      defaultSortOrder: "ascend",
-      sorter: (a, b) => a.when - b.when,
-      render: (text) => <div>{text > 0 ? text : "Jetzt"}</div>,
-    },
-  ];
-
   return (
     <div>
       <DepartureTable
         fontSize={props.fontSize}
-        columns={columns}
         dataSource={columnData}
         remarksVisibility={props.remarksVisibility}
         hideThirdColumn={props.hideThirdColumn}
+        language={props.language}
       />
     </div>
   );

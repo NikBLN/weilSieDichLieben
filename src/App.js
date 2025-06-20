@@ -24,10 +24,15 @@ import {
   message,
   Typography,
   Space,
+  notification,
 } from "antd";
 import DonationDisplay from "./Components/DonationDisplay";
+import CookieBanner from "./Components/CookieBanner";
+import LegalModals from "./Components/LegalModals";
+import { getTranslation } from "./dictionary";
 
 const App = () => {
+  const [language, setLanguage] = useState("de");
   const [messageApi, contextHolder] = message.useMessage();
   const [selectedStations, setSelectedStations] = useState([]);
   const [settingsAreVisible, setSettingsAreVisible] = useState(false);
@@ -40,8 +45,20 @@ const App = () => {
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [remarksVisibility, setRemarksVisibility] = useState(true);
   const [hideThirdColumn, setHideThirdColumn] = useState(false);
+  const [standardRemarksVisibility, setStandardRemarksVisibility] =
+    useState(true);
   const [autoHideEnabled, setAutoHideEnabled] = useState(false);
   const [uiVisible, setUiVisible] = useState(true);
+  const [isPulsing, setIsPulsing] = useState(false);
+  const [cookieConsent, setCookieConsent] = useState(() => {
+    const stored = document.cookie.replace(
+      /(?:(?:^|.*;\s*)cookieConsent\s*=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+    if (stored === "true") return true;
+    if (stored === "false") return false;
+    return null;
+  });
   const autoHideTimeoutRef = React.useRef(null);
 
   const { Title, Text } = Typography;
@@ -58,11 +75,67 @@ const App = () => {
     fetchFontSizeFromCookie();
     fetchRemarksVisibilityFromCookie();
     fetchHideThirdColumnFromCookie();
+    fetchStandardRemarksVisibilityFromCookie();
+    fetchLanguageFromCookie();
+
+    // Check notification version
+    fetch(
+      "https://raw.githubusercontent.com/NikBLN/weilSieDichLieben/main/notification-version.json"
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        const storedVersion = cookieConsent
+          ? document.cookie.replace(
+              /(?:(?:^|.*;\s*)notificationVersion\s*=\s*([^;]*).*$)|^.*$/,
+              "$1"
+            ) || "0"
+          : "0";
+        if (data.version > parseInt(storedVersion)) {
+          const title =
+            typeof data.title === "object"
+              ? data.title[language] ||
+                data.title.de ||
+                "Neue Features verfügbar!"
+              : data.title || "Neue Features verfügbar!";
+          const message =
+            typeof data.message === "object"
+              ? data.message[language] ||
+                data.message.de ||
+                "In den Einstellungen (⚙️) sind ein paar neue Einstellungen dazugekommen. Schau doch mal vorbei!"
+              : data.message ||
+                "In den Einstellungen (⚙️) sind ein paar neue Einstellungen dazugekommen. Schau doch mal vorbei!";
+
+          notification.info({
+            message: title,
+            description: message,
+            placement: "topRight",
+            duration: 0,
+            btn: (
+              <Button
+                size="small"
+                onClick={() => {
+                  if (cookieConsent) {
+                    document.cookie = `notificationVersion=${
+                      data.version
+                    };path=/;expires=${new Date(
+                      Date.now() + 31536000000
+                    ).toUTCString()}`;
+                  }
+                  notification.destroy();
+                }}
+              >
+                Nicht mehr anzeigen
+              </Button>
+            ),
+          });
+        }
+      })
+      .catch(console.error);
 
     return () => {
       clearInterval(apiAvailableInterval);
     };
-  }, []);
+  }, [cookieConsent]);
 
   useEffect(() => {
     // Handle export URL generation
@@ -71,7 +144,7 @@ const App = () => {
     } else {
       setExportUrl("");
     }
-  }, [selectedStations]);
+  }, [selectedStations, fontSize, remarksVisibility, autoHideEnabled]);
 
   useEffect(() => {
     // Handle auto-hide functionality
@@ -89,7 +162,8 @@ const App = () => {
       }
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
+    buildUrlOutOfSelectedStations(selectedStations);
+    document.addEventListener("mousemove", handleMouseMove);
 
     if (autoHideEnabled && !settingsAreVisible) {
       autoHideTimeoutRef.current = setTimeout(() => {
@@ -98,27 +172,53 @@ const App = () => {
     }
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener("mousemove", handleMouseMove);
       if (autoHideTimeoutRef.current) {
         clearTimeout(autoHideTimeoutRef.current);
       }
     };
   }, [autoHideEnabled, settingsAreVisible]);
 
+  const acceptCookies = () => {
+    document.cookie = `cookieConsent=true;path=/;expires=${new Date(
+      Date.now() + 31536000000
+    ).toUTCString()}`;
+    setCookieConsent(true);
+  };
+
+  const declineCookies = () => {
+    document.cookie = `cookieConsent=false;path=/;expires=${new Date(
+      Date.now() + 31536000000
+    ).toUTCString()}`;
+    setCookieConsent(false);
+    messageApi.open({
+      type: "warning",
+      content: getTranslation(language, "cookiesDeclinedInfo"),
+    });
+  };
+
+  const resetCookieConsent = () => {
+    document.cookie =
+      "cookieConsent=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    setCookieConsent(null);
+  };
+
   const fetchStationData = () => {
     if (urlHasParams()) {
       // fetch data from url
       getUrlParams();
     } else {
-      // fetch data from cookie
-      fetchStationsFromCookie();
-      fetchFontSizeFromCookie();
-      fetchRemarksVisibilityFromCookie();
+      // fetch data from cookie if allowed
+      if (cookieConsent) {
+        fetchStationsFromCookie();
+        fetchFontSizeFromCookie();
+        fetchRemarksVisibilityFromCookie();
+      }
     }
   };
 
   const buildUrlOutOfSelectedStations = (stationData) => {
-    // this function build a url for export out of the stationData
+    // this function builds a url for export out of the stationData
     const urlParams = new URLSearchParams(window.location.search);
     urlParams.delete("id");
     urlParams.delete("bus");
@@ -132,6 +232,10 @@ const App = () => {
     urlParams.delete("when");
     urlParams.delete("results");
     urlParams.delete("fontSize");
+    urlParams.delete("remarksVisibility");
+    urlParams.delete("autoHide");
+    urlParams.delete("destinationId");
+    urlParams.delete("destinationName");
 
     stationData.forEach((station) => {
       urlParams.append("id", station.id);
@@ -146,6 +250,16 @@ const App = () => {
       urlParams.append("when", station.when);
       urlParams.append("results", station.results);
       urlParams.append("fontSize", fontSize);
+      urlParams.append("remarksVisibility", remarksVisibility);
+      urlParams.append("autoHide", autoHideEnabled);
+
+      if (
+        station.destination?.id != null &&
+        station.destination?.name != null
+      ) {
+        urlParams.append("destinationId", station.destination.id);
+        urlParams.append("destinationName", station.destination.name);
+      }
     });
 
     setExportUrl(`${window.location.origin}?${urlParams.toString()}`);
@@ -170,6 +284,8 @@ const App = () => {
     const value = urlParams.getAll("value");
     const when = urlParams.getAll("when");
     const results = urlParams.getAll("results");
+    const destinationId = urlParams.getAll("destinationId");
+    const destinationName = urlParams.getAll("destinationName");
 
     const fontSize = urlParams.get("fontSize");
     setFontSize(parseInt(fontSize));
@@ -187,6 +303,13 @@ const App = () => {
         value: value[index],
         when: when[index] === "null" ? null : when[index],
         results: results[index],
+        destination:
+          destinationId[index] != null && destinationName[index] != null
+            ? {
+                id: destinationId[index],
+                name: destinationName[index],
+              }
+            : null,
       };
     });
 
@@ -210,6 +333,7 @@ const App = () => {
   };
 
   const fetchRemarksVisibilityFromCookie = () => {
+    if (!cookieConsent) return;
     const cookieRemarksVisibility = document.cookie.replace(
       /(?:(?:^|.*;\s*)remarksVisibility\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
@@ -232,6 +356,7 @@ const App = () => {
   };
 
   const fetchAutoHideFromCookie = () => {
+    if (!cookieConsent) return;
     const cookieAutoHide = document.cookie.replace(
       /(?:(?:^|.*;\s*)autoHide\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
@@ -240,6 +365,38 @@ const App = () => {
     if (cookieAutoHide != null && cookieAutoHide !== "") {
       setAutoHideEnabled(JSON.parse(cookieAutoHide));
     }
+  };
+
+  const fetchStandardRemarksVisibilityFromCookie = () => {
+    if (!cookieConsent) return;
+    const cookieStandardRemarksVisibility = document.cookie.replace(
+      /(?:(?:^|.*;\s*)standardRemarksVisibility\s*=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+
+    if (
+      cookieStandardRemarksVisibility != null &&
+      cookieStandardRemarksVisibility !== ""
+    ) {
+      setStandardRemarksVisibility(JSON.parse(cookieStandardRemarksVisibility));
+    }
+  };
+
+  const fetchLanguageFromCookie = () => {
+    if (!cookieConsent) return;
+    const cookieLanguage = document.cookie.replace(
+      /(?:(?:^|.*;\s*)language\s*=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+
+    if (cookieLanguage && cookieLanguage !== "") {
+      setLanguage(JSON.parse(cookieLanguage));
+    }
+  };
+
+  const onLanguageChange = (value) => {
+    setLanguage(value);
+    saveDataInCookie("language", value);
   };
 
   const onAutoHideChange = (value) => {
@@ -260,7 +417,13 @@ const App = () => {
     saveDataInCookie("hideThirdColumn", value);
   };
 
+  const onStandardRemarksVisibilityChange = (value) => {
+    setStandardRemarksVisibility(value);
+    saveDataInCookie("standardRemarksVisibility", value);
+  };
+
   const fetchFontSizeFromCookie = () => {
+    if (!cookieConsent) return;
     const cookieFontSize = document.cookie.replace(
       /(?:(?:^|.*;\s*)fontSize\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
@@ -275,6 +438,7 @@ const App = () => {
   };
 
   const saveDataInCookie = (propertyName, value) => {
+    if (!cookieConsent) return;
     const cookieValue = `${propertyName}=${JSON.stringify(
       value
     )};path=/;expires=${new Date(Date.now() + 31536000000).toUTCString()}`;
@@ -282,6 +446,7 @@ const App = () => {
   };
 
   const fetchStationsFromCookie = () => {
+    if (!cookieConsent) return;
     const cookieSelectedStations = document.cookie.replace(
       /(?:(?:^|.*;\s*)bvgDepatureSelectedStations\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
@@ -318,6 +483,16 @@ const App = () => {
 
     saveDataInCookie("bvgDepatureSelectedStations", updatedSelectedStations);
   };
+
+  const triggerPulse = () => {
+    setIsPulsing(true);
+    setTimeout(() => setIsPulsing(false), 1000);
+  };
+
+  useEffect(() => {
+    const interval = setInterval(triggerPulse, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const copyExportUrlToClipboard = () => {
     navigator.clipboard
@@ -430,9 +605,9 @@ const App = () => {
                 </a>
               </Text>
               <Text>
-                Thank you {<a href="https://github.com/derhuerst">Jannis</a>}{" "}
-                for providing and maintaining this awesome API! Feel free to
-                check out and support his project.
+                Danke {<a href="https://github.com/derhuerst">Jannis</a>} für
+                das Betreiben und Bereitstellen der tollen API! Schaut doch mal
+                bei transport.rest vorbei!
               </Text>
             </Space>
             <Title level={5}>Allgemeines</Title>
@@ -445,8 +620,6 @@ const App = () => {
             <Title level={5}>Angaben gemäß § 5 TMG</Title>
             <Space direction="vertical" size={1}>
               <Text>Nikolas Tsombanis</Text>
-              <Text>Blumenthalstr. 3</Text>
-              <Text>12103 Berlin</Text>
             </Space>
             <Title level={5}>Kontakt</Title>
             <Space direction="vertical" size={1}>
@@ -461,8 +634,6 @@ const App = () => {
             </Title>
             <Space direction="vertical" size={1}>
               <Text>Nikolas Tsombanis</Text>
-              <Text>Blumenthalstr. 3</Text>
-              <Text>12103 Berlin</Text>
             </Space>
           </div>
         </Modal>
@@ -478,7 +649,7 @@ const App = () => {
         />
         <Popover
           placement="bottomLeft"
-          title="Support this project with a donation <3"
+          title={getTranslation(language, "supportProjectTitle")}
           content={
             <Space
               style={{ width: "500px", height: "300px", overflow: "auto" }}
@@ -487,7 +658,7 @@ const App = () => {
             >
               <a href="https://www.paypal.com/donate/?hosted_button_id=R96455XKT9X8G">
                 <Button style={{ marginBottom: "8px" }} type="primary">
-                  Donate with PayPal
+                  {getTranslation(language, "donateWithPaypal")}
                 </Button>
               </a>
               <Icon
@@ -499,34 +670,13 @@ const App = () => {
                   />
                 )}
               />
-              <Text strong>Why should you consider donating?</Text>
-              <Text>
-                By donating, you'll be supporting my work and helping me cover
-                the costs of hosting the website.
-              </Text>
-              <Text strong>What do you get in return?</Text>
-              <Text>
-                During the donation process, you can request to be acknowledged
-                as a supporter on this website. Your name, Twitter handle,
-                Instagram handle, or other information will be displayed at the
-                bottom of the website for all users to see! I'm updating the
-                donations manually each day, so please be patient if your name
-                doesn't show up immediately.
-              </Text>
-              <Text>
-                I believe in providing this website to everyone for free and
-                without ads, so there won't be any additional premium features
-                aside from this cool departure board.
-              </Text>
-              <Text strong>
-                Will I be the only one receiving the donation money?
-              </Text>
-              <Text>
-                No, I will donate 30% of the donation (after PayPal fees) to{" "}
-                {<a href="https://github.com/derhuerst">Jannis</a>} for
-                providing the data for this website. Without him, this project
-                would not have been possible!
-              </Text>
+              <Text strong>{getTranslation(language, "whyDonateH1")}</Text>
+              <Text>{getTranslation(language, "whyDonateP1")}</Text>
+              <Text strong>{getTranslation(language, "whyDonateH2")}</Text>
+              <Text>{getTranslation(language, "whyDonateP2")}</Text>
+              <Text>{getTranslation(language, "whyDonateP3")}</Text>
+              <Text strong>{getTranslation(language, "whyDonateH3")}</Text>
+              <Text>{getTranslation(language, "whyDonateP4")}</Text>
             </Space>
           }
           trigger="click"
@@ -541,30 +691,27 @@ const App = () => {
         </Popover>
         <Popover
           placement="bottomLeft"
-          title="Check out this project on Github."
+          title="Check out this project on GitHub"
           content={
             <Space
               style={{ width: "500px", overflow: "auto" }}
               direction="vertical"
               size={1}
             >
+              <Text>
+                If you are a developer, feel free to check out the repo of this
+                project on GitHub. I'm always happy if you have a great feature
+                idea and contribute to this open source project!
+              </Text>
               <a
                 href="https://github.com/NikBLN/weilSieDichLieben"
                 target="_blank"
                 rel="noreferrer"
               >
-                <Button style={{ marginBottom: "8px" }} type="primary">
-                  Visit Github
+                <Button style={{ marginTop: "8px" }} type="primary">
+                  Visit GitHub
                 </Button>
               </a>
-              <Text strong>
-                If you are a developer, feel free to check out the repo of this
-                project on Github.
-              </Text>
-              <Text strong>
-                I'm always happy if you have a great feature idea and contribute
-                to this open source project!
-              </Text>
             </Space>
           }
           trigger="click"
@@ -594,10 +741,11 @@ const App = () => {
           width: "33.33%",
         }}
       >
-        <Icon
-          component={() => (
-            <img src={bvgIcon} style={{ height: "48px" }} alt="Icon" />
-          )}
+        <img
+          src={bvgIcon}
+          style={{ height: "48px" }}
+          alt="Icon"
+          className={isPulsing ? "pulse-animation" : ""}
         />
       </div>
     );
@@ -615,7 +763,7 @@ const App = () => {
       >
         <div>
           <Popover
-            title="Schriftgröße Anzeigetafel"
+            title={getTranslation(language, "fontSize")}
             trigger="click"
             content={
               <div
@@ -628,7 +776,6 @@ const App = () => {
                   onClick={() => {
                     setFontSize((prev) => prev + 2);
                     saveDataInCookie("fontSize", fontSize + 2);
-                    buildUrlOutOfSelectedStations(selectedStations);
                   }}
                   icon={<PlusOutlined />}
                 />
@@ -637,7 +784,6 @@ const App = () => {
                   onClick={() => {
                     setFontSize((prev) => prev - 2);
                     saveDataInCookie("fontSize", fontSize - 2);
-                    buildUrlOutOfSelectedStations(selectedStations);
                   }}
                   icon={<MinusOutlined />}
                 />
@@ -656,7 +802,7 @@ const App = () => {
         <div>
           <Popover
             placement="bottomRight"
-            title="Einstellungen exportieren"
+            title={getTranslation(language, "exportSettings")}
             content={
               <div style={{ display: "flex", alignItems: "center" }}>
                 <div>
@@ -698,9 +844,9 @@ const App = () => {
       }}
     >
       {contextHolder}
-      <div 
-        style={{ 
-          display: "flex", 
+      <div
+        style={{
+          display: "flex",
           padding: "8px",
           transform: uiVisible ? "translateY(0)" : "translateY(-100%)",
           transition: "transform 0.3s ease-in-out",
@@ -708,18 +854,20 @@ const App = () => {
           width: "100%",
           backgroundColor: "black",
           zIndex: 1,
-          boxSizing: "border-box"
+          boxSizing: "border-box",
         }}
       >
         {renderHeaderLeftSideContent()}
         {renderHeaderMidContent()}
         {renderHeaderRightSideContent()}
       </div>
-      <div style={{ 
-        flex: 1, 
-        marginTop: uiVisible ? "64px" : 0,
-        transition: "margin-top 0.3s ease-in-out"
-      }}>
+      <div
+        style={{
+          flex: 1,
+          marginTop: uiVisible ? "64px" : 0,
+          transition: "margin-top 0.3s ease-in-out",
+        }}
+      >
         {!settingsAreVisible && selectedStations.length === 0 && (
           <div
             style={{
@@ -734,12 +882,21 @@ const App = () => {
           </div>
         )}
         {!settingsAreVisible && selectedStations.length > 0 && (
-          <div style={{ padding: "8px", overflow: "auto", paddingBottom: "60px" }}>
+          <div
+            style={{ 
+              padding: "8px", 
+              overflow: "auto", 
+              height: `calc(100vh - ${uiVisible ? '64px' : '0px'} - ${fontSize + 56}px)`,
+              boxSizing: "border-box"
+            }}
+          >
             <DepartureDisplay
               fontSize={fontSize}
               selectedStations={selectedStations}
               remarksVisibility={remarksVisibility}
               hideThirdColumn={hideThirdColumn}
+              standardRemarksVisibility={standardRemarksVisibility}
+              language={language}
             />
           </div>
         )}
@@ -753,25 +910,39 @@ const App = () => {
             removeStation={removeStation}
             remarksVisibility={remarksVisibility}
             onRemarksVisibilityChange={onRemarksVisibilityChange}
+            standardRemarksVisibility={standardRemarksVisibility}
+            onStandardRemarksVisibilityChange={
+              onStandardRemarksVisibilityChange
+            }
             autoHideEnabled={autoHideEnabled}
             onAutoHideChange={onAutoHideChange}
             hideThirdColumn={hideThirdColumn}
             onHideThirdColumnChange={onHideThirdColumnChange}
+            language={language}
+            onLanguageChange={onLanguageChange}
+            onResetCookieConsent={resetCookieConsent}
           />
         )}
       </div>
-      <div 
-        style={{ 
+      <div
+        style={{
           position: "fixed",
           bottom: 0,
           left: 0,
           right: 0,
           transform: uiVisible ? "translateY(0)" : "translateY(100%)",
-          transition: "transform 0.3s ease-in-out"
+          transition: "transform 0.3s ease-in-out",
         }}
       >
-        <DonationDisplay fontSize={fontSize} />
+        <DonationDisplay fontSize={fontSize} language={language} />
+        <LegalModals language={language} />
       </div>
+      <CookieBanner
+        visible={cookieConsent === null}
+        onAccept={acceptCookies}
+        onDecline={declineCookies}
+        language={language}
+      />
     </div>
   );
 };

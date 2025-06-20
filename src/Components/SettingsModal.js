@@ -1,6 +1,7 @@
 import React from "react";
 import { Modal, Button, Typography } from "antd";
 import StationFinder from "../Components/StationFinder";
+import { getTranslation } from "../dictionary";
 
 const SettingsModal = (props) => {
   const { Text } = Typography;
@@ -8,7 +9,7 @@ const SettingsModal = (props) => {
   return (
     <Modal
       closable={false}
-      title="Station hinzufügen"
+      title={getTranslation(props.language, "addStation")}
       open={props.settingsModalVisible}
       footer={[
         <Button
@@ -18,17 +19,18 @@ const SettingsModal = (props) => {
             props.setSettingsModalVisible(false);
           }}
         >
-          Schließen
+          {getTranslation(props.language, "close")}
         </Button>,
       ]}
     >
       <div style={{ display: "flex", flexDirection: "column" }}>
         <Text style={{ marginTop: "8px", marginBottom: "8px" }}>
-          Gib den Namen einer Station ein:
+          {getTranslation(props.language, "provideStationName")}
         </Text>
         <StationFinder
           onSelect={props.onStationSelect}
           selectedStations={props.selectedStations}
+          language={props.language}
         />
       </div>
     </Modal>
