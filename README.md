@@ -82,6 +82,7 @@ This project stores a few cookies in your browser to save your personal settings
 - `autoHide` – remember if header/footer should auto‑hide
 - `language` – chosen interface language
 - `notificationVersion` – prevents showing the same update notification twice
+- `hideDepartureCol` - remember if the departure column should be hidden
 
 All cookies expire after about one year and are not used for tracking or advertising purposes.
 
