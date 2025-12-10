@@ -12,7 +12,9 @@ import Icon, {
   InfoCircleOutlined,
   EuroOutlined,
   GithubOutlined,
+  MenuOutlined,
 } from "@ant-design/icons";
+import useIsMobile from "./hooks/useIsMobile";
 import bvgIcon from "./images/BVG.png";
 import payPalQrCode from "./images/PayPalQrCode.png";
 import DepartureDisplay from "./Components/DepartureDisplay";
@@ -21,6 +23,7 @@ import {
   Input,
   Modal,
   Popover,
+  Drawer,
   message,
   Typography,
   Space,
@@ -43,6 +46,7 @@ const App = () => {
   const [exportUrl, setExportUrl] = useState("");
   const [fontSize, setFontSize] = useState(16);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [donationModalVisible, setDonationModalVisible] = useState(false);
   const [remarksVisibility, setRemarksVisibility] = useState(true);
   const [standardRemarksVisibility, setStandardRemarksVisibility] =
     useState(true);
@@ -58,7 +62,10 @@ const App = () => {
     if (stored === "false") return false;
     return null;
   });
+  const [hamburgerMenuOpen, setHamburgerMenuOpen] = useState(false);
+  const [fontSizeModalOpen, setFontSizeModalOpen] = useState(false);
   const autoHideTimeoutRef = React.useRef(null);
+  const isMobile = useIsMobile();
 
   const { Title, Text } = Typography;
 
@@ -146,7 +153,7 @@ const App = () => {
 
   useEffect(() => {
     // Handle auto-hide functionality
-    const handleMouseMove = () => {
+    const handleUserActivity = () => {
       if (autoHideEnabled && !settingsAreVisible) {
         setUiVisible(true);
         if (autoHideTimeoutRef.current) {
@@ -161,7 +168,8 @@ const App = () => {
     };
 
     buildUrlOutOfSelectedStations(selectedStations);
-    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mousemove", handleUserActivity);
+    document.addEventListener("touchstart", handleUserActivity);
 
     if (autoHideEnabled && !settingsAreVisible) {
       autoHideTimeoutRef.current = setTimeout(() => {
@@ -170,7 +178,8 @@ const App = () => {
     }
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mousemove", handleUserActivity);
+      document.removeEventListener("touchstart", handleUserActivity);
       if (autoHideTimeoutRef.current) {
         clearTimeout(autoHideTimeoutRef.current);
       }
@@ -553,7 +562,208 @@ const App = () => {
     );
   };
 
+  const renderInfoModal = () => (
+    <Modal
+      title="Informationen und Impressum"
+      open={infoModalVisible}
+      footer={null}
+      onCancel={() => {
+        setInfoModalVisible(false);
+      }}
+    >
+      <div
+        style={{
+          height: "250px",
+          overflow: "auto",
+        }}
+      >
+        <Title level={5}>Bereitstellung der Daten</Title>
+        <Space direction="vertical" size={1}>
+          <Text>
+            <a href="https://www.transport.rest">
+              transport.rest transit APIs
+            </a>
+          </Text>
+          <Text>
+            Danke {<a href="https://github.com/derhuerst">Jannis</a>} für
+            das Betreiben und Bereitstellen der tollen API! Schaut doch mal
+            bei transport.rest vorbei!
+          </Text>
+        </Space>
+        <Title level={5}>Allgemeines</Title>
+        <Space direction="vertical" size={1}>
+          <Text strong>
+            Diese Website ist ein privates Projekt und wird nicht von der
+            BVG betrieben.
+          </Text>
+        </Space>
+        <Title level={5}>Angaben gemäß § 5 TMG</Title>
+        <Space direction="vertical" size={1}>
+          <Text>Nikolas Tsombanis</Text>
+        </Space>
+        <Title level={5}>Kontakt</Title>
+        <Space direction="vertical" size={1}>
+          <Text>
+            <a href="mailto:weilsiedichlieben@posteo.de">
+              weilsiedichlieben@posteo.de
+            </a>
+          </Text>
+        </Space>
+        <Title level={5}>
+          Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV
+        </Title>
+        <Space direction="vertical" size={1}>
+          <Text>Nikolas Tsombanis</Text>
+        </Space>
+      </div>
+    </Modal>
+  );
+
+  const renderDonationModal = () => (
+    <Modal
+      title={getTranslation(language, "supportProjectTitle")}
+      open={donationModalVisible}
+      footer={null}
+      onCancel={() => setDonationModalVisible(false)}
+    >
+      <Space direction="vertical" size={8} style={{ width: "100%" }}>
+        <a href="https://www.paypal.com/donate/?hosted_button_id=R96455XKT9X8G">
+          <Button style={{ marginBottom: "8px" }} type="primary">
+            {getTranslation(language, "donateWithPaypal")}
+          </Button>
+        </a>
+        <Icon
+          component={() => (
+            <img
+              src={payPalQrCode}
+              style={{ height: "100px" }}
+              alt="PayPal QR Code"
+            />
+          )}
+        />
+        <Text strong>{getTranslation(language, "whyDonateH1")}</Text>
+        <Text>{getTranslation(language, "whyDonateP1")}</Text>
+        <Text strong>{getTranslation(language, "whyDonateH2")}</Text>
+        <Text>{getTranslation(language, "whyDonateP2")}</Text>
+        <Text>{getTranslation(language, "whyDonateP3")}</Text>
+        <Text strong>{getTranslation(language, "whyDonateH3")}</Text>
+        <Text>{getTranslation(language, "whyDonateP4")}</Text>
+      </Space>
+    </Modal>
+  );
+
+  const renderFontSizeModal = () => (
+    <Modal
+      title={getTranslation(language, "fontSize")}
+      open={fontSizeModalOpen}
+      footer={null}
+      onCancel={() => setFontSizeModalOpen(false)}
+      centered
+      width={280}
+    >
+      <div style={{ display: "flex", justifyContent: "center", gap: "16px", padding: "16px 0" }}>
+        <Button
+          size="large"
+          onClick={() => {
+            setFontSize((prev) => prev + 2);
+            saveDataInCookie("fontSize", fontSize + 2);
+          }}
+          icon={<PlusOutlined />}
+        />
+        <Button
+          size="large"
+          onClick={() => {
+            setFontSize((prev) => prev - 2);
+            saveDataInCookie("fontSize", fontSize - 2);
+          }}
+          icon={<MinusOutlined />}
+        />
+      </div>
+    </Modal>
+  );
+
+  const renderHamburgerMenu = () => (
+    <>
+      <MenuOutlined
+        style={{ fontSize: "28px", color: "#f0d722", marginRight: "16px" }}
+        onClick={() => setHamburgerMenuOpen(true)}
+      />
+      <Drawer
+        title={getTranslation(language, "menu")}
+        placement="left"
+        onClose={() => setHamburgerMenuOpen(false)}
+        open={hamburgerMenuOpen}
+        width={280}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          {/* Info */}
+          <div
+            style={{ display: "flex", alignItems: "center", cursor: "pointer", color: "#f0d722" }}
+            onClick={() => { setInfoModalVisible(true); setHamburgerMenuOpen(false); }}
+          >
+            <InfoCircleOutlined style={{ fontSize: "24px", marginRight: "12px" }} />
+            <span>{getTranslation(language, "info")}</span>
+          </div>
+
+          {/* GitHub */}
+          <a
+            href="https://github.com/NikBLN/weilSieDichLieben"
+            target="_blank"
+            rel="noreferrer"
+            style={{ display: "flex", alignItems: "center", color: "#f0d722", textDecoration: "none" }}
+          >
+            <GithubOutlined style={{ fontSize: "24px", marginRight: "12px" }} />
+            <span>GitHub</span>
+          </a>
+
+          {/* Font Size */}
+          <div
+            style={{ display: "flex", alignItems: "center", cursor: "pointer", color: "#f0d722" }}
+            onClick={() => { setFontSizeModalOpen(true); setHamburgerMenuOpen(false); }}
+          >
+            <FontSizeOutlined style={{ fontSize: "24px", marginRight: "12px" }} />
+            <span>{getTranslation(language, "fontSize")}</span>
+          </div>
+
+          {/* Export */}
+          <div style={{ color: "#f0d722" }}>
+            <div style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
+              <ExportOutlined rotate={270} style={{ fontSize: "24px", marginRight: "12px" }} />
+              <span>{getTranslation(language, "exportSettings")}</span>
+            </div>
+            <div style={{ marginLeft: "36px" }}>
+              <Button
+                onClick={copyExportUrlToClipboard}
+                icon={<CopyOutlined />}
+              >
+                {getTranslation(language, "copySettingsUrl")}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Drawer>
+    </>
+  );
+
   const renderHeaderLeftSideContent = () => {
+    // Mobile: Hamburger menu only
+    if (isMobile) {
+      return (
+        <div style={{ display: "flex", alignItems: "center", flex: "0 0 auto" }}>
+          {renderInfoModal()}
+          {renderDonationModal()}
+          {renderFontSizeModal()}
+          {renderHamburgerMenu()}
+          {!apiIsAvailable && (
+            <span style={{ color: "#f0d722", fontSize: "12px" }}>
+              API nicht verfügbar
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    // Desktop: Full icons
     return (
       <div
         style={{
@@ -565,60 +775,8 @@ const App = () => {
           color: "#f0d722",
         }}
       >
-        <Modal
-          title="Informationen und Impressum"
-          open={infoModalVisible}
-          footer={null}
-          onCancel={() => {
-            setInfoModalVisible(false);
-          }}
-        >
-          <div
-            style={{
-              height: "250px",
-              overflow: "auto",
-            }}
-          >
-            <Title level={5}>Bereitstellung der Daten</Title>
-            <Space direction="vertical" size={1}>
-              <Text>
-                <a href="https://www.transport.rest">
-                  transport.rest transit APIs
-                </a>
-              </Text>
-              <Text>
-                Danke {<a href="https://github.com/derhuerst">Jannis</a>} für
-                das Betreiben und Bereitstellen der tollen API! Schaut doch mal
-                bei transport.rest vorbei!
-              </Text>
-            </Space>
-            <Title level={5}>Allgemeines</Title>
-            <Space direction="vertical" size={1}>
-              <Text strong>
-                Diese Website ist ein privates Projekt und wird nicht von der
-                BVG betrieben.
-              </Text>
-            </Space>
-            <Title level={5}>Angaben gemäß § 5 TMG</Title>
-            <Space direction="vertical" size={1}>
-              <Text>Nikolas Tsombanis</Text>
-            </Space>
-            <Title level={5}>Kontakt</Title>
-            <Space direction="vertical" size={1}>
-              <Text>
-                <a href="mailto:weilsiedichlieben@posteo.de">
-                  weilsiedichlieben@posteo.de
-                </a>
-              </Text>
-            </Space>
-            <Title level={5}>
-              Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV
-            </Title>
-            <Space direction="vertical" size={1}>
-              <Text>Nikolas Tsombanis</Text>
-            </Space>
-          </div>
-        </Modal>
+        {renderInfoModal()}
+        {renderDonationModal()}
         <InfoCircleOutlined
           onClick={() => {
             setInfoModalVisible(true);
@@ -629,48 +787,15 @@ const App = () => {
             marginRight: "24px",
           }}
         />
-        <Popover
-          placement="bottomLeft"
-          title={getTranslation(language, "supportProjectTitle")}
-          content={
-            <Space
-              style={{ width: "500px", height: "300px", overflow: "auto" }}
-              direction="vertical"
-              size={1}
-            >
-              <a href="https://www.paypal.com/donate/?hosted_button_id=R96455XKT9X8G">
-                <Button style={{ marginBottom: "8px" }} type="primary">
-                  {getTranslation(language, "donateWithPaypal")}
-                </Button>
-              </a>
-              <Icon
-                component={() => (
-                  <img
-                    src={payPalQrCode}
-                    style={{ height: "100px" }}
-                    alt="Icon"
-                  />
-                )}
-              />
-              <Text strong>{getTranslation(language, "whyDonateH1")}</Text>
-              <Text>{getTranslation(language, "whyDonateP1")}</Text>
-              <Text strong>{getTranslation(language, "whyDonateH2")}</Text>
-              <Text>{getTranslation(language, "whyDonateP2")}</Text>
-              <Text>{getTranslation(language, "whyDonateP3")}</Text>
-              <Text strong>{getTranslation(language, "whyDonateH3")}</Text>
-              <Text>{getTranslation(language, "whyDonateP4")}</Text>
-            </Space>
-          }
-          trigger="click"
-        >
-          <EuroOutlined
-            style={{
-              fontSize: "32px",
-              color: "#f0d722",
-              marginRight: "24px",
-            }}
-          />
-        </Popover>
+        <EuroOutlined
+          onClick={() => setDonationModalVisible(true)}
+          style={{
+            fontSize: "32px",
+            color: "#f0d722",
+            marginRight: "24px",
+            cursor: "pointer",
+          }}
+        />
         <Popover
           placement="bottomLeft"
           title="Check out this project on GitHub"
@@ -720,12 +845,13 @@ const App = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          width: "33.33%",
+          width: isMobile ? "auto" : "33.33%",
+          flex: 1,
         }}
       >
         <img
           src={bvgIcon}
-          style={{ height: "48px" }}
+          style={{ height: isMobile ? "36px" : "48px" }}
           alt="Icon"
           className={isPulsing ? "pulse-animation" : ""}
         />
@@ -734,6 +860,20 @@ const App = () => {
   };
 
   const renderHeaderRightSideContent = () => {
+    // Mobile: Only Donation + Settings
+    if (isMobile) {
+      return (
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", flex: "0 0 auto" }}>
+          <EuroOutlined
+            onClick={() => setDonationModalVisible(true)}
+            style={{ fontSize: "28px", color: "#f0d722", cursor: "pointer" }}
+          />
+          {renderTopSettingsIcon()}
+        </div>
+      );
+    }
+
+    // Desktop: Full icons
     return (
       <div
         style={{
@@ -909,7 +1049,7 @@ const App = () => {
           bottom: 0,
           left: 0,
           right: 0,
-          transform: uiVisible ? "translateY(0)" : "translateY(100%)",
+          transform: uiVisible && !(isMobile && settingsAreVisible) ? "translateY(0)" : "translateY(100%)",
           transition: "transform 0.3s ease-in-out",
         }}
       >

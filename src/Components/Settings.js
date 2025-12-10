@@ -6,9 +6,11 @@ import { DeleteOutlined } from "@ant-design/icons";
 import "animate.css";
 import StationFinder from "./StationFinder";
 import { getTranslation } from "../dictionary";
+import useIsMobile from "../hooks/useIsMobile";
 
 const Settings = (props) => {
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     return () => {
@@ -51,11 +53,11 @@ const Settings = (props) => {
     <div
       className={props.settingsClass}
       style={{
-        height: "calc(100vh - 144px)",
+        height: isMobile ? "100vh" : "calc(100vh - 144px)",
         backgroundColor: "lightgray",
-        margin: "16px",
+        margin: isMobile ? 0 : "16px",
         marginBottom: "0px",
-        borderRadius: "20px",
+        borderRadius: isMobile ? 0 : "20px",
         position: "relative",
         display: "flex",
         flexDirection: "column",
@@ -64,7 +66,8 @@ const Settings = (props) => {
     >
       <div
         style={{
-          flex: "1",
+          flex: "1 1 50%",
+          minHeight: 0,
           padding: "16px",
           paddingBottom: "16px",
           overflowY: "auto",
@@ -330,24 +333,19 @@ const Settings = (props) => {
       <div
         style={{
           padding: "16px",
-          flexShrink: 0,
-          height: "auto",
-          minHeight: "100px",
-          maxHeight: "200px",
+          flex: "1 1 50%",
+          minHeight: 0,
+          overflow: "hidden",
           backgroundColor: "lightgray",
-          position: "sticky",
-          bottom: 0,
-          zIndex: 1,
         }}
       >
         <Card
           style={{
             boxShadow: "3px 3px 10px 0px rgba(0,0,0,0.5)",
-            height: "100%",
+            height: "calc(100% - 64px)",
           }}
           bodyStyle={{
             overflowY: "auto",
-            maxHeight: "calc(200px - 40px)",
             paddingRight: "4px",
           }}
           size="small"
@@ -394,12 +392,8 @@ const Settings = (props) => {
               {getTranslation(props.language, "reset")}
             </Button>
           </div>
-          <div style={{ display: "flex", marginBottom: "8px" }}>
-            <div
-              style={{
-                marginRight: "8px",
-              }}
-            >
+          <div style={{ display: "flex", marginBottom: "8px", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ marginRight: "8px", flex: 1 }}>
               {getTranslation(props.language, "showRemarks")}
             </div>
             <Switch
@@ -409,8 +403,8 @@ const Settings = (props) => {
               checked={props.remarksVisibility}
             />
           </div>
-          <div style={{ display: "flex", marginBottom: "8px" }}>
-            <div style={{ marginRight: "8px" }}>
+          <div style={{ display: "flex", marginBottom: "8px", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ marginRight: "8px", flex: 1 }}>
               {getTranslation(props.language, "showStandardRemarks")}
             </div>
             <Switch
@@ -420,8 +414,8 @@ const Settings = (props) => {
               checked={props.standardRemarksVisibility}
             />
           </div>
-          <div style={{ display: "flex", marginBottom: "8px" }}>
-            <div style={{ marginRight: "8px" }}>
+          <div style={{ display: "flex", marginBottom: "8px", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ marginRight: "8px", flex: 1 }}>
               {getTranslation(props.language, "hideHeaderFooter")}
             </div>
             <Switch

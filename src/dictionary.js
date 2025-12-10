@@ -59,6 +59,11 @@ const dictionary = {
     noVehicleFound: "Kein Fahrzeug gefunden.",
     cancelled: "Fällt aus",
     minutes: "min",
+    menu: "Menü",
+    info: "Info",
+    copy: "Kopieren",
+    copySettingsUrl: "URL kopieren",
+    departure: "Abfahrt",
   },
   en: {
     line: "Line",
@@ -119,6 +124,11 @@ const dictionary = {
     noVehicleFound: "No vehicle found.",
     cancelled: "Cancelled",
     minutes: "min",
+    menu: "Menu",
+    info: "Info",
+    copy: "Copy",
+    copySettingsUrl: "Copy URL",
+    departure: "Departure",
   },
 };
 
