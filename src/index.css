@@ -36,3 +36,54 @@ antd-custom-cell {
     transform: scale(1);
   }
 }
+
+/* Mobile styles (< 576px) */
+@media screen and (max-width: 575px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Ant Design Popover mobile overrides */
+  .ant-popover {
+    max-width: calc(100vw - 32px) !important;
+  }
+
+  .ant-popover-inner-content {
+    max-width: 100% !important;
+  }
+
+  /* Fullscreen modal for mobile RadarMap */
+  .mobile-fullscreen-modal .ant-modal {
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    top: 0 !important;
+  }
+
+  .mobile-fullscreen-modal .ant-modal-content {
+    border-radius: 0 !important;
+    min-height: 100vh;
+  }
+
+  .mobile-fullscreen-modal .ant-modal-body {
+    padding: 0 !important;
+  }
+
+  /* Ant Design Drawer dark theme */
+  .ant-drawer-header {
+    background-color: #1a1a1a !important;
+    border-bottom: 1px solid #333 !important;
+  }
+
+  .ant-drawer-title {
+    color: #f0d722 !important;
+  }
+
+  .ant-drawer-close {
+    color: #f0d722 !important;
+  }
+
+  .ant-drawer-body {
+    background-color: #1a1a1a !important;
+  }
+}

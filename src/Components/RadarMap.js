@@ -18,19 +18,19 @@ const KM_TO_DEGREES_LAT = 2 / 111; // 1 degree latitude ≈ 111km
 const RADAR_SEARCH_RADIUS_KM = 2;
 const API_RESULTS_LIMIT = 100;
 
-// Shared container styles
-const CONTAINER_STYLE = {
-  height: "300px",
-  width: "500px",
+// Function to get container styles based on mobile state
+const getContainerStyle = (isMobile) => ({
+  height: isMobile ? "calc(100vh - 55px)" : "300px",
+  width: isMobile ? "100%" : "500px",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
   backgroundColor: "lightGray",
   fontFamily: "DotMatrix",
   color: "black",
-};
+});
 
-const RadarMap = ({ stopLocation, dataSource = [], language = "de" }) => {
+const RadarMap = ({ stopLocation, dataSource = [], language = "de", isMobile = false }) => {
   const [vehicles, setVehicles] = useState(null);
   const [center, setCenter] = useState([52.52, 13.405]);
   const mapRef = useRef(null);
@@ -91,11 +91,13 @@ const RadarMap = ({ stopLocation, dataSource = [], language = "de" }) => {
     default: "🚍",
   };
 
+  const containerStyle = getContainerStyle(isMobile);
+
   if (!stopLocation)
     return <div>{getTranslation(language, "noPositionAvailable")}</div>;
   if (vehicles === null) {
     return (
-      <div style={{ ...CONTAINER_STYLE, flexDirection: "column" }}>
+      <div style={{ ...containerStyle, flexDirection: "column" }}>
         <span style={{ marginBottom: 8 }}>
           {getTranslation(language, "loadingVehicleData")}
         </span>
@@ -106,7 +108,7 @@ const RadarMap = ({ stopLocation, dataSource = [], language = "de" }) => {
 
   if (vehicles.length === 0) {
     return (
-      <div style={CONTAINER_STYLE}>
+      <div style={containerStyle}>
         {getTranslation(language, "noVehicleFound")}
       </div>
     );
@@ -140,7 +142,10 @@ const RadarMap = ({ stopLocation, dataSource = [], language = "de" }) => {
   });
 
   return (
-    <div style={{ height: "300px", width: "500px" }}>
+    <div style={{
+      height: isMobile ? "calc(100vh - 55px)" : "300px",
+      width: isMobile ? "100%" : "500px"
+    }}>
       <style>{`.vehicle-tooltip{background:black !important;color:#FFA500 !important;border:none !important;}`}</style>
       <MapContainer
         center={center}
