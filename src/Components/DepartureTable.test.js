@@ -76,6 +76,24 @@ describe('DepartureTable sorting', () => {
     expect(rowsDesc[0].textContent).toContain('Station B');
   });
 
+  test('clicking destination header toggles alphabetical sort by direction', () => {
+    render(<DepartureTable {...baseProps} dataSource={[...dataSource]} />);
+
+    // initial order is sorted by time ascending -> Dir1 first (when: 3)
+    const rowsBefore = screen.getAllByText(/Dir/);
+    expect(rowsBefore[0].textContent).toContain('Dir1');
+
+    // click destination header to sort ascending -> Dir1 first
+    fireEvent.click(screen.getByText(/Destination/i));
+    const rowsAsc = screen.getAllByText(/Dir\d/);
+    expect(rowsAsc[0].textContent).toContain('Dir1');
+
+    // click again to sort descending -> Dir2 first
+    fireEvent.click(screen.getByText(/Destination/i));
+    const rowsDesc = screen.getAllByText(/Dir\d/);
+    expect(rowsDesc[0].textContent).toContain('Dir2');
+  });
+
   test('station names become clickable when tripId provided', () => {
     render(<DepartureTable {...baseProps} dataSource={[...dataSource]} />);
     const clickable = screen.getByText('Station B');

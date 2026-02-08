@@ -27,6 +27,7 @@ jest.mock('react-leaflet', () => ({
 }));
 
 const baseStation = {
+  instanceId: 1,
   id: '1',
   value: 'Station',
   when: 0,

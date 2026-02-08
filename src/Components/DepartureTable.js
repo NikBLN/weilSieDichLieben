@@ -9,6 +9,7 @@ import useIsMobile from "../hooks/useIsMobile";
 const DepartureTable = (props) => {
   const [isPaused, setIsPaused] = useState(false);
   const [sortOrder, setSortOrder] = useState("off");
+  const [sortField, setSortField] = useState("departureName");
   const [radarModalOpen, setRadarModalOpen] = useState(false);
   const [selectedStopLocation, setSelectedStopLocation] = useState(null);
   const isMobile = useIsMobile();
@@ -108,19 +109,24 @@ const DepartureTable = (props) => {
     return remarks.map((remark) => remark.text).join(" *** ");
   };
 
-  const handleSort = () => {
-    setSortOrder((current) => {
-      switch (current) {
-        case "off":
-          return "asc";
-        case "asc":
-          return "desc";
-        case "desc":
-          return "off";
-        default:
-          return "off";
-      }
-    });
+  const handleSort = (field) => {
+    if (field !== sortField) {
+      setSortField(field);
+      setSortOrder("asc");
+    } else {
+      setSortOrder((current) => {
+        switch (current) {
+          case "off":
+            return "asc";
+          case "asc":
+            return "desc";
+          case "desc":
+            return "off";
+          default:
+            return "off";
+        }
+      });
+    }
   };
 
   const getSortedData = () => {
@@ -128,7 +134,7 @@ const DepartureTable = (props) => {
       return props.dataSource.sort((a, b) => a.when - b.when);
 
     return [...props.dataSource].sort((a, b) => {
-      const comparison = a.departureName.localeCompare(b.departureName);
+      const comparison = a[sortField].localeCompare(b[sortField]);
       return sortOrder === "asc" ? comparison : -comparison;
     });
   };
@@ -173,12 +179,13 @@ const DepartureTable = (props) => {
           <Col style={styles.columnName} span={4}>
             {getTranslation(props.language, "line")}
           </Col>
-          <Col style={styles.columnName} span={9}>
-            {getTranslation(props.language, "destination")}
+          <Col style={styles.columnNameClickable} span={9} onClick={() => handleSort("direction")}>
+            {getTranslation(props.language, "destination")}{" "}
+            {sortField === "direction" && sortOrder !== "off" && (sortOrder === "asc" ? "↑" : "↓")}
           </Col>
-          <Col style={styles.columnNameClickable} span={9} onClick={handleSort}>
+          <Col style={styles.columnNameClickable} span={9} onClick={() => handleSort("departureName")}>
             {getTranslation(props.language, "departureName")}{" "}
-            {sortOrder !== "off" && (sortOrder === "asc" ? "↑" : "↓")}
+            {sortField === "departureName" && sortOrder !== "off" && (sortOrder === "asc" ? "↑" : "↓")}
           </Col>
           <Col style={styles.columnName} span={2}>
             {getTranslation(props.language, "when")}
