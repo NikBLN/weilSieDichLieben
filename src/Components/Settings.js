@@ -29,7 +29,7 @@ const Settings = (props) => {
   const onPropChange = (checked, dataSet, type) => {
     const selectedStationsCopy = [...props.selectedStations];
     const index = selectedStationsCopy.findIndex(
-      (selectedStation) => selectedStation.id === dataSet.id
+      (selectedStation) => selectedStation.instanceId === dataSet.instanceId
     );
 
     selectedStationsCopy[index] = { ...selectedStationsCopy[index] };
@@ -77,7 +77,7 @@ const Settings = (props) => {
         <Row gutter={[16, 16]} wrap={true} style={{ margin: 0 }}>
           {props.selectedStations.map((station) => {
             return (
-              <Col key={station.id} xs={24} sm={12} md={8} lg={6}>
+              <Col key={station.instanceId} xs={24} sm={12} md={8} lg={6}>
                 <Card
                   style={{ boxShadow: "3px 3px 10px 0px rgba(0,0,0,0.5)" }}
                   size="small"

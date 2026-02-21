@@ -66,6 +66,7 @@ const App = () => {
   const [hamburgerMenuOpen, setHamburgerMenuOpen] = useState(false);
   const [fontSizeModalOpen, setFontSizeModalOpen] = useState(false);
   const autoHideTimeoutRef = React.useRef(null);
+  const instanceIdCounter = React.useRef(0);
   const isMobile = useIsMobile();
 
   const { Title, Text } = Typography;
@@ -301,6 +302,7 @@ const App = () => {
 
     const fromUrlRetrievedStations = id.map((_, index) => {
       return {
+        instanceId: index + 1,
         bus: bus[index] === "true",
         express: express[index] === "true",
         ferry: ferry[index] === "true",
@@ -322,6 +324,7 @@ const App = () => {
       };
     });
 
+    instanceIdCounter.current = fromUrlRetrievedStations.length;
     setSelectedStations(fromUrlRetrievedStations);
   };
 
@@ -354,6 +357,7 @@ const App = () => {
   };
 
   const fetchHideDepartureColFromCookie = () => {
+    if (!cookieConsent) return;
     const cookieHideDepartureCol = document.cookie.replace(
       /(?:(?:^|.*;\s*)hideDepartureCol\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
@@ -461,13 +465,24 @@ const App = () => {
       "$1"
     );
     if (cookieSelectedStations) {
-      setSelectedStations(JSON.parse(cookieSelectedStations));
+      const stations = JSON.parse(cookieSelectedStations);
+      let maxId = 0;
+      const migratedStations = stations.map((station, index) => {
+        if (station.instanceId == null) {
+          station = { ...station, instanceId: index + 1 };
+        }
+        maxId = Math.max(maxId, station.instanceId);
+        return station;
+      });
+      instanceIdCounter.current = maxId;
+      setSelectedStations(migratedStations);
     }
   };
 
   const onStationSelect = (dataSet) => {
     const selectedStationsCopy = [...selectedStations];
-    selectedStationsCopy.push(dataSet);
+    instanceIdCounter.current += 1;
+    selectedStationsCopy.push({ ...dataSet, instanceId: instanceIdCounter.current });
     setSelectedStations(selectedStationsCopy);
 
     saveDataInCookie("bvgDepatureSelectedStations", selectedStationsCopy);
@@ -476,7 +491,7 @@ const App = () => {
   const onStationEdit = (dataSet) => {
     const selectedStationsCopy = [...selectedStations];
     const index = selectedStationsCopy.findIndex(
-      (selectedStation) => selectedStation.id === dataSet.id
+      (selectedStation) => selectedStation.instanceId === dataSet.instanceId
     );
     selectedStationsCopy[index] = dataSet;
     setSelectedStations(selectedStationsCopy);
@@ -486,7 +501,7 @@ const App = () => {
 
   const removeStation = (station) => {
     const updatedSelectedStations = selectedStations.filter(
-      (selectedStation) => selectedStation.id !== station.id
+      (selectedStation) => selectedStation.instanceId !== station.instanceId
     );
     setSelectedStations(updatedSelectedStations);
 

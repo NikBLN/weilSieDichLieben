@@ -136,7 +136,7 @@ const DepartureDisplay = (props) => {
           : null;
 
         columnData.push({
-          key: `${departure.stop.id}_${j}`,
+          key: `${i}_${departure.stop.id}_${j}`,
           lineName: departure.line.name,
           direction: departure.direction,
           departureName: departure.stop.name,

@@ -36,10 +36,6 @@ const StationFinder = (props) => {
         return {
           value: dataSet.name,
           id: dataSet.id,
-          disabled:
-            props.selectedStations.filter(
-              (station) => station.id === dataSet.id
-            ).length > 0,
           when: 0,
           results: 4,
           suburban: true,
