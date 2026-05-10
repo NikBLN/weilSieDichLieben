@@ -203,10 +203,12 @@ const DepartureTable = (props) => {
             </Col>
           )}
           <Col
-            style={{ ...styles.columnName, textAlign: "right" }}
+            style={{ ...styles.columnName, position: "relative" }}
             span={props.hideDepartureCol ? 4 : 2}
           >
-            {getTranslation(props.language, whenHeaderKey)}
+            <span style={{ position: "absolute", right: 0, whiteSpace: "nowrap" }}>
+              {getTranslation(props.language, whenHeaderKey)}
+            </span>
           </Col>
         </Row>
       )}
