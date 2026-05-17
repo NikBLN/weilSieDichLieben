@@ -178,4 +178,35 @@ describe('DepartureTable sorting', () => {
       'Station B',
     ]);
   });
+
+  describe('mobile rendering', () => {
+    beforeEach(() => {
+      Object.defineProperty(window, 'innerWidth', {
+        writable: true,
+        configurable: true,
+        value: 375,
+      });
+    });
+
+    test('renders a per departure group header by default', () => {
+      render(<DepartureTable {...baseProps} dataSource={[...dataSource]} />);
+
+      expect(screen.getByText(/Departure:\s*Station A/i)).toBeTruthy();
+      expect(screen.getByText(/Departure:\s*Station B/i)).toBeTruthy();
+    });
+
+    test('hideDepartureCol removes the departure group headers on mobile', () => {
+      render(
+        <DepartureTable
+          {...baseProps}
+          hideDepartureCol
+          dataSource={[...dataSource]}
+        />
+      );
+
+      expect(screen.queryByText(/Departure:\s*Station/i)).toBeNull();
+      expect(screen.getByText('3 min')).toBeTruthy();
+      expect(screen.getByText('5 min')).toBeTruthy();
+    });
+  });
 });
