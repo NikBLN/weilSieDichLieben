@@ -1086,7 +1086,6 @@ const App = () => {
         flexDirection: "column",
         height: "100vh",
         backgroundColor: "black",
-        position: "relative",
       }}
     >
       {contextHolder}
