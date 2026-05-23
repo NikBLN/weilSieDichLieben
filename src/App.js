@@ -108,14 +108,7 @@ const App = () => {
   useLayoutEffect(() => {
     // Measure before paint so the content does not jump.
     measureUiLayout();
-  }, [
-    measureUiLayout,
-    fontSize,
-    isMobile,
-    language,
-    selectedStations.length,
-    settingsAreVisible,
-  ]);
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
