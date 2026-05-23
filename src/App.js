@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {
-  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -85,7 +84,7 @@ const App = () => {
 
   const { Title, Text } = Typography;
 
-  const measureUiLayout = useCallback(() => {
+  const measureUiLayout = () => {
     // Follow the actual rendered header/footer size instead of a fixed formula.
     const nextLayout = {
       headerHeight: headerRef.current?.getBoundingClientRect().height ?? 0,
@@ -103,7 +102,7 @@ const App = () => {
 
       return nextLayout;
     });
-  }, []);
+  };
 
   useLayoutEffect(() => {
     // Measure before paint so the content does not jump.
@@ -138,7 +137,7 @@ const App = () => {
       window.removeEventListener("resize", measureUiLayout);
       resizeObserver.disconnect();
     };
-  }, [measureUiLayout]);
+  }, []);
 
   useEffect(() => {
     // Init the app
