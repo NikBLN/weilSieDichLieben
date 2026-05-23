@@ -137,12 +137,15 @@ describe('DepartureTable sorting', () => {
     expect(screen.queryByText(/Departure from/i)).toBeNull();
 
     const destinationHeaderColumn = screen.getByText(/Direction/i, { selector: '.ant-col' });
-    const whenHeaderColumn = screen.getByText(/^Departure$/i, { selector: '.ant-col' });
+    const whenHeaderText = screen.getByText(/^Departure$/i);
+    const whenHeaderColumn = whenHeaderText.closest('.ant-col');
     const whenDataColumn = screen.getByText('3 min', { selector: '.ant-col' });
 
     expect(destinationHeaderColumn.className).toContain('ant-col-16');
     expect(whenHeaderColumn.className).toContain('ant-col-4');
-    expect(whenHeaderColumn.style.textAlign).toBe('right');
+    expect(whenHeaderColumn.style.position).toBe('relative');
+    expect(whenHeaderText.style.position).toBe('absolute');
+    expect(whenHeaderText.style.right).toBe('0px');
     expect(whenDataColumn.className).toContain('ant-col-4');
     expect(whenDataColumn.style.textAlign).toBe('right');
   });
