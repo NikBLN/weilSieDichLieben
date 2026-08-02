@@ -1,0 +1,45 @@
+# Origin lock: only Cloudflare may reach this host directly.
+#
+# The site is served through Cloudflare, but the origin IP is public:
+# the MX record points at www329.your-server.de, which resolves to the
+# same machine. Without this allowlist the proxy can simply be skipped.
+#
+# IP ranges from https://www.cloudflare.com/ips-v4 and /ips-v6.
+# Cloudflare adds ranges occasionally - re-check when edge requests
+# start returning 403.
+
+# Guarded on mod_authz_host: it provides "Require ip". Without the guard a
+# host lacking the module would answer 500 instead of degrading to a no-op.
+<IfModule mod_authz_host.c>
+  <RequireAny>
+    # Keep ACME reachable, otherwise Hetzner's Let's Encrypt renewal
+    # fails and Cloudflare's Full (strict) mode breaks with it.
+    Require expr "%{REQUEST_URI} =~ m#^/\.well-known/#"
+
+    # Cloudflare IPv4
+    Require ip 173.245.48.0/20
+    Require ip 103.21.244.0/22
+    Require ip 103.22.200.0/22
+    Require ip 103.31.4.0/22
+    Require ip 141.101.64.0/18
+    Require ip 108.162.192.0/18
+    Require ip 190.93.240.0/20
+    Require ip 188.114.96.0/20
+    Require ip 197.234.240.0/22
+    Require ip 198.41.128.0/17
+    Require ip 162.158.0.0/15
+    Require ip 104.16.0.0/13
+    Require ip 104.24.0.0/14
+    Require ip 172.64.0.0/13
+    Require ip 131.0.72.0/22
+
+    # Cloudflare IPv6
+    Require ip 2400:cb00::/32
+    Require ip 2606:4700::/32
+    Require ip 2803:f800::/32
+    Require ip 2405:b500::/32
+    Require ip 2405:8100::/32
+    Require ip 2a06:98c0::/29
+    Require ip 2c0f:f248::/32
+  </RequireAny>
+</IfModule>
