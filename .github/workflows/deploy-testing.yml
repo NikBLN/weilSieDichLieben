@@ -1,0 +1,58 @@
+name: Deploy to testing.weilsiedichlieben.de
+
+on:
+  push:
+    branches:
+      - feature/vbb-api
+
+# Only one deploy to the test system at a time; a newer push wins.
+concurrency:
+  group: deploy-testing
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests
+      run: npm test -- --watchAll=false
+
+    - name: Build the project
+      run: npm run build
+      env:
+        REACT_APP_API_BASE_URL: https://api.weilsiedichlieben.de/v1
+
+    # Keep the test system out of search engines. Appended to the origin
+    # lock from public/.htaccess, so it only applies to this deployment.
+    - name: Add noindex header
+      run: |
+        cat >> build/.htaccess <<'EOF'
+
+        # Test system only: keep it out of search engines.
+        <IfModule mod_headers.c>
+          Header always set X-Robots-Tag "noindex, nofollow"
+        </IfModule>
+        EOF
+
+    - name: Upload to Hetzner FTP (public_html/testing)
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./build/
+        server-dir: /public_html/testing/
+        protocol: ftps
+        dangerously-ignore-invalid-cert: true
