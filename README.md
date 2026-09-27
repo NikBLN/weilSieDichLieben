@@ -64,6 +64,10 @@ npm start          # app on http://localhost:3000
 The mock API ([`scripts/mock-api.js`](./scripts/mock-api.js)) returns made-up
 departures, including a disruption, a cancelled trip and hints, so every part
 of the board can be designed and tested. It is not real timetable data.
+On start it prints a link that opens the board with two sample stations
+already set up. The station search only knows the six sample stations
+(e.g. Alexanderplatz, Hauptbahnhof, Mehringdamm); for any other text it
+suggests all of them.
 
 To run your own copy with real departures, connect it to the public
 [transport.rest](https://transport.rest) API. What to change is described in

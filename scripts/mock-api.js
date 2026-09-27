@@ -133,7 +133,10 @@ const server = http.createServer((req, res) => {
     case "/v1/stations": {
       const q = (p.get("q") || "").trim().toLowerCase();
       if (q.length < 2) return error(res, 400, "invalid_parameter", "q must have at least 2 characters");
-      return json(res, 200, { stations: STATIONS.filter((s) => s.name.toLowerCase().includes(q)) });
+      // Without a match, suggest all sample stations so the search always
+      // offers something to pick.
+      const matches = STATIONS.filter((s) => s.name.toLowerCase().includes(q));
+      return json(res, 200, { stations: matches.length ? matches : STATIONS });
     }
     case "/v1/departures":
       if (!p.get("stop")) return error(res, 400, "invalid_parameter", "Missing parameter: stop");
@@ -145,6 +148,28 @@ const server = http.createServer((req, res) => {
   }
 });
 
+// Share link that opens the board with two sample stations already set up.
+const demoLink = () => {
+  const params = new URLSearchParams({ fontSize: "22" });
+  for (const s of STATIONS.slice(0, 2)) {
+    params.append("id", s.id);
+    params.append("value", s.name);
+    for (const p of ["bus", "express", "ferry", "regional", "suburban", "subway", "tram"]) {
+      params.append(p, "true");
+    }
+    params.append("when", "0");
+    params.append("results", "4");
+  }
+  return `http://localhost:3000/?${params}`;
+};
+
 server.listen(PORT, () => {
   console.log(`Mock API with sample data on http://localhost:${PORT}/v1`);
+  console.log("");
+  console.log("Start the app with `npm start`, then open this link to see a board");
+  console.log("with two sample stations:");
+  console.log(demoLink());
+  console.log("");
+  console.log("The station search offers the sample stations only:");
+  console.log(STATIONS.map((s) => `  ${s.name}`).join("\n"));
 });
