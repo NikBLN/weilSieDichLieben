@@ -105,7 +105,7 @@ directly.
 | Endpoint | Parameters | Response |
 |---|---|---|
 | `GET /health` | – | `{ ok }` |
-| `GET /stations` | `q`, `lang` | `{ stations: [{ id, name, lat, lon }] }` |
+| `GET /stations` | `q`, `lang` | `{ stations: [{ id, name, lat, lon, products }] }`, `products` lists the means of transport that stop there (e.g. `["subway", "bus"]`) |
 | `GET /departures` | `stop`, `products`, `offset`, `results`, `direction`, `remarks` (`all` or `disruptions`), `lang` | `{ departures: [{ tripId, line, product, direction, stop, plannedWhen, when, cancelled, platform, remarks }] }` |
 | `GET /vehicles` | `lat`, `lon`, `radius`, `trips` | `{ vehicles: [{ tripId, line, product, direction, lat, lon }] }` |
 

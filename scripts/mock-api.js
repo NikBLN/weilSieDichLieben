@@ -14,12 +14,18 @@ const http = require("http");
 const PORT = Number(process.env.PORT) || 8787;
 
 const STATIONS = [
-  { id: "900100003", name: "S+U Alexanderplatz Bhf (Berlin)", lat: 52.521508, lon: 13.411267 },
-  { id: "900003201", name: "S+U Berlin Hauptbahnhof", lat: 52.525592, lon: 13.369545 },
-  { id: "900017101", name: "U Mehringdamm (Berlin)", lat: 52.49357, lon: 13.388138 },
-  { id: "900120003", name: "S Ostkreuz Bhf (Berlin)", lat: 52.503013, lon: 13.469031 },
-  { id: "900023201", name: "S+U Zoologischer Garten Bhf (Berlin)", lat: 52.506921, lon: 13.332707 },
-  { id: "900007102", name: "S+U Gesundbrunnen Bhf (Berlin)", lat: 52.548637, lon: 13.388372 },
+  { id: "900100003", name: "S+U Alexanderplatz Bhf (Berlin)", lat: 52.521508, lon: 13.411267,
+    products: ["suburban", "subway"] },
+  { id: "900003201", name: "S+U Berlin Hauptbahnhof", lat: 52.525592, lon: 13.369545,
+    products: ["suburban", "subway", "tram", "bus", "express", "regional"] },
+  { id: "900017101", name: "U Mehringdamm (Berlin)", lat: 52.49357, lon: 13.388138,
+    products: ["subway", "bus"] },
+  { id: "900120003", name: "S Ostkreuz Bhf (Berlin)", lat: 52.503013, lon: 13.469031,
+    products: ["suburban", "bus", "express", "regional"] },
+  { id: "900023201", name: "S+U Zoologischer Garten Bhf (Berlin)", lat: 52.506921, lon: 13.332707,
+    products: ["suburban", "subway", "bus"] },
+  { id: "900007102", name: "S+U Gesundbrunnen Bhf (Berlin)", lat: 52.548637, lon: 13.388372,
+    products: ["suburban", "subway", "bus", "express", "regional"] },
 ];
 
 const LINES = [
@@ -70,7 +76,8 @@ const iso = (date) => {
 };
 
 function departures(params) {
-  const stop = stationById(params.get("stop") || "");
+  // A departure's stop has no products, like the real API.
+  const { products: _products, ...stop } = stationById(params.get("stop") || "");
   const results = Math.min(50, Math.max(1, Number(params.get("results")) || 10));
   const offset = Number(params.get("offset")) || 0;
   const products = params.get("products")?.split(",");
