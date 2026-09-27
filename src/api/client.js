@@ -9,16 +9,16 @@ export class ApiError extends Error {
   }
 }
 
-// Status, bei denen die API als nicht verfügbar gilt: Netzwerkfehler (0),
-// Rate-Limit und Störung der Datenquelle.
+// Statuses that mark the API as unavailable: network error (0), rate limit
+// and timetable service outage.
 export const isUnavailableError = (err) =>
   err instanceof ApiError && [0, 429, 503].includes(err.status);
 
 export const isAbortError = (err) => err?.name === "AbortError";
 
-// GET auf die API. `params` ist eine Liste von [Name, Wert]-Paaren, damit die
-// Reihenfolge in der URL immer gleich ist. Die API cacht nach der
-// vollständigen URL, gleiche Anfragen sollen also gleich aussehen.
+// GET request to the API. `params` is a list of [name, value] pairs so the
+// order in the URL is always the same. The API caches by full URL, so equal
+// requests should look equal.
 export async function apiGet(path, params = [], { signal } = {}) {
   const url = new URL(`${API_BASE_URL}${path}`);
   for (const [name, value] of params) {
@@ -42,7 +42,7 @@ export async function apiGet(path, params = [], { signal } = {}) {
   try {
     body = await response.json();
   } catch {
-    // Keine JSON-Antwort, z. B. eine Fehlerseite.
+    // Not a JSON response, e.g. an error page.
   }
 
   if (!response.ok) {

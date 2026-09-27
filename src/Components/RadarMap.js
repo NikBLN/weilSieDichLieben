@@ -44,7 +44,7 @@ const RadarMap = ({ stopLocation, dataSource = [], language = "de", isMobile = f
   useEffect(() => {
     if (!stopLocation?.latitude || !stopLocation?.longitude) return;
 
-    // Nur die Fahrten, die an dieser Station in der Tafel stehen.
+    // Only the trips shown on the board for this station.
     const trips = dataSource
       .filter((d) => d.stopLocation?.id === stopLocation.id)
       .map((d) => d.tripId);

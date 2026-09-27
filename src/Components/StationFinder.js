@@ -18,7 +18,7 @@ const StationFinder = (props) => {
     const query = queryStr.trim();
     if (query.length < MIN_QUERY_LENGTH) return undefined;
 
-    // Neue Eingabe bricht die vorige Suche ab.
+    // New input aborts the previous search.
     const controller = new AbortController();
     const timer = setTimeout(() => {
       searchStations(query, {

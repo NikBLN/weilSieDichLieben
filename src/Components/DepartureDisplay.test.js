@@ -120,3 +120,21 @@ test("reports an available API after a successful fetch", async () => {
   renderDisplay({ onApiAvailabilityChange });
   await waitFor(() => expect(onApiAvailabilityChange).toHaveBeenCalledWith(true));
 });
+
+test("shows the other stations when one station fails", async () => {
+  const otherStation = { ...baseStation, instanceId: 2, id: "900017101" };
+  getDepartures.mockImplementation((station) =>
+    station.id === otherStation.id
+      ? Promise.reject(new ApiError(400, "invalid_parameter", "x"))
+      : Promise.resolve([departure()]),
+  );
+  const onApiAvailabilityChange = jest.fn();
+  jest.spyOn(console, "error").mockImplementation(() => {});
+  renderDisplay({
+    selectedStations: [baseStation, otherStation],
+    onApiAvailabilityChange,
+  });
+  expect(await screen.findByText("S Ahrensfelde Bhf (Berlin)")).toBeTruthy();
+  // An invalid parameter is not an outage of the API.
+  expect(onApiAvailabilityChange).toHaveBeenCalledWith(true);
+});

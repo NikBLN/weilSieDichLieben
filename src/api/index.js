@@ -2,7 +2,7 @@ import { apiGet } from "./client";
 
 export { ApiError, isAbortError, isUnavailableError } from "./client";
 
-// Reihenfolge wie in den Stationseinstellungen.
+// Same order as in the station settings.
 export const PRODUCTS = [
   "suburban",
   "subway",
@@ -22,7 +22,7 @@ const clampInt = (value, min, max, fallback) => {
   return Math.min(max, Math.max(min, n));
 };
 
-// Auf rund 100 m gerundet, damit gleiche Karten dieselbe URL erzeugen.
+// Rounded to about 100 m so the same map produces the same URL.
 const roundCoord = (value) => Math.round(Number(value) * 1000) / 1000;
 
 export async function searchStations(query, { language, signal } = {}) {
@@ -37,7 +37,7 @@ export async function searchStations(query, { language, signal } = {}) {
   return data?.stations ?? [];
 }
 
-// `station` ist ein Eintrag aus den Stationseinstellungen.
+// `station` is an entry of the station settings.
 export async function getDepartures(
   station,
   { language, standardRemarks, signal } = {},
@@ -85,9 +85,9 @@ export async function isAlive({ signal } = {}) {
   }
 }
 
-// Wandelt die Abfahrten mehrerer Stationen in das Zeilenformat von
-// DepartureTable. `when` ist die Minutenzahl bis zur Abfahrt, bei
-// ausgefallenen Fahrten null ("Fällt aus").
+// Converts the departures of several stations into the row format of
+// DepartureTable. `when` is the number of minutes until departure, null for
+// cancelled departures ("Fällt aus").
 export function toColumnData(departuresPerStation, now = new Date()) {
   const rows = [];
   departuresPerStation.forEach((departures, i) => {

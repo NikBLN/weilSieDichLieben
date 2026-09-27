@@ -13,6 +13,12 @@ const REFRESH_INTERVAL_MS = 60000;
 const DepartureDisplay = (props) => {
   const [columnData, setColumnData] = useState([]);
   const controllerRef = useRef(null);
+  // Last successful departures per station, used when a single station fails.
+  const lastResultsRef = useRef([]);
+
+  useEffect(() => {
+    lastResultsRef.current = [];
+  }, [props.selectedStations]);
 
   useEffect(() => {
     let interval;
@@ -29,7 +35,7 @@ const DepartureDisplay = (props) => {
   }, [props.selectedStations, props.language, props.standardRemarksVisibility]);
 
   const fetchDataForSelectedStations = async () => {
-    // Eine neue Runde bricht die vorige ab, falls sie noch läuft.
+    // A new round aborts the previous one if it is still running.
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;
@@ -49,16 +55,17 @@ const DepartureDisplay = (props) => {
       .filter((r) => r.status === "rejected")
       .map((r) => r.reason)
       .filter((err) => !isAbortError(err));
+    errors.forEach((err) => console.error("Error fetching departures:", err));
 
-    if (errors.length > 0) {
-      // Bei Fehlern bleibt die letzte Anzeige stehen.
-      errors.forEach((err) => console.error("Error fetching departures:", err));
-      if (errors.some(isUnavailableError)) props.onApiAvailabilityChange?.(false);
-      return;
-    }
+    // Each station on its own: a failing station keeps its last departures,
+    // the others are updated.
+    const departures = results.map((r, i) =>
+      r.status === "fulfilled" ? r.value : lastResultsRef.current[i] ?? [],
+    );
+    lastResultsRef.current = departures;
 
-    props.onApiAvailabilityChange?.(true);
-    setColumnData(toColumnData(results.map((r) => r.value)));
+    props.onApiAvailabilityChange?.(!errors.some(isUnavailableError));
+    setColumnData(toColumnData(departures));
   };
 
   return (
