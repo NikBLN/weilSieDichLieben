@@ -51,14 +51,26 @@ npm install
 ```
 
 ### Running Locally
-```bash
-npm start
-```
-This will start the development server at `http://localhost:3000` and open the app in your browser.
+The API behind weilsiedichlieben.de is private and only answers requests from
+weilsiedichlieben.de, so a local copy gets no data from it. For working on the
+app, start the mock API with sample data in one terminal and the app in a
+second one:
 
-In development the app talks to the API at `http://localhost:8787/v1`
-(see `.env.development`). The API lives in a separate repository; maintainers
-start it there with `wrangler dev`. To use a different API address, create
+```bash
+npm run mock-api   # sample data on http://localhost:8787/v1
+npm start          # app on http://localhost:3000
+```
+
+The mock API ([`scripts/mock-api.js`](./scripts/mock-api.js)) returns made-up
+departures, including a disruption, a cancelled trip and hints, so every part
+of the board can be designed and tested. It is not real timetable data.
+
+To run your own copy with real departures, connect it to the public
+[transport.rest](https://transport.rest) API. What to change is described in
+[`docs/transport-rest.md`](./docs/transport-rest.md).
+
+In development the app talks to `http://localhost:8787/v1` (see
+`.env.development`). To use a different address, create
 `.env.development.local` with `REACT_APP_API_BASE_URL=...`.
 
 ### Building

@@ -6,9 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Start development server:**
 ```bash
+npm run mock-api   # sample data on http://localhost:8787/v1 (or the real API locally)
 npm start
 ```
-Opens at http://localhost:3000 with hot reload.
+Opens at http://localhost:3000 with hot reload. The mock API in `scripts/mock-api.js` must keep returning the same format as the real API (see README "API"). `docs/transport-rest.md` explains how to run a private copy with transport.rest.
 
 **Run tests:**
 ```bash
