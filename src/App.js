@@ -621,12 +621,15 @@ const App = () => {
       >
         <Title level={5}>Bereitstellung der Daten</Title>
         <Space direction="vertical" size={1}>
-          <Text>
-            Fahrplandaten:{" "}
+          <Text strong>
+            Fahrplandaten powered by{" "}
             <a href="https://www.vbb.de">
-              Verkehrsverbund Berlin-Brandenburg (VBB)
+              VBB Verkehrsverbund Berlin-Brandenburg
             </a>
-            . Keine Gewähr für Richtigkeit und Aktualität.
+          </Text>
+          <Text>
+            Die Fahrplandaten kommen vom VBB. Keine Gewähr für Richtigkeit und
+            Aktualität.
           </Text>
           <Text>
             <a href="https://transport.rest">

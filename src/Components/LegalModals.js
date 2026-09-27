@@ -94,7 +94,20 @@ const privacyContent = {
         gewählten Verkehrsmittel und bei der Fahrzeugkarte die Koordinaten der
         Station. Ihre IP-Adresse wird nicht an den VBB weitergegeben.
       </Paragraph>
-      <Title level={5}>8. Kontakt zum Datenschutz</Title>
+      <Title level={5}>8. Kartenkacheln von OpenStreetMap</Title>
+      <Paragraph>
+        Wenn Sie die Fahrzeugkarte öffnen, lädt Ihr Browser Kartenkacheln
+        direkt von den Servern der OpenStreetMap Foundation (St John’s
+        Innovation Centre, Cowley Road, Cambridge, CB4 0WS, Vereinigtes
+        Königreich). Dabei werden Ihre IP-Adresse und der gezeigte
+        Kartenausschnitt an die OpenStreetMap Foundation übermittelt. Weitere
+        Informationen finden Sie in der{" "}
+        <a href="https://osmfoundation.org/wiki/Privacy_Policy">
+          Datenschutzerklärung der OpenStreetMap Foundation
+        </a>
+        .
+      </Paragraph>
+      <Title level={5}>9. Kontakt zum Datenschutz</Title>
       <Paragraph>
         Bei Fragen zur Erhebung, Verarbeitung oder Nutzung Ihrer
         personenbezogenen Daten wenden Sie sich bitte an:
@@ -182,7 +195,19 @@ const privacyContent = {
         and, for the vehicle map, the coordinates of the station. Your IP
         address is not passed on to VBB.
       </Paragraph>
-      <Title level={5}>8. Contact</Title>
+      <Title level={5}>8. Map tiles from OpenStreetMap</Title>
+      <Paragraph>
+        When you open the vehicle map, your browser loads map tiles directly
+        from the servers of the OpenStreetMap Foundation (St John’s Innovation
+        Centre, Cowley Road, Cambridge, CB4 0WS, United Kingdom). Your IP
+        address and the map section shown are transmitted to the OpenStreetMap
+        Foundation. For more information, see the{" "}
+        <a href="https://osmfoundation.org/wiki/Privacy_Policy">
+          OpenStreetMap Foundation Privacy Policy
+        </a>
+        .
+      </Paragraph>
+      <Title level={5}>9. Contact</Title>
       <Paragraph>
         For questions related to your data, contact:
         <br /> <b>Nikolas Tsombanis</b> –{" "}
