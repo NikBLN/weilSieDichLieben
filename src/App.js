@@ -632,15 +632,18 @@ const App = () => {
             und verantwortet. Der VBB stellt ausschließlich die Fahrplandaten
             bereit. Keine Gewähr für Richtigkeit und Aktualität der Daten.
           </Text>
-          <Text>
-            <a href="https://transport.rest">
-              transport.rest transit APIs
-            </a>
+          <Text strong>
+            Mit{" "}
+            <a href="https://transport.rest">transport.rest transit APIs</a>{" "}
+            fing alles an
           </Text>
           <Text>
-            Danke {<a href="https://github.com/derhuerst">Jannis</a>} für
-            das Betreiben und Bereitstellen der tollen API! Schaut doch mal
-            bei transport.rest vorbei!
+            Mit dieser API konnte das Projekt starten, ohne sie gäbe es diese
+            Website nicht. Danke{" "}
+            {<a href="https://github.com/derhuerst">Jannis</a>} für das
+            Betreiben und Bereitstellen der tollen API! Inzwischen kommen die
+            Fahrplandaten direkt vom VBB, transport.rest wird aktuell nicht
+            mehr genutzt. Schaut trotzdem mal bei transport.rest vorbei!
           </Text>
         </Space>
         <Title level={5}>Allgemeines</Title>
