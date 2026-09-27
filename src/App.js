@@ -622,7 +622,7 @@ const App = () => {
         <Title level={5}>Bereitstellung der Daten</Title>
         <Space direction="vertical" size={1}>
           <Text strong>
-            Open Data powered by{" "}
+            Fahrplandaten powered by{" "}
             <a href="https://www.vbb.de">
               VBB Verkehrsverbund Berlin-Brandenburg
             </a>
