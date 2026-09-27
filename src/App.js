@@ -37,6 +37,7 @@ import DonationDisplay from "./Components/DonationDisplay";
 import CookieBanner from "./Components/CookieBanner";
 import LegalModals from "./Components/LegalModals";
 import { getTranslation } from "./dictionary";
+import { isAlive } from "./api";
 
 const App = () => {
   const [language, setLanguage] = useState("de");
@@ -349,21 +350,7 @@ const App = () => {
   };
 
   const checkIfApiIsAvailable = () => {
-    // check if API is available by fetching a stop
-    fetch("https://v6.bvg.transport.rest/stops/900017101/departures", {
-      headers: { "User-Agent": "https://weilsiedichlieben.de" },
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          setApiIsAvailable(true);
-        } else {
-          setApiIsAvailable(false);
-        }
-      })
-      .catch((error) => {
-        console.error("Error checking API availability:", error);
-        setApiIsAvailable(false);
-      });
+    isAlive().then(setApiIsAvailable);
   };
 
   const fetchRemarksVisibilityFromCookie = () => {
@@ -635,6 +622,13 @@ const App = () => {
         <Title level={5}>Bereitstellung der Daten</Title>
         <Space direction="vertical" size={1}>
           <Text>
+            Fahrplandaten:{" "}
+            <a href="https://www.vbb.de">
+              Verkehrsverbund Berlin-Brandenburg (VBB)
+            </a>
+            . Keine Gewähr für Richtigkeit und Aktualität.
+          </Text>
+          <Text>
             <a href="https://transport.rest">
               transport.rest transit APIs
             </a>
@@ -649,7 +643,7 @@ const App = () => {
         <Space direction="vertical" size={1}>
           <Text strong>
             Diese Website ist ein privates Projekt und wird nicht von der
-            BVG betrieben.
+            BVG oder dem VBB betrieben.
           </Text>
         </Space>
         <Title level={5}>Angaben gemäß § 5 TMG</Title>
@@ -1090,6 +1084,7 @@ const App = () => {
               hideDepartureCol={hideDepartureCol}
               standardRemarksVisibility={standardRemarksVisibility}
               language={language}
+              onApiAvailabilityChange={setApiIsAvailable}
             />
           </div>
         )}

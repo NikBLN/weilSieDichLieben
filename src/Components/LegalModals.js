@@ -69,7 +69,32 @@ const privacyContent = {
         Gunzenhausen, gehostet. Hetzner speichert IP-Adressen in Server-Logfiles
         zur Erkennung und Abwehr von Angriffen.
       </Paragraph>
-      <Title level={5}>6. Kontakt zum Datenschutz</Title>
+      <Title level={5}>6. Cloudflare</Title>
+      <Paragraph>
+        Diese Website und die zugehörige Schnittstelle api.weilsiedichlieben.de
+        werden über Cloudflare (Cloudflare, Inc., 101 Townsend St., San
+        Francisco, CA 94107, USA) ausgeliefert. Cloudflare verarbeitet dabei
+        als Auftragsverarbeiter Ihre IP-Adresse und technische Verbindungsdaten,
+        um die Inhalte schnell bereitzustellen und Angriffe abzuwehren.
+        Cloudflare ist unter dem EU-US Data Privacy Framework zertifiziert.
+        Weitere Informationen finden Sie in der{" "}
+        <a href="https://www.cloudflare.com/privacypolicy/">
+          Datenschutzerklärung von Cloudflare
+        </a>
+        .
+      </Paragraph>
+      <Title level={5}>7. Fahrplandaten</Title>
+      <Paragraph>
+        Die Fahrplandaten stammen vom Verkehrsverbund Berlin-Brandenburg GmbH
+        (VBB), Hardenbergplatz 2, 10623 Berlin. Für Stationssuche, Abfahrten
+        und Fahrzeugpositionen fragt Ihr Browser die Schnittstelle
+        api.weilsiedichlieben.de ab. Diese leitet die Anfrage an den VBB
+        beziehungsweise dessen technischen Dienstleister weiter. Übermittelt
+        werden nur die Inhalte der Anfrage, also Suchbegriffe, Stationen, die
+        gewählten Verkehrsmittel und bei der Fahrzeugkarte die Koordinaten der
+        Station. Ihre IP-Adresse wird nicht an den VBB weitergegeben.
+      </Paragraph>
+      <Title level={5}>8. Kontakt zum Datenschutz</Title>
       <Paragraph>
         Bei Fragen zur Erhebung, Verarbeitung oder Nutzung Ihrer
         personenbezogenen Daten wenden Sie sich bitte an:
@@ -135,7 +160,29 @@ const privacyContent = {
         Gunzenhausen, Germany. Server log data (such as IP addresses) is stored
         for security purposes.
       </Paragraph>
-      <Title level={5}>6. Contact</Title>
+      <Title level={5}>6. Cloudflare</Title>
+      <Paragraph>
+        This website and its interface api.weilsiedichlieben.de are delivered
+        via Cloudflare (Cloudflare, Inc., 101 Townsend St., San Francisco, CA
+        94107, USA). As a processor, Cloudflare processes your IP address and
+        technical connection data to deliver content quickly and to fend off
+        attacks. Cloudflare is certified under the EU-US Data Privacy
+        Framework. For more information, see Cloudflare's{" "}
+        <a href="https://www.cloudflare.com/privacypolicy/">Privacy Policy</a>
+        .
+      </Paragraph>
+      <Title level={5}>7. Timetable data</Title>
+      <Paragraph>
+        Timetable data is provided by Verkehrsverbund Berlin-Brandenburg GmbH
+        (VBB), Hardenbergplatz 2, 10623 Berlin, Germany. For station search,
+        departures and vehicle positions, your browser queries the interface
+        api.weilsiedichlieben.de, which forwards the request to VBB or its
+        technical service provider. Only the content of the request is
+        transmitted: search terms, stations, the selected means of transport
+        and, for the vehicle map, the coordinates of the station. Your IP
+        address is not passed on to VBB.
+      </Paragraph>
+      <Title level={5}>8. Contact</Title>
       <Paragraph>
         For questions related to your data, contact:
         <br /> <b>Nikolas Tsombanis</b> –{" "}

@@ -27,7 +27,7 @@ Creates optimized production build in `build/` directory.
 
 ## Application Architecture
 
-This is a React 18 application that creates a customizable BVG (Berlin public transport) departure board. The app fetches live departure data from the BVG transport.rest API and displays it in a format suitable for tablets/monitors.
+This is a React 18 application that creates a customizable BVG (Berlin public transport) departure board. The app fetches live departure data from its own API at `api.weilsiedichlieben.de/v1` and displays it in a format suitable for tablets/monitors.
 
 ### Core Architecture Patterns
 
@@ -52,14 +52,18 @@ App (main state manager)
 - Unidirectional: props down, callbacks up
 - Station configurations flow from App → Settings → StationFinder
 - Real-time departure data flows from API → DepartureDisplay → DepartureTable
+- `src/api/toColumnData` converts API departures into the row format of `DepartureTable`
 
 ### Key APIs and Endpoints
 
-**BVG Transport REST API:**
-- Station search: `v6.bvg.transport.rest/locations`
-- Departures: `v6.bvg.transport.rest/stops/{id}/departures`
-- Journeys: `v6.bvg.transport.rest/journeys` (for direction filtering)
-- Vehicle radar: `v6.bvg.transport.rest/radar` (live vehicle positions)
+**weilsiedichlieben API** (`https://api.weilsiedichlieben.de/v1`):
+- All calls go through `src/api/` (`searchStations`, `getDepartures`, `getVehicles`, `isAlive`). Components never call `fetch` for timetable data.
+- Base URL from `REACT_APP_API_BASE_URL`: `.env.development` points to a local API on `http://localhost:8787/v1`, `.env.production` to the deployed one.
+- Endpoints: `/health`, `/stations?q&lang`, `/departures?stop&products&offset&results&direction&remarks&lang`, `/vehicles?lat&lon&radius&trips`.
+- Always build query parameters in the fixed order used in `src/api/index.js`; the API caches by full URL.
+- Errors are `{ error: { code, message } }`. `isUnavailableError` (network, 429, 503) drives the "API not available" hint in `App`.
+- Station IDs are 9 digits (`900100003`). A cancelled departure becomes `when: null` in the table rows.
+- The API itself lives in a separate repository. Only document what a browser can see here: address, endpoints, fields. No details about how the API works internally.
 
 ### Station Configuration Schema
 
@@ -89,6 +93,8 @@ Uses `dictionary.js` with `getTranslation(language, "key")` function. Supports G
 
 - Component tests using React Testing Library
 - Mocks for external dependencies (react-leaflet, matchMedia)
+- Components mock `../api` instead of `fetch`; `src/api/index.test.js` covers URLs and the row conversion
+- CRA resets mocks before each test, so set mock implementations in `beforeEach`
 - Test files follow `ComponentName.test.js` naming
 - Focus on user interactions and rendering behavior
 

@@ -2,6 +2,10 @@
 import { AutoComplete, message } from "antd";
 import React, { useDeferredValue, useEffect, useState } from "react";
 import { getTranslation } from "../dictionary";
+import { isAbortError, searchStations } from "../api";
+
+const SEARCH_DEBOUNCE_MS = 300;
+const MIN_QUERY_LENGTH = 2;
 
 const StationFinder = (props) => {
   const [messageApi, contextHolder] = message.useMessage();
@@ -9,20 +13,28 @@ const StationFinder = (props) => {
   const [value, setValue] = useState();
   const deferredOptions = useDeferredValue(options);
   const [queryStr, setQueryStr] = useState("");
-  const baseFetchUrl =
-    "https://v6.bvg.transport.rest/locations?poi=false&addresses=false&query=";
 
   useEffect(() => {
-    const fetchUrl = baseFetchUrl + queryStr;
-    if (queryStr !== "") {
-      fetch(fetchUrl, {
-          headers: { "User-Agent": "https://weilsiedichlieben.de" },
-        })
-        .then((res) => res.json())
-        .then((res) => {
-          prepareOptionsData(res);
+    const query = queryStr.trim();
+    if (query.length < MIN_QUERY_LENGTH) return undefined;
+
+    // Neue Eingabe bricht die vorige Suche ab.
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      searchStations(query, {
+        language: props.language,
+        signal: controller.signal,
+      })
+        .then(prepareOptionsData)
+        .catch((err) => {
+          if (!isAbortError(err)) console.error("Error searching stations:", err);
         });
-    }
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [queryStr]);
 
   const success = () => {

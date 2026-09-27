@@ -6,17 +6,13 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import { getTranslation } from "../dictionary";
+import { getVehicles, isAbortError } from "../api";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
 });
-
-// Constants for geographic calculations (2km radius)
-const KM_TO_DEGREES_LAT = 2 / 111; // 1 degree latitude ≈ 111km
-const RADAR_SEARCH_RADIUS_KM = 2;
-const API_RESULTS_LIMIT = 100;
 
 // Function to get container styles based on mobile state
 const getContainerStyle = (isMobile) => ({
@@ -48,36 +44,30 @@ const RadarMap = ({ stopLocation, dataSource = [], language = "de", isMobile = f
   useEffect(() => {
     if (!stopLocation?.latitude || !stopLocation?.longitude) return;
 
-    const fetchData = async () => {
-      try {
-        const { latitude, longitude } = stopLocation;
-        const deltaLat = KM_TO_DEGREES_LAT;
-        const deltaLon =
-          RADAR_SEARCH_RADIUS_KM / (111 * Math.cos((latitude * Math.PI) / 180));
-        const north = latitude + deltaLat;
-        const south = latitude - deltaLat;
-        const west = longitude - deltaLon;
-        const east = longitude + deltaLon;
+    // Nur die Fahrten, die an dieser Station in der Tafel stehen.
+    const trips = dataSource
+      .filter((d) => d.stopLocation?.id === stopLocation.id)
+      .map((d) => d.tripId);
+    if (trips.length === 0) {
+      setVehicles([]);
+      return undefined;
+    }
 
-        const url = `https://v6.bvg.transport.rest/radar?north=${north}&west=${west}&south=${south}&east=${east}&results=${API_RESULTS_LIMIT}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        // Get line names for the clicked station from dataSource
-        const stationLineNames = dataSource
-          .filter((d) => d.stopLocation?.id === stopLocation.id)
-          .map((d) => d.lineName);
-
-        const matches = data.movements?.filter((m) =>
-          stationLineNames.includes(m.line?.name)
-        );
-        setVehicles(matches || []);
-      } catch (err) {
+    const controller = new AbortController();
+    getVehicles({
+      latitude: stopLocation.latitude,
+      longitude: stopLocation.longitude,
+      trips,
+      signal: controller.signal,
+    })
+      .then(setVehicles)
+      .catch((err) => {
+        if (isAbortError(err)) return;
         console.error(err);
         setVehicles([]);
-      }
-    };
+      });
 
-    fetchData();
+    return () => controller.abort();
   }, [stopLocation, dataSource]);
 
   const vehicleIcons = {
@@ -117,7 +107,7 @@ const RadarMap = ({ stopLocation, dataSource = [], language = "de", isMobile = f
   const markers = vehicles.map((v, idx) => {
     const icon = L.divIcon({
       html: `<div style="font-size:26px">${
-        vehicleIcons[v.line?.product] || vehicleIcons.default
+        vehicleIcons[v.product] || vehicleIcons.default
       }</div>`,
       className: "",
       iconSize: [26, 26],
@@ -125,8 +115,8 @@ const RadarMap = ({ stopLocation, dataSource = [], language = "de", isMobile = f
     });
     return (
       <Marker
-        key={idx}
-        position={[v.location.latitude, v.location.longitude]}
+        key={v.tripId || idx}
+        position={[v.lat, v.lon]}
         icon={icon}
       >
         <Tooltip
@@ -135,7 +125,7 @@ const RadarMap = ({ stopLocation, dataSource = [], language = "de", isMobile = f
           offset={[10, 0]}
           className="vehicle-tooltip"
         >
-          {`${v.line.name} (${v.direction})`}
+          {`${v.line} (${v.direction})`}
         </Tooltip>
       </Marker>
     );
