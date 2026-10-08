@@ -2,15 +2,36 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, useRef } from "react";
 import DepartureTable from "./DepartureTable";
+import { getTranslation } from "../dictionary";
+
+let lastLoggedFetchError = null;
+const logFetchError = (error) => {
+  const message = error?.message || String(error);
+  if (message === lastLoggedFetchError) return;
+  lastLoggedFetchError = message;
+  console.error("Error fetching departures:", error);
+};
+
+// Why a station's departures could not be loaded, as a dictionary key.
+const classifyFetchError = (error) => {
+  if (error?.status === 429) return "statusRateLimited";
+  if (error?.status) return "statusApiError";
+  if (error instanceof SyntaxError) return "statusInvalidResponse";
+  return "statusApiUnreachable";
+};
 
 const DepartureDisplay = (props) => {
   const [columnData, setColumnData] = useState([]);
-  const departureDataRef = useRef([]);
-  const fetchCounter = useRef(0);
+  // null until the first round of fetches settles; then { failures, total }.
+  const [fetchStatus, setFetchStatus] = useState(null);
   const fetchIsInProgress = useRef(false);
+  const fetchGeneration = useRef(0);
 
   useEffect(() => {
     let interval;
+    fetchGeneration.current += 1;
+    fetchIsInProgress.current = false;
+    setFetchStatus(null);
     if (props.selectedStations.length > 0) {
       fetchDataForSelectedStations();
       interval = setInterval(() => {
@@ -24,16 +45,51 @@ const DepartureDisplay = (props) => {
     };
   }, [props.selectedStations]);
 
-  const fetchDataForSelectedStations = () => {
+  // Fetch every station, then show whatever arrived. A station that fails no
+  // longer holds back the others; its failure is reported on the board.
+  const fetchDataForSelectedStations = async () => {
     if (fetchIsInProgress.current) return;
-
     fetchIsInProgress.current = true;
-    departureDataRef.current = [];
-    fetchCounter.current = 0;
-    for (let i = 0; i < props.selectedStations.length; i++) {
-      const selectedStation = props.selectedStations[i];
-      fetchDeparturesAtStop(selectedStation);
+    const generation = fetchGeneration.current;
+
+    const results = await Promise.allSettled(
+      props.selectedStations.map(fetchDeparturesAtStop)
+    );
+    // The stations changed while this round was in flight.
+    if (generation !== fetchGeneration.current) return;
+    fetchIsInProgress.current = false;
+
+    const failures = [];
+    const data = [];
+    results.forEach((result) => {
+      if (result.status === "fulfilled") {
+        data.push(result.value);
+      } else {
+        logFetchError(result.reason);
+        failures.push(classifyFetchError(result.reason));
+      }
+    });
+
+    // When every station failed, keep the last good rows rather than blanking
+    // the board on a single hiccup; the status line still says what happened.
+    if (data.length > 0 || failures.length === 0) {
+      setColumnData(getColumnData(data));
     }
+    setFetchStatus({ failures, total: results.length });
+  };
+
+  const fetchJson = async (url) => {
+    const response = await fetch(url, {
+      headers: { "User-Agent": "https://weilsiedichlieben.de" },
+    });
+    if (!response.ok) {
+      const error = new Error(
+        `HTTP ${response.status} ${response.statusText} from ${url}`
+      );
+      error.status = response.status;
+      throw error;
+    }
+    return response.json();
   };
 
   const convertJourneyResultToDepartureData = (journeys) => {
@@ -68,19 +124,6 @@ const DepartureDisplay = (props) => {
     };
   };
 
-  const handleFetchResponse = (res) => {
-    if (fetchCounter.current >= props.selectedStations.length) return;
-
-    fetchCounter.current += 1;
-    departureDataRef.current.push(res);
-
-    if (fetchCounter.current === props.selectedStations.length) {
-      const columnData = getColumnData(departureDataRef.current);
-      setColumnData(columnData);
-      fetchIsInProgress.current = false;
-    }
-  };
-
   const fetchDeparturesAtStop = async (station) => {
     const {
       id: stationId,
@@ -96,34 +139,20 @@ const DepartureDisplay = (props) => {
       regional,
     } = station;
 
-    try {
-      let url;
-      let response;
-      const now = new Date();
-      const later = new Date(now.getTime() + when * 60000);
-      const formattedTime = later.toLocaleTimeString("de-DE", {
-        hour12: false,
-      });
+    const now = new Date();
+    const later = new Date(now.getTime() + when * 60000);
+    const formattedTime = later.toLocaleTimeString("de-DE", {
+      hour12: false,
+    });
 
-      if (destination) {
-        url = `https://v6.bvg.transport.rest/journeys?language=${props.language}&from=${stationId}&to=${destination.id}&departure=${formattedTime}&results=${results}&suburban=${suburban}&subway=${subway}&tram=${tram}&bus=${bus}&ferry=${ferry}&express=${express}&regional=${regional}&remarks=${props.standardRemarksVisibility}`;
-        response = await fetch(url, {
-          headers: { "User-Agent": "https://weilsiedichlieben.de" },
-        });
-        const data = await response.json();
-        handleFetchResponse(convertJourneyResultToDepartureData(data.journeys));
-      } else {
-        url = `https://v6.bvg.transport.rest/stops/${stationId}/departures?language=${props.language}&when=${formattedTime}&results=${results}&suburban=${suburban}&subway=${subway}&tram=${tram}&bus=${bus}&ferry=${ferry}&express=${express}&regional=${regional}&remarks=${props.standardRemarksVisibility}`;
-        response = await fetch(url, {
-          headers: { "User-Agent": "https://weilsiedichlieben.de" },
-        });
-        const data = await response.json();
-        handleFetchResponse(data);
-      }
-    } catch (error) {
-      console.error("Error fetching departures:", error);
-      fetchIsInProgress.current = false;
+    if (destination) {
+      const url = `https://v6.bvg.transport.rest/journeys?language=${props.language}&from=${stationId}&to=${destination.id}&departure=${formattedTime}&results=${results}&suburban=${suburban}&subway=${subway}&tram=${tram}&bus=${bus}&ferry=${ferry}&express=${express}&regional=${regional}&remarks=${props.standardRemarksVisibility}`;
+      const data = await fetchJson(url);
+      return convertJourneyResultToDepartureData(data.journeys ?? []);
     }
+    const url = `https://v6.bvg.transport.rest/stops/${stationId}/departures?language=${props.language}&when=${formattedTime}&results=${results}&suburban=${suburban}&subway=${subway}&tram=${tram}&bus=${bus}&ferry=${ferry}&express=${express}&regional=${regional}&remarks=${props.standardRemarksVisibility}`;
+    const data = await fetchJson(url);
+    return { departures: data.departures ?? [] };
   };
 
   const getColumnData = (data) => {
@@ -156,6 +185,21 @@ const DepartureDisplay = (props) => {
     return columnData;
   };
 
+  // A line for the board explaining what it shows, or why it shows nothing.
+  const getStatusMessage = () => {
+    const t = (key) => getTranslation(props.language, key);
+    if (props.selectedStations.length === 0) return t("statusNoStations");
+    if (!fetchStatus) return columnData.length === 0 ? t("statusLoading") : null;
+
+    const { failures, total } = fetchStatus;
+    if (failures.length > 0) {
+      const reasons = [...new Set(failures)].map(t).join(" / ");
+      if (failures.length === total) return reasons;
+      return `${failures.length}/${total} ${t("statusSomeStationsFailed")}: ${reasons}`;
+    }
+    return columnData.length === 0 ? t("statusNoDepartures") : null;
+  };
+
   return (
     <div>
       <DepartureTable
@@ -164,6 +208,7 @@ const DepartureDisplay = (props) => {
         remarksVisibility={props.remarksVisibility}
         hideDepartureCol={props.hideDepartureCol}
         language={props.language}
+        statusMessage={getStatusMessage()}
       />
     </div>
   );

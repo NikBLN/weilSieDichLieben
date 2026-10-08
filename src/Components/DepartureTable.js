@@ -265,6 +265,14 @@ const DepartureTable = (props) => {
         </Row>
       )}
 
+      {props.statusMessage && (
+        <Row style={styles.dataRow} role="status">
+          <Col style={{ ...styles.column, whiteSpace: "normal" }} span={24}>
+            {props.statusMessage}
+          </Col>
+        </Row>
+      )}
+
       {/* Mobile: Grouped view by departure name */}
       {isMobile &&
         !props.hideDepartureCol &&
