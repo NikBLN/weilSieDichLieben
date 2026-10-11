@@ -2,22 +2,35 @@
 import React, { useEffect, useState, useRef } from "react";
 import DepartureTable from "./DepartureTable";
 import {
+  ApiError,
   getDepartures,
   isAbortError,
   isUnavailableError,
   toColumnData,
 } from "../api";
+import { getTranslation } from "../dictionary";
 
 const REFRESH_INTERVAL_MS = 60000;
 
+// Why a station's departures could not be loaded, as a dictionary key.
+const classifyFetchError = (error) => {
+  if (!(error instanceof ApiError)) return "statusInvalidResponse";
+  if (error.status === 0) return "statusApiUnreachable";
+  if (error.status === 429) return "statusRateLimited";
+  return "statusApiError";
+};
+
 const DepartureDisplay = (props) => {
   const [columnData, setColumnData] = useState([]);
+  // null until the first round of fetches settles; then { failures, total }.
+  const [fetchStatus, setFetchStatus] = useState(null);
   const controllerRef = useRef(null);
   // Last successful departures per station, used when a single station fails.
   const lastResultsRef = useRef([]);
 
   useEffect(() => {
     lastResultsRef.current = [];
+    setFetchStatus(null);
   }, [props.selectedStations]);
 
   useEffect(() => {
@@ -66,6 +79,25 @@ const DepartureDisplay = (props) => {
 
     props.onApiAvailabilityChange?.(!errors.some(isUnavailableError));
     setColumnData(toColumnData(departures));
+    setFetchStatus({
+      failures: errors.map(classifyFetchError),
+      total: results.length,
+    });
+  };
+
+  // A line for the board explaining what it shows, or why it shows nothing.
+  const getStatusMessage = () => {
+    const t = (key) => getTranslation(props.language, key);
+    if (props.selectedStations.length === 0) return t("statusNoStations");
+    if (!fetchStatus) return columnData.length === 0 ? t("statusLoading") : null;
+
+    const { failures, total } = fetchStatus;
+    if (failures.length > 0) {
+      const reasons = [...new Set(failures)].map(t).join(" / ");
+      if (failures.length === total) return reasons;
+      return `${failures.length}/${total} ${t("statusSomeStationsFailed")}: ${reasons}`;
+    }
+    return columnData.length === 0 ? t("statusNoDepartures") : null;
   };
 
   return (
@@ -76,6 +108,7 @@ const DepartureDisplay = (props) => {
         remarksVisibility={props.remarksVisibility}
         hideDepartureCol={props.hideDepartureCol}
         language={props.language}
+        statusMessage={getStatusMessage()}
       />
     </div>
   );

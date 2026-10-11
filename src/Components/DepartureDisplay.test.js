@@ -138,3 +138,52 @@ test("shows the other stations when one station fails", async () => {
   // An invalid parameter is not an outage of the API.
   expect(onApiAvailabilityChange).toHaveBeenCalledWith(true);
 });
+
+test("says when no stations are selected", () => {
+  renderDisplay({ selectedStations: [] });
+  expect(screen.getByRole("status").textContent).toContain(
+    "No stations selected.",
+  );
+});
+
+test("says when there are no departures", async () => {
+  renderDisplay();
+  expect(
+    await screen.findByText(
+      "No departures for the selected stations and filters.",
+    ),
+  ).toBeTruthy();
+});
+
+test("says when the API is unreachable", async () => {
+  getDepartures.mockRejectedValue(
+    new ApiError(0, "network_error", "Failed to fetch"),
+  );
+  jest.spyOn(console, "error").mockImplementation(() => {});
+  renderDisplay();
+  expect(await screen.findByText("The BVG API is not reachable.")).toBeTruthy();
+});
+
+test("says when the API answers with an error", async () => {
+  getDepartures.mockRejectedValue(new ApiError(503, "upstream_timeout", "x"));
+  jest.spyOn(console, "error").mockImplementation(() => {});
+  renderDisplay();
+  expect(
+    await screen.findByText("The BVG API responded with an error."),
+  ).toBeTruthy();
+});
+
+test("shows the stations that loaded and reports the ones that failed", async () => {
+  const otherStation = { ...baseStation, instanceId: 2, id: "900017101" };
+  getDepartures.mockImplementation((station) =>
+    station.id === otherStation.id
+      ? Promise.reject(new ApiError(429, "rate_limited", "x"))
+      : Promise.resolve([departure()]),
+  );
+  jest.spyOn(console, "error").mockImplementation(() => {});
+  renderDisplay({ selectedStations: [baseStation, otherStation] });
+  expect(await screen.findByText("S Ahrensfelde Bhf (Berlin)")).toBeTruthy();
+  expect(screen.getByRole("status").textContent).toContain(
+    "1/2 stations could not be loaded: Too many requests",
+  );
+});

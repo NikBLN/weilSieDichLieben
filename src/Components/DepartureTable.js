@@ -4,6 +4,7 @@ import Marquee from "react-fast-marquee";
 import { getTranslation } from "../dictionary";
 import radarIcon from "../images/radar.png";
 import RadarMap from "./RadarMap";
+import StatusRow from "./StatusRow";
 import useIsMobile from "../hooks/useIsMobile";
 
 const DepartureTable = (props) => {
@@ -263,6 +264,12 @@ const DepartureTable = (props) => {
             {getTranslation(props.language, whenHeaderKey)}
           </Col>
         </Row>
+      )}
+
+      {props.statusMessage && (
+        <StatusRow rowStyle={styles.dataRow} textStyle={styles.column}>
+          {props.statusMessage}
+        </StatusRow>
       )}
 
       {/* Mobile: Grouped view by departure name */}
