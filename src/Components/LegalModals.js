@@ -227,7 +227,7 @@ const termsContent = {
   de: (
     <div style={{ maxHeight: "300px", overflow: "auto" }}>
       <Paragraph>
-        <b>Gültig ab:</b> 30. Mai 2025
+        <b>Gültig ab:</b> 18. Oktober 2026
         <br />
         <b>Betreiber:</b> Nikolas Tsombanis –{" "}
         <a href="mailto:weilsiedichlieben@posteo.de">
@@ -274,7 +274,7 @@ const termsContent = {
   en: (
     <div style={{ maxHeight: "300px", overflow: "auto" }}>
       <Paragraph>
-        <b>Valid from:</b> May 30, 2025
+        <b>Valid from:</b> October 18, 2026
         <br />
         <b>Operator:</b> Nikolas Tsombanis –{" "}
         <a href="mailto:weilsiedichlieben@posteo.de">
