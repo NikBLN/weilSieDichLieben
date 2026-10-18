@@ -91,13 +91,9 @@ describe("App auto-hide layout", () => {
     });
 
     global.fetch = jest.fn((url) => {
-      if (
-        typeof url === "string" &&
-        url.includes("notification-version.json")
-      ) {
-        return Promise.resolve({
-          json: () => Promise.resolve({ version: 0 }),
-        });
+      // No header notice unless a test provides one.
+      if (typeof url === "string" && url.startsWith("/notice.json")) {
+        return Promise.resolve({ ok: false });
       }
 
       return Promise.resolve({
@@ -114,6 +110,105 @@ describe("App auto-hide layout", () => {
     jest.useRealTimers();
     getBoundingClientRectMock.mockRestore();
     jest.resetAllMocks();
+  });
+
+  const serveNotice = (getNotice) => {
+    const fallbackFetch = global.fetch.getMockImplementation();
+    global.fetch.mockImplementation((url) =>
+      typeof url === "string" && url.startsWith("/notice.json")
+        ? Promise.resolve({
+            ok: true,
+            text: () => Promise.resolve(JSON.stringify(getNotice())),
+          })
+        : fallbackFetch(url)
+    );
+  };
+
+  test("stores the version of a closed notice in a cookie", async () => {
+    serveNotice(() => ({ version: 3, title: { de: "Hinweis", en: "Notice" } }));
+    render(<App />);
+
+    expect(await screen.findByText("Notice")).toBeTruthy();
+
+    act(() => {
+      screen.getByRole("button", { name: "Close" }).click();
+    });
+
+    expect(screen.queryByTestId("notice")).toBeNull();
+    // The cookie mock keeps only the last assignment.
+    expect(document.cookie).toMatch(/^noticeVersion=3;/);
+  });
+
+  test("keeps a notice closed whose version is stored in the cookie", async () => {
+    document.cookie += ";noticeVersion=3";
+    serveNotice(() => ({ version: 3, title: "Old notice" }));
+    render(<App />);
+
+    await screen.findByTestId("app-content");
+    await act(async () => {});
+
+    expect(screen.queryByText("Old notice")).toBeNull();
+  });
+
+  test("shows a closed notice again when its version changes", async () => {
+    document.cookie += ";noticeVersion=3";
+    let version = 3;
+    serveNotice(() => ({ version, title: "Updated notice" }));
+    render(<App />);
+
+    await screen.findByTestId("app-content");
+    await act(async () => {});
+    expect(screen.queryByText("Updated notice")).toBeNull();
+
+    version = 4;
+    await act(async () => {
+      jest.advanceTimersByTime(1800000);
+    });
+
+    expect(await screen.findByText("Updated notice")).toBeTruthy();
+  });
+
+  test("does not store a cookie without consent", async () => {
+    document.cookie = "cookieConsent=false";
+    serveNotice(() => ({ version: 1, title: "Notice" }));
+    render(<App />);
+
+    const closeButton = await screen.findByRole("button", { name: "Schließen" });
+    act(() => {
+      closeButton.click();
+    });
+
+    expect(screen.queryByText("Notice")).toBeNull();
+    expect(document.cookie).toBe("cookieConsent=false");
+  });
+
+  test("hides a temporary notice after hideAfter seconds without a cookie", async () => {
+    serveNotice(() => ({ version: 1, title: "Temporary notice", hideAfter: 30 }));
+    const cookieBefore = document.cookie;
+    render(<App />);
+
+    expect(await screen.findByText("Temporary notice")).toBeTruthy();
+    expect(screen.getByTestId("notice-countdown")).toBeTruthy();
+
+    act(() => {
+      jest.advanceTimersByTime(29000);
+    });
+    expect(screen.queryByText("Temporary notice")).toBeTruthy();
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    expect(screen.queryByText("Temporary notice")).toBeNull();
+    expect(document.cookie).toBe(cookieBefore);
+  });
+
+  test("shows no notice when notice.json is missing", async () => {
+    render(<App />);
+
+    await screen.findByTestId("app-content");
+    await act(async () => {});
+
+    expect(screen.queryByTestId("notice")).toBeNull();
   });
 
   test("removes reserved header and footer space after auto-hide", async () => {

@@ -21,3 +21,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# header notice, maintained on the server via FTP; never deploy a copy from
+# the repository (the dev server serves the example in docs/notice/)
+/public/notice.json

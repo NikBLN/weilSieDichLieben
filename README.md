@@ -13,6 +13,7 @@ _Configure your own personal BVG Public Transport Anzeigetafel and enjoy public 
 - [Getting Started](#getting-started)
 - [Development](#development)
 - [API](#api)
+- [Header notice](#header-notice)
 - [Cookie Usage](#cookie-usage)
 - [Contributing](#contributing)
 - [License](#license)
@@ -112,6 +113,60 @@ directly.
 Errors come as `{ error: { code, message } }`. Station IDs are 9 digits
 (e.g. `900100003`); older 12-digit IDs are accepted as well.
 
+## Header notice
+A short notice can be shown in the header, e.g. to announce changes. The app
+reads it from `/notice.json` on the web server on every page load and again
+every 30 minutes (for screens that are never reloaded). Missing, inactive or
+broken files simply show no notice.
+
+The file is maintained by hand via FTP and is **not** part of the repository
+(`public/notice.json` is in `.gitignore`). The FTP
+deploy only deletes or overwrites files it uploaded itself, so a deploy leaves
+the notice alone. `testing.weilsiedichlieben.de` reads its own file from the
+`testing/` folder.
+
+```json
+{
+  "version": 1,
+  "active": true,
+  "from": "2026-10-18",
+  "until": "2026-11-30",
+  "hideAfter": 60,
+  "badge": { "de": "NEU", "en": "NEW" },
+  "title": { "de": "Abfahrtsdaten jetzt direkt vom {image}", "en": "Departure data now directly from {image}" },
+  "text": { "de": "Danke an den VBB!", "en": "Thanks to VBB!" },
+  "image": "/VBB.png",
+  "imageAlt": "VBB"
+}
+```
+
+| Field | Required | Meaning |
+|---|---|---|
+| `version` | yes | Number. Raise it to show the notice again to everyone who closed it |
+| `title` | yes | Main line |
+| `active` | no | `false` hides the notice, default `true` |
+| `from`, `until` | no | Time window. A date (`2026-10-18`) means the whole day, a date with time (`2026-10-18T08:00:00+02:00`) the exact moment |
+| `hideAfter` | no | Seconds after which the notice disappears for this visit; a shrinking bar at the bottom shows the time left |
+| `badge` | no | Small highlighted label in front of the title |
+| `text` | no | Smaller second line |
+| `image` | no | Image path on the web server, e.g. `/VBB.png`. Upload the image via FTP or add it to [`public/`](./public) to deploy it with the app. `{image}` in the title places it, otherwise it follows the title |
+| `imageAlt` | no | Image description for screen readers |
+
+Texts are either one string for all languages or `{ "de": ..., "en": ... }`;
+a missing translation falls back to German. The file may contain `//` and
+`/* */` comments; the example in `docs/notice/` documents every field that way.
+
+Closing the notice with ✕ stores its `version` in the `noticeVersion` cookie
+(only with cookie consent; without it the notice comes back on the next
+visit). It stays closed until `notice.json` has a different `version`, so
+change the version whenever everyone should see the notice again. A notice
+hidden by `hideAfter` is not stored and shows again on the next visit.
+
+[`docs/notice/notice.json`](./docs/notice/notice.json) contains an example.
+`npm start` serves it as `/notice.json` (see
+[`src/setupProxy.js`](./src/setupProxy.js)), so edit it there and reload the
+page to try a notice locally.
+
 ## Cookie Usage
 This project stores a few cookies in your browser to save your personal settings. They are only used to improve your experience and are never shared with third parties. The cookies currently in use are:
 
@@ -120,7 +175,7 @@ This project stores a few cookies in your browser to save your personal settings
 - `remarksVisibility` and `standardRemarksVisibility` – whether to display scrolling remarks
 - `autoHide` – remember if header/footer should auto‑hide
 - `language` – chosen interface language
-- `notificationVersion` – prevents showing the same update notification twice
+- `noticeVersion` – version of the last closed header notice
 - `hideDepartureCol` - remember if the departure column should be hidden
 
 All cookies expire after about one year and are not used for tracking or advertising purposes.

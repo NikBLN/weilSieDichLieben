@@ -1,0 +1,6 @@
+{
+  // notice.json may contain comments, the app strips them before parsing.
+  "files.associations": {
+    "**/docs/notice/notice.json": "jsonc"
+  }
+}

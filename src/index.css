@@ -47,6 +47,15 @@ antd-custom-cell {
   animation: pulseAnimation 1s ease-in-out;
 }
 
+@keyframes noticeCountdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
 @keyframes pulseAnimation {
   0% {
     transform: scale(1);

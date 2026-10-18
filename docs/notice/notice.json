@@ -1,0 +1,58 @@
+// Hinweis im Header. Liegt auf dem Server unter public_html/notice.json.
+// Kommentare mit // und /* */ sind erlaubt.
+//
+// Alle Felder:
+//
+//   "version": 3
+//     Pflicht. Zahl. Wer den Hinweis mit ✕ schließt, bekommt ihn erst wieder
+//     angezeigt, wenn hier eine andere Zahl steht (Cookie "noticeVersion").
+//
+//   "title": "Text" oder { "de": "Text", "en": "Text" }
+//     Pflicht. Hauptzeile. {image} setzt das Bild an diese Stelle,
+//     ohne Platzhalter steht es hinter dem Titel.
+//
+//   "active": true
+//     Optional. false blendet den Hinweis aus. Standard: true.
+//
+//   "from": "2026-10-18"
+//   "until": "2026-11-30T18:00:00+01:00"
+//     Optional. Zeitraum. Nur Datum = ganzer Tag (from ab 00:00, until bis
+//     23:59), mit Uhrzeit = genau ab/bis dann.
+//
+//   "hideAfter": 30
+//     Optional. Sekunden, nach denen der Hinweis für diesen Besuch
+//     verschwindet. Ein Balken unten zeigt die Restzeit. Setzt kein Cookie.
+//
+//   "badge": { "de": "NEU", "en": "NEW" }
+//     Optional. Kleines gelbes Label vor dem Titel.
+//
+//   "text": { "de": "Text", "en": "Text" }
+//     Optional. Kleinere zweite Zeile.
+//
+//   "image": "/VBB.png"
+//     Optional. Pfad zum Bild auf dem Webserver. Bild per FTP hochladen
+//     oder im Repo nach public/ legen, dann wird es mit deployt.
+//
+//   "imageAlt": "VBB"
+//     Optional. Bildbeschreibung für Screenreader.
+//
+// Texte sind entweder ein String für alle Sprachen oder { "de": ..., "en": ... },
+// fehlt "en", wird "de" genommen. Ist etwas ungültig (z. B. "version": "3" in
+// Anführungszeichen oder ein falsches Datum), erscheint gar kein Hinweis.
+// Nach dem letzten Feld kein Komma.
+{
+  "version": 1,
+  "active": true,
+  "from": "2026-10-18",
+  "badge": { "de": "NEU", "en": "NEW" },
+  "title": {
+    "de": "Abfahrtsdaten jetzt direkt vom {image}",
+    "en": "Departure data now directly from {image}"
+  },
+  "text": {
+    "de": "Wir sollten damit weniger Ausfälle verzeichnen. Danke an den VBB!",
+    "en": "This should mean fewer outages. Thanks to VBB!"
+  },
+  "image": "/VBB.png",
+  "imageAlt": "VBB"
+}

@@ -44,6 +44,7 @@ App (main state manager)
 ├── Settings (configuration panel)
 │   ├── SettingsModal (station editing)
 │   └── StationFinder (station search/add)
+├── Notice (header notice from notice.json)
 ├── DepartureDisplay (main view)
 │   └── DepartureTable (departure list with RadarMap popover)
 ├── DonationDisplay, CookieBanner, LegalModals
@@ -65,6 +66,12 @@ App (main state manager)
 - Errors are `{ error: { code, message } }`. `isUnavailableError` (network, 429, 503) drives the "API not available" hint in `App`.
 - Station IDs are 9 digits (`900100003`). A cancelled departure becomes `when: null` in the table rows.
 - The API itself lives in a separate repository. Only document what a browser can see here: address, endpoints, fields. No details about how the API works internally.
+
+### Header Notice
+
+- `src/notice.js` loads `/notice.json` from the web server (on start and every 30 minutes) and checks it; `Components/Notice.js` renders it in the header.
+- The file is maintained via FTP and is not in the repository; the commented example `docs/notice/notice.json` lists all fields and is served by `src/setupProxy.js` in development (see README "Header notice").
+- Closing stores the notice `version` in the `noticeVersion` cookie (only with consent); a different version shows it again.
 
 ### Station Configuration Schema
 

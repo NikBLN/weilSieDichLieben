@@ -32,12 +32,15 @@ import {
   message,
   Typography,
   Space,
+  Grid,
 } from "antd";
 import DonationDisplay from "./Components/DonationDisplay";
 import CookieBanner from "./Components/CookieBanner";
 import LegalModals from "./Components/LegalModals";
+import Notice from "./Components/Notice";
 import { getTranslation } from "./dictionary";
 import { isAlive } from "./api";
+import { fetchNotice, getActiveNotice } from "./notice";
 
 const App = () => {
   const [language, setLanguage] = useState("de");
@@ -70,6 +73,12 @@ const App = () => {
   });
   const [hamburgerMenuOpen, setHamburgerMenuOpen] = useState(false);
   const [fontSizeModalOpen, setFontSizeModalOpen] = useState(false);
+  const [notice, setNotice] = useState(null);
+  // Version of the last closed notice. A new version in notice.json shows the
+  // notice again for everyone.
+  const [closedNoticeVersion, setClosedNoticeVersion] = useState(null);
+  // When a temporary notice hides itself, drives the countdown bar.
+  const [noticeHideAt, setNoticeHideAt] = useState(null);
   const autoHideTimeoutRef = useRef(null);
   const lastMousePosition = useRef({ x: null, y: null });
   const instanceIdCounter = useRef(0);
@@ -81,6 +90,11 @@ const App = () => {
     footerHeight: 0,
   });
   const isMobile = useIsMobile();
+  const screens = Grid.useBreakpoint();
+  // Wide screens show the notice next to the logo, smaller ones in its own row.
+  const noticeInline = !isMobile && Boolean(screens.xl);
+  const noticeVisible =
+    notice != null && notice.version !== closedNoticeVersion;
 
   const { Title, Text } = Typography;
 
@@ -153,11 +167,46 @@ const App = () => {
     fetchHideDepartureColFromCookie();
     fetchStandardRemarksVisibilityFromCookie();
     fetchLanguageFromCookie();
+    fetchNoticeVersionFromCookie();
 
     return () => {
       clearInterval(apiAvailableInterval);
     };
   }, [cookieConsent]);
+
+  useEffect(() => {
+    // Reload the notice every 30 minutes so kiosk screens that never reload
+    // pick up new notices and time windows.
+    const loadNotice = () => {
+      fetchNotice().then((rawNotice) => setNotice(getActiveNotice(rawNotice)));
+    };
+
+    loadNotice();
+    const noticeInterval = setInterval(loadNotice, 1800000);
+
+    return () => {
+      clearInterval(noticeInterval);
+    };
+  }, []);
+
+  useEffect(() => {
+    // A temporary notice closes itself after "hideAfter" seconds. Unlike the
+    // close button this is not stored, so it shows again on the next visit.
+    if (!noticeVisible || notice.hideAfter == null) {
+      setNoticeHideAt(null);
+      return undefined;
+    }
+
+    const hideAfterMs = notice.hideAfter * 1000;
+    setNoticeHideAt(Date.now() + hideAfterMs);
+    const hideTimeout = setTimeout(() => {
+      setClosedNoticeVersion(notice.version);
+    }, hideAfterMs);
+
+    return () => {
+      clearTimeout(hideTimeout);
+    };
+  }, [noticeVisible, notice?.version]);
 
   useEffect(() => {
     // Handle export URL generation
@@ -414,6 +463,23 @@ const App = () => {
     if (cookieLanguage && cookieLanguage !== "") {
       setLanguage(JSON.parse(cookieLanguage));
     }
+  };
+
+  const fetchNoticeVersionFromCookie = () => {
+    if (!cookieConsent) return;
+    const cookieNoticeVersion = document.cookie.replace(
+      /(?:(?:^|.*;\s*)noticeVersion\s*=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+
+    if (cookieNoticeVersion !== "") {
+      setClosedNoticeVersion(Number(cookieNoticeVersion));
+    }
+  };
+
+  const closeNotice = () => {
+    setClosedNoticeVersion(notice.version);
+    saveDataInCookie("noticeVersion", notice.version);
   };
 
   const onLanguageChange = (value) => {
@@ -824,7 +890,8 @@ const App = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "flex-start",
-          width: "33.33%",
+          flex: "1 1 0",
+          minWidth: 0,
           marginRight: "8px",
           color: "#f0d722",
         }}
@@ -899,8 +966,7 @@ const App = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          width: isMobile ? "auto" : "33.33%",
-          flex: 1,
+          flex: isMobile ? 1 : "0 0 auto",
         }}
       >
         <img
@@ -934,10 +1000,16 @@ const App = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "flex-end",
-          width: "33.33%",
+          flex: "1 1 0",
+          minWidth: 0,
         }}
       >
-        <div>
+        {noticeInline && noticeVisible && (
+          <div style={{ minWidth: 0, margin: "0 24px 0 16px" }}>
+            {renderNotice()}
+          </div>
+        )}
+        <div style={{ marginLeft: "auto" }}>
           <Popover
             title={getTranslation(language, "fontSize")}
             trigger="click"
@@ -1009,6 +1081,16 @@ const App = () => {
     );
   };
 
+  const renderNotice = () => (
+    <Notice
+      notice={notice}
+      hideAt={noticeHideAt}
+      language={language}
+      isMobile={isMobile}
+      onClose={closeNotice}
+    />
+  );
+
   // Reserve shell space only while the bars are visible.
   const footerVisible = uiVisible && !settingsAreVisible;
   const headerOffset = uiVisible ? uiLayout.headerHeight : 0;
@@ -1030,6 +1112,7 @@ const App = () => {
         data-testid="app-header"
         style={{
           display: "flex",
+          flexWrap: "wrap",
           padding: "8px",
           transform: uiVisible ? "translateY(0)" : "translateY(-100%)",
           transition: "transform 0.3s ease-in-out",
@@ -1043,6 +1126,18 @@ const App = () => {
         {renderHeaderLeftSideContent()}
         {renderHeaderMidContent()}
         {renderHeaderRightSideContent()}
+        {!noticeInline && noticeVisible && (
+          <div
+            style={{
+              flexBasis: "100%",
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "8px",
+            }}
+          >
+            {renderNotice()}
+          </div>
+        )}
       </div>
       <div
         data-testid="app-content"
