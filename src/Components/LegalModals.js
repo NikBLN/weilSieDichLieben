@@ -245,6 +245,12 @@ const termsContent = {
         wird keine Haftung für Richtigkeit, Vollständigkeit oder Aktualität
         übernommen.
       </Paragraph>
+      <Paragraph>
+        Die Fahrplandaten (Stationen, Abfahrten und Fahrzeugpositionen) stammen
+        vom Verkehrsverbund Berlin-Brandenburg GmbH (VBB). Auch für sie gilt:
+        keine Gewähr für Richtigkeit und Aktualität, kein Anspruch auf ständige
+        Verfügbarkeit.
+      </Paragraph>
       <Title level={5}>3. Urheberrecht</Title>
       <Paragraph>
         Alle Inhalte, Bilder und Texte sind urheberrechtlich geschützt und
@@ -284,6 +290,12 @@ const termsContent = {
       <Paragraph>
         The content on this website is provided for informational purposes only.
         No liability is assumed for accuracy, completeness or timeliness.
+      </Paragraph>
+      <Paragraph>
+        The timetable data (stations, departures and vehicle positions) is
+        provided by Verkehrsverbund Berlin-Brandenburg GmbH (VBB). The same
+        applies to it: no guarantee of accuracy or timeliness, and no claim to
+        constant availability.
       </Paragraph>
       <Title level={5}>3. Copyright</Title>
       <Paragraph>

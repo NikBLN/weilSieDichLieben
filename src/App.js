@@ -702,8 +702,6 @@ const App = () => {
         <Text strong>{getTranslation(language, "whyDonateH2")}</Text>
         <Text>{getTranslation(language, "whyDonateP2")}</Text>
         <Text>{getTranslation(language, "whyDonateP3")}</Text>
-        <Text strong>{getTranslation(language, "whyDonateH3")}</Text>
-        <Text>{getTranslation(language, "whyDonateP4")}</Text>
       </Space>
     </Modal>
   );
