@@ -67,7 +67,9 @@ const privacyContent = {
       <Paragraph>
         Diese Website wird bei Hetzner Online GmbH, Industriestr. 25, 91710
         Gunzenhausen, gehostet. Hetzner speichert IP-Adressen in Server-Logfiles
-        zur Erkennung und Abwehr von Angriffen.
+        zur Erkennung und Abwehr von Angriffen. Auch die Schnittstelle
+        api.weilsiedichlieben.de läuft auf einem Server der Hetzner Online GmbH,
+        Anfragen an sie gehen über Cloudflare (siehe Abschnitt 6).
       </Paragraph>
       <Title level={5}>6. Cloudflare</Title>
       <Paragraph>
@@ -171,7 +173,9 @@ const privacyContent = {
       <Paragraph>
         This website is hosted by Hetzner Online GmbH, Industriestr. 25, 91710
         Gunzenhausen, Germany. Server log data (such as IP addresses) is stored
-        for security purposes.
+        for security purposes. The interface api.weilsiedichlieben.de also runs
+        on a server of Hetzner Online GmbH; requests to it pass through
+        Cloudflare (see section 6).
       </Paragraph>
       <Title level={5}>6. Cloudflare</Title>
       <Paragraph>
