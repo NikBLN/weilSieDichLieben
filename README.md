@@ -12,14 +12,15 @@ _Configure your own personal BVG Public Transport Anzeigetafel and enjoy public 
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Development](#development)
+- [API](#api)
 - [Cookie Usage](#cookie-usage)
 - [Contributing](#contributing)
 - [License](#license)
 
 ## About
-weilSieDichLieben is a small React application that displays live departure information from the Berlin public transport system (BVG). It was built so you can run your very own BVG style departure board on a spare tablet, monitor or phone. Configure the stops you care about and the page remembers your settings so the board is ready whenever you open it.
+weilSieDichLieben is a small React application that displays live departure information for Berlin and Brandenburg public transport. It was built so you can run your very own BVG style departure board on a spare tablet, monitor or phone. Configure the stops you care about and the page remembers your settings so the board is ready whenever you open it.
 
-The application fetches its data from the public BVG API and is optimized to run in a fullscreen web view. It works best on tablets but can be used on any device with a modern browser.
+The application fetches its data from its own API at `api.weilsiedichlieben.de` (timetable data: [VBB Verkehrsverbund Berlin-Brandenburg](https://www.vbb.de)) and is optimized to run in a fullscreen web view. It works best on tablets but can be used on any device with a modern browser.
 
 ## Demo
 Visit [www.weilSieDichLieben.de](https://www.weilSiedichLieben.de) to try the app without installing anything. On iOS/iPadOS you can add the page to your home screen via the "Share" button to run it in fullscreen mode.
@@ -36,7 +37,7 @@ Visit [www.weilSieDichLieben.de](https://www.weilSiedichLieben.de) to try the ap
 You can either use the hosted version above or run the project locally.
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) (tested with Node 20)
+- [Node.js](https://nodejs.org/) (tested with Node 20 and 24)
 - npm comes bundled with Node.js
 
 ### Installation
@@ -50,10 +51,31 @@ npm install
 ```
 
 ### Running Locally
+The API behind weilsiedichlieben.de is private and only answers requests from
+weilsiedichlieben.de, so a local copy gets no data from it. For working on the
+app, start the mock API with sample data in one terminal and the app in a
+second one:
+
 ```bash
-npm start
+npm run mock-api   # sample data on http://localhost:8787/v1
+npm start          # app on http://localhost:3000
 ```
-This will start the development server at `http://localhost:3000` and open the app in your browser.
+
+The mock API ([`scripts/mock-api.js`](./scripts/mock-api.js)) returns made-up
+departures, including a disruption, a cancelled trip and hints, so every part
+of the board can be designed and tested. It is not real timetable data.
+On start it prints a link that opens the board with two sample stations
+already set up. The station search only knows the six sample stations
+(e.g. Alexanderplatz, Hauptbahnhof, Mehringdamm); for any other text it
+suggests all of them.
+
+To run your own copy with real departures, connect it to the public
+[transport.rest](https://transport.rest) API. What to change is described in
+[`docs/transport-rest.md`](./docs/transport-rest.md).
+
+In development the app talks to `http://localhost:8787/v1` (see
+`.env.development`). To use a different address, create
+`.env.development.local` with `REACT_APP_API_BASE_URL=...`.
 
 ### Building
 For a production build run:
@@ -72,6 +94,23 @@ npm test -- --watchAll=false
 
 ## Development
 The React source code lives in the [`src`](./src) directory while static assets such as `index.html` reside in [`public`](./public). Feel free to open issues or pull requests if you want to contribute. Please read our [Code of Conduct](./CODE_OF_CONDUCT.md) before participating.
+
+## API
+The app only talks to `https://api.weilsiedichlieben.de/v1`. The base URL is
+set via `REACT_APP_API_BASE_URL` (`.env.development`, `.env.production`) and
+read in [`src/api/config.js`](./src/api/config.js). All requests go through
+[`src/api/`](./src/api); components never call `fetch` for timetable data
+directly.
+
+| Endpoint | Parameters | Response |
+|---|---|---|
+| `GET /health` | – | `{ ok }` |
+| `GET /stations` | `q`, `lang` | `{ stations: [{ id, name, lat, lon, products }] }`, `products` lists the means of transport that stop there (e.g. `["subway", "bus"]`) |
+| `GET /departures` | `stop`, `products`, `offset`, `results`, `direction`, `remarks` (`all` or `disruptions`), `lang` | `{ departures: [{ tripId, line, product, direction, stop, plannedWhen, when, cancelled, platform, remarks }] }` |
+| `GET /vehicles` | `lat`, `lon`, `radius`, `trips` | `{ vehicles: [{ tripId, line, product, direction, lat, lon }] }` |
+
+Errors come as `{ error: { code, message } }`. Station IDs are 9 digits
+(e.g. `900100003`); older 12-digit IDs are accepted as well.
 
 ## Cookie Usage
 This project stores a few cookies in your browser to save your personal settings. They are only used to improve your experience and are never shared with third parties. The cookies currently in use are:

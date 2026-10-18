@@ -17,19 +17,26 @@ beforeAll(() => {
     };
   }
 });
-import { render, screen, waitFor } from '@testing-library/react';
-import DepartureDisplay from './DepartureDisplay';
-jest.mock('react-leaflet', () => ({
+import { render, screen, waitFor } from "@testing-library/react";
+import DepartureDisplay from "./DepartureDisplay";
+import { ApiError, getDepartures } from "../api";
+
+jest.mock("react-leaflet", () => ({
   MapContainer: ({ children }) => <div>{children}</div>,
   TileLayer: () => <div></div>,
   Marker: ({ children }) => <div>{children}</div>,
   Tooltip: ({ children }) => <div>{children}</div>,
 }));
 
+jest.mock("../api", () => {
+  const actual = jest.requireActual("../api");
+  return { ...actual, getDepartures: jest.fn() };
+});
+
 const baseStation = {
   instanceId: 1,
-  id: '1',
-  value: 'Station',
+  id: "900100003",
+  value: "Station",
   when: 0,
   results: 1,
   suburban: true,
@@ -41,33 +48,21 @@ const baseStation = {
   regional: true,
 };
 
-beforeEach(() => {
-  global.fetch = jest.fn(() =>
-    Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve({ departures: [] }),
-    })
-  );
+const departure = (overrides = {}) => ({
+  tripId: "1|3030|0|86|27092026",
+  line: "S7",
+  product: "suburban",
+  direction: "S Ahrensfelde Bhf (Berlin)",
+  stop: { id: "900100003", name: "Alexanderplatz", lat: 52.52, lon: 13.41 },
+  plannedWhen: new Date(Date.now() + 5 * 60000).toISOString(),
+  when: new Date(Date.now() + 5 * 60000 + 30000).toISOString(),
+  cancelled: false,
+  platform: "3",
+  remarks: [],
+  ...overrides,
 });
 
-afterEach(() => {
-  jest.resetAllMocks();
-});
-
-test('does not fetch when no stations', async () => {
-  render(
-    <DepartureDisplay
-      selectedStations={[]}
-      fontSize={16}
-      remarksVisibility={false}
-      standardRemarksVisibility={false}
-      language="en"
-    />
-  );
-  await waitFor(() => expect(global.fetch).not.toHaveBeenCalled());
-});
-
-test('fetches departures when stations provided', async () => {
+const renderDisplay = (props = {}) =>
   render(
     <DepartureDisplay
       selectedStations={[baseStation]}
@@ -75,61 +70,120 @@ test('fetches departures when stations provided', async () => {
       remarksVisibility={false}
       standardRemarksVisibility={false}
       language="en"
-    />
-  );
-  await waitFor(() => expect(global.fetch).toHaveBeenCalled());
-});
-
-const renderDisplay = (stations) =>
-  render(
-    <DepartureDisplay
-      selectedStations={stations}
-      fontSize={16}
-      remarksVisibility={false}
-      standardRemarksVisibility={false}
-      language="en"
-    />
+      {...props}
+    />,
   );
 
-test('says when no stations are selected', () => {
-  renderDisplay([]);
-  expect(screen.getByRole('status').textContent).toContain('No stations selected.');
+beforeEach(() => {
+  getDepartures.mockResolvedValue([]);
 });
 
-test('says when there are no departures', async () => {
-  renderDisplay([baseStation]);
-  expect(await screen.findByText('No departures for the selected stations and filters.')).toBeTruthy();
+afterEach(() => {
+  jest.resetAllMocks();
 });
 
-test('says when the API is unreachable', async () => {
-  global.fetch = jest.fn(() => Promise.reject(new TypeError('Failed to fetch')));
-  renderDisplay([baseStation]);
-  expect(await screen.findByText('The BVG API is not reachable.')).toBeTruthy();
+test("does not fetch when no stations", async () => {
+  renderDisplay({ selectedStations: [] });
+  await waitFor(() => expect(getDepartures).not.toHaveBeenCalled());
 });
 
-test('says when the API answers with an error', async () => {
-  global.fetch = jest.fn(() => Promise.resolve({ ok: false, status: 503, statusText: 'Service Unavailable' }));
-  renderDisplay([baseStation]);
-  expect(await screen.findByText('The BVG API responded with an error.')).toBeTruthy();
-});
-
-test('shows the stations that loaded and reports the ones that failed', async () => {
-  global.fetch = jest.fn((url) =>
-    url.includes('/stops/2/')
-      ? Promise.resolve({ ok: false, status: 429, statusText: 'Too Many Requests' })
-      : Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({
-            departures: [{
-              stop: { id: '1', name: 'Alexanderplatz', location: {} },
-              line: { name: 'U2' },
-              direction: 'Pankow',
-              when: new Date(Date.now() + 5 * 60000).toISOString(),
-            }],
-          }),
-        })
+test("fetches departures with language and remark setting", async () => {
+  renderDisplay({ standardRemarksVisibility: true });
+  await waitFor(() => expect(getDepartures).toHaveBeenCalled());
+  expect(getDepartures).toHaveBeenCalledWith(
+    baseStation,
+    expect.objectContaining({ language: "en", standardRemarks: true }),
   );
-  renderDisplay([baseStation, { ...baseStation, instanceId: 2, id: '2' }]);
-  expect(await screen.findByText('Pankow')).toBeTruthy();
-  expect(screen.getByRole('status').textContent).toContain('1/2 stations could not be loaded: Too many requests');
+});
+
+test("shows departures and marks cancelled ones", async () => {
+  getDepartures.mockResolvedValue([
+    departure(),
+    departure({ tripId: "2", direction: "Erkner", cancelled: true }),
+  ]);
+  renderDisplay();
+  expect(await screen.findByText("S Ahrensfelde Bhf (Berlin)")).toBeTruthy();
+  expect(screen.getByText("5 min")).toBeTruthy();
+  expect(screen.getByText("Cancelled")).toBeTruthy();
+});
+
+test("reports an unavailable API on 503", async () => {
+  const onApiAvailabilityChange = jest.fn();
+  getDepartures.mockRejectedValue(new ApiError(503, "upstream_timeout", "x"));
+  jest.spyOn(console, "error").mockImplementation(() => {});
+  renderDisplay({ onApiAvailabilityChange });
+  await waitFor(() => expect(onApiAvailabilityChange).toHaveBeenCalledWith(false));
+});
+
+test("reports an available API after a successful fetch", async () => {
+  const onApiAvailabilityChange = jest.fn();
+  renderDisplay({ onApiAvailabilityChange });
+  await waitFor(() => expect(onApiAvailabilityChange).toHaveBeenCalledWith(true));
+});
+
+test("shows the other stations when one station fails", async () => {
+  const otherStation = { ...baseStation, instanceId: 2, id: "900017101" };
+  getDepartures.mockImplementation((station) =>
+    station.id === otherStation.id
+      ? Promise.reject(new ApiError(400, "invalid_parameter", "x"))
+      : Promise.resolve([departure()]),
+  );
+  const onApiAvailabilityChange = jest.fn();
+  jest.spyOn(console, "error").mockImplementation(() => {});
+  renderDisplay({
+    selectedStations: [baseStation, otherStation],
+    onApiAvailabilityChange,
+  });
+  expect(await screen.findByText("S Ahrensfelde Bhf (Berlin)")).toBeTruthy();
+  // An invalid parameter is not an outage of the API.
+  expect(onApiAvailabilityChange).toHaveBeenCalledWith(true);
+});
+
+test("says when no stations are selected", () => {
+  renderDisplay({ selectedStations: [] });
+  expect(screen.getByRole("status").textContent).toContain(
+    "No stations selected.",
+  );
+});
+
+test("says when there are no departures", async () => {
+  renderDisplay();
+  expect(
+    await screen.findByText(
+      "No departures for the selected stations and filters.",
+    ),
+  ).toBeTruthy();
+});
+
+test("says when the API is unreachable", async () => {
+  getDepartures.mockRejectedValue(
+    new ApiError(0, "network_error", "Failed to fetch"),
+  );
+  jest.spyOn(console, "error").mockImplementation(() => {});
+  renderDisplay();
+  expect(await screen.findByText("The BVG API is not reachable.")).toBeTruthy();
+});
+
+test("says when the API answers with an error", async () => {
+  getDepartures.mockRejectedValue(new ApiError(503, "upstream_timeout", "x"));
+  jest.spyOn(console, "error").mockImplementation(() => {});
+  renderDisplay();
+  expect(
+    await screen.findByText("The BVG API responded with an error."),
+  ).toBeTruthy();
+});
+
+test("shows the stations that loaded and reports the ones that failed", async () => {
+  const otherStation = { ...baseStation, instanceId: 2, id: "900017101" };
+  getDepartures.mockImplementation((station) =>
+    station.id === otherStation.id
+      ? Promise.reject(new ApiError(429, "rate_limited", "x"))
+      : Promise.resolve([departure()]),
+  );
+  jest.spyOn(console, "error").mockImplementation(() => {});
+  renderDisplay({ selectedStations: [baseStation, otherStation] });
+  expect(await screen.findByText("S Ahrensfelde Bhf (Berlin)")).toBeTruthy();
+  expect(screen.getByRole("status").textContent).toContain(
+    "1/2 stations could not be loaded: Too many requests",
+  );
 });

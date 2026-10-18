@@ -1,5 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import App from "./App";
+import { isAlive } from "./api";
 
 jest.mock("./Components/DepartureDisplay", () => () => (
   <div data-testid="mock-departure-display">Departure display</div>
@@ -15,6 +16,7 @@ jest.mock("./Components/DonationDisplay", () => () => (
 
 jest.mock("./Components/LegalModals", () => () => <div>Legal modals</div>);
 jest.mock("./Components/CookieBanner", () => () => null);
+jest.mock("./api", () => ({ isAlive: jest.fn() }));
 
 // JSDOM does not compute layout, so the test provides fixed heights.
 const createRect = (height) => ({
@@ -54,6 +56,7 @@ describe("App auto-hide layout", () => {
   });
 
   beforeEach(() => {
+    isAlive.mockResolvedValue(true);
     jest.useFakeTimers();
 
     getBoundingClientRectMock = jest

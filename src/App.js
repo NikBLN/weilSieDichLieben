@@ -37,6 +37,7 @@ import DonationDisplay from "./Components/DonationDisplay";
 import CookieBanner from "./Components/CookieBanner";
 import LegalModals from "./Components/LegalModals";
 import { getTranslation } from "./dictionary";
+import { isAlive } from "./api";
 
 const App = () => {
   const [language, setLanguage] = useState("de");
@@ -349,21 +350,7 @@ const App = () => {
   };
 
   const checkIfApiIsAvailable = () => {
-    // check if API is available by fetching a stop
-    fetch("https://v6.bvg.transport.rest/stops/900017101/departures", {
-      headers: { "User-Agent": "https://weilsiedichlieben.de" },
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          setApiIsAvailable(true);
-        } else {
-          setApiIsAvailable(false);
-        }
-      })
-      .catch((error) => {
-        console.error("Error checking API availability:", error);
-        setApiIsAvailable(false);
-      });
+    isAlive().then(setApiIsAvailable);
   };
 
   const fetchRemarksVisibilityFromCookie = () => {
@@ -634,22 +621,36 @@ const App = () => {
       >
         <Title level={5}>Bereitstellung der Daten</Title>
         <Space direction="vertical" size={1}>
-          <Text>
-            <a href="https://transport.rest">
-              transport.rest transit APIs
+          <Text strong>
+            Fahrplandaten powered by{" "}
+            <a href="https://www.vbb.de">
+              VBB Verkehrsverbund Berlin-Brandenburg
             </a>
           </Text>
           <Text>
-            Danke {<a href="https://github.com/derhuerst">Jannis</a>} für
-            das Betreiben und Bereitstellen der tollen API! Schaut doch mal
-            bei transport.rest vorbei!
+            Diese Website ist ein privates Projekt und wird von mir betrieben
+            und verantwortet. Der VBB stellt ausschließlich die Fahrplandaten
+            bereit. Keine Gewähr für Richtigkeit und Aktualität der Daten.
+          </Text>
+          <Text strong>
+            Mit{" "}
+            <a href="https://transport.rest">transport.rest transit APIs</a>{" "}
+            fing alles an
+          </Text>
+          <Text>
+            Mit dieser API konnte das Projekt starten, ohne sie gäbe es diese
+            Website nicht. Danke{" "}
+            {<a href="https://github.com/derhuerst">Jannis</a>} für das
+            Betreiben und Bereitstellen der tollen API! Inzwischen kommen die
+            Fahrplandaten direkt vom VBB, transport.rest wird aktuell nicht
+            mehr genutzt. Schaut trotzdem mal bei transport.rest vorbei!
           </Text>
         </Space>
         <Title level={5}>Allgemeines</Title>
         <Space direction="vertical" size={1}>
           <Text strong>
             Diese Website ist ein privates Projekt und wird nicht von der
-            BVG betrieben.
+            BVG oder dem VBB betrieben.
           </Text>
         </Space>
         <Title level={5}>Angaben gemäß § 5 TMG</Title>
@@ -701,8 +702,6 @@ const App = () => {
         <Text strong>{getTranslation(language, "whyDonateH2")}</Text>
         <Text>{getTranslation(language, "whyDonateP2")}</Text>
         <Text>{getTranslation(language, "whyDonateP3")}</Text>
-        <Text strong>{getTranslation(language, "whyDonateH3")}</Text>
-        <Text>{getTranslation(language, "whyDonateP4")}</Text>
       </Space>
     </Modal>
   );
@@ -1090,6 +1089,7 @@ const App = () => {
               hideDepartureCol={hideDepartureCol}
               standardRemarksVisibility={standardRemarksVisibility}
               language={language}
+              onApiAvailabilityChange={setApiIsAvailable}
             />
           </div>
         )}

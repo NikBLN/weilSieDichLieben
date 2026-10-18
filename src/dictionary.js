@@ -64,15 +64,12 @@ const dictionary = {
     when: "Abfahrt in",
     whyDonateH1: "Warum solltest du in Betracht ziehen zu spenden?",
     whyDonateH2: "Was bekommst du dafür?",
-    whyDonateH3:
-      "Werde ich der einzige sein, der das Geld aus den Spenden erhält?",
     whyDonateP1:
       "Durch eine Spende unterstützt du meine Arbeit und hilfst mir, die Kosten für das Hosting der Website zu decken.",
     whyDonateP2:
       "Während des Spendenprozesses kannst du anfordern, als Unterstützer auf dieser Website anerkannt zu werden. Dein Name, Twitter-Handle, Instagram-Handle oder andere Informationen werden am Ende der Website angezeigt, damit alle Benutzer sie sehen können! Ich aktualisiere die Spenden manuell jeden Tag, also bitte sei geduldig, wenn dein Name nicht sofort angezeigt wird.",
     whyDonateP3:
       "Ich glaube daran, diese Website allen kostenlos und ohne Werbung zur Verfügung zu stellen, daher wird es keine zusätzlichen Premium-Funktionen geben, abgesehen von dieser coolen Anzeigetafel.",
-    whyDonateP4: `Nein, ich werde 30% der Spende (nach PayPal-Gebühren) an Jannis (https://github.com/derhuerst) für die Bereitstellung der Daten für diese Website spenden. Ohne ihn wäre dieses Projekt nicht möglich gewesen!`,
   },
   en: {
     acceptCookies: "Accept cookies",
@@ -138,15 +135,12 @@ const dictionary = {
     when: "Departure in",
     whyDonateH1: "Why should you consider donating?",
     whyDonateH2: "What do you get in return?",
-    whyDonateH3: "Will I be the only one receiving the donation money?",
     whyDonateP1:
       "By donating, you'll be supporting my work and helping me cover the costs of hosting the website.",
     whyDonateP2:
       "During the donation process, you can request to be acknowledged as a supporter on this website. Your name, Twitter handle, Instagram handle, or other information will be displayed at the bottom of the website for all users to see! I'm updating the donations manually each day, so please be patient if your name doesn't show up immediately.",
     whyDonateP3:
       "I believe in providing this website to everyone for free and without ads, so there won't be any additional premium features aside from this cool departure board.",
-    whyDonateP4: `
-    No, I will donate 30% of the donation (after PayPal fees) to Jannis (https://github.com/derhuerst) for providing the data for this website. Without him, this project would not have been possible!`,
   },
 };
 

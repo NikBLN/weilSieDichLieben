@@ -67,9 +67,49 @@ const privacyContent = {
       <Paragraph>
         Diese Website wird bei Hetzner Online GmbH, Industriestr. 25, 91710
         Gunzenhausen, gehostet. Hetzner speichert IP-Adressen in Server-Logfiles
-        zur Erkennung und Abwehr von Angriffen.
+        zur Erkennung und Abwehr von Angriffen. Auch die Schnittstelle
+        api.weilsiedichlieben.de läuft auf einem Server der Hetzner Online GmbH,
+        Anfragen an sie gehen über Cloudflare (siehe Abschnitt 6).
       </Paragraph>
-      <Title level={5}>6. Kontakt zum Datenschutz</Title>
+      <Title level={5}>6. Cloudflare</Title>
+      <Paragraph>
+        Diese Website und die zugehörige Schnittstelle api.weilsiedichlieben.de
+        werden über Cloudflare (Cloudflare, Inc., 101 Townsend St., San
+        Francisco, CA 94107, USA) ausgeliefert. Cloudflare verarbeitet dabei
+        als Auftragsverarbeiter Ihre IP-Adresse und technische Verbindungsdaten,
+        um die Inhalte schnell bereitzustellen und Angriffe abzuwehren.
+        Cloudflare ist unter dem EU-US Data Privacy Framework zertifiziert.
+        Weitere Informationen finden Sie in der{" "}
+        <a href="https://www.cloudflare.com/privacypolicy/">
+          Datenschutzerklärung von Cloudflare
+        </a>
+        .
+      </Paragraph>
+      <Title level={5}>7. Fahrplandaten</Title>
+      <Paragraph>
+        Die Fahrplandaten stammen vom Verkehrsverbund Berlin-Brandenburg GmbH
+        (VBB), Hardenbergplatz 2, 10623 Berlin. Für Stationssuche, Abfahrten
+        und Fahrzeugpositionen fragt Ihr Browser die Schnittstelle
+        api.weilsiedichlieben.de ab. Diese leitet die Anfrage an den VBB
+        beziehungsweise dessen technischen Dienstleister weiter. Übermittelt
+        werden nur die Inhalte der Anfrage, also Suchbegriffe, Stationen, die
+        gewählten Verkehrsmittel und bei der Fahrzeugkarte die Koordinaten der
+        Station. Ihre IP-Adresse wird nicht an den VBB weitergegeben.
+      </Paragraph>
+      <Title level={5}>8. Kartenkacheln von OpenStreetMap</Title>
+      <Paragraph>
+        Wenn Sie die Fahrzeugkarte öffnen, lädt Ihr Browser Kartenkacheln
+        direkt von den Servern der OpenStreetMap Foundation (St John’s
+        Innovation Centre, Cowley Road, Cambridge, CB4 0WS, Vereinigtes
+        Königreich). Dabei werden Ihre IP-Adresse und der gezeigte
+        Kartenausschnitt an die OpenStreetMap Foundation übermittelt. Weitere
+        Informationen finden Sie in der{" "}
+        <a href="https://osmfoundation.org/wiki/Privacy_Policy">
+          Datenschutzerklärung der OpenStreetMap Foundation
+        </a>
+        .
+      </Paragraph>
+      <Title level={5}>9. Kontakt zum Datenschutz</Title>
       <Paragraph>
         Bei Fragen zur Erhebung, Verarbeitung oder Nutzung Ihrer
         personenbezogenen Daten wenden Sie sich bitte an:
@@ -133,9 +173,45 @@ const privacyContent = {
       <Paragraph>
         This website is hosted by Hetzner Online GmbH, Industriestr. 25, 91710
         Gunzenhausen, Germany. Server log data (such as IP addresses) is stored
-        for security purposes.
+        for security purposes. The interface api.weilsiedichlieben.de also runs
+        on a server of Hetzner Online GmbH; requests to it pass through
+        Cloudflare (see section 6).
       </Paragraph>
-      <Title level={5}>6. Contact</Title>
+      <Title level={5}>6. Cloudflare</Title>
+      <Paragraph>
+        This website and its interface api.weilsiedichlieben.de are delivered
+        via Cloudflare (Cloudflare, Inc., 101 Townsend St., San Francisco, CA
+        94107, USA). As a processor, Cloudflare processes your IP address and
+        technical connection data to deliver content quickly and to fend off
+        attacks. Cloudflare is certified under the EU-US Data Privacy
+        Framework. For more information, see Cloudflare's{" "}
+        <a href="https://www.cloudflare.com/privacypolicy/">Privacy Policy</a>
+        .
+      </Paragraph>
+      <Title level={5}>7. Timetable data</Title>
+      <Paragraph>
+        Timetable data is provided by Verkehrsverbund Berlin-Brandenburg GmbH
+        (VBB), Hardenbergplatz 2, 10623 Berlin, Germany. For station search,
+        departures and vehicle positions, your browser queries the interface
+        api.weilsiedichlieben.de, which forwards the request to VBB or its
+        technical service provider. Only the content of the request is
+        transmitted: search terms, stations, the selected means of transport
+        and, for the vehicle map, the coordinates of the station. Your IP
+        address is not passed on to VBB.
+      </Paragraph>
+      <Title level={5}>8. Map tiles from OpenStreetMap</Title>
+      <Paragraph>
+        When you open the vehicle map, your browser loads map tiles directly
+        from the servers of the OpenStreetMap Foundation (St John’s Innovation
+        Centre, Cowley Road, Cambridge, CB4 0WS, United Kingdom). Your IP
+        address and the map section shown are transmitted to the OpenStreetMap
+        Foundation. For more information, see the{" "}
+        <a href="https://osmfoundation.org/wiki/Privacy_Policy">
+          OpenStreetMap Foundation Privacy Policy
+        </a>
+        .
+      </Paragraph>
+      <Title level={5}>9. Contact</Title>
       <Paragraph>
         For questions related to your data, contact:
         <br /> <b>Nikolas Tsombanis</b> –{" "}
@@ -151,7 +227,7 @@ const termsContent = {
   de: (
     <div style={{ maxHeight: "300px", overflow: "auto" }}>
       <Paragraph>
-        <b>Gültig ab:</b> 30. Mai 2025
+        <b>Gültig ab:</b> 18. Oktober 2026
         <br />
         <b>Betreiber:</b> Nikolas Tsombanis –{" "}
         <a href="mailto:weilsiedichlieben@posteo.de">
@@ -168,6 +244,12 @@ const termsContent = {
         Die Inhalte auf dieser Website dienen ausschließlich der Information. Es
         wird keine Haftung für Richtigkeit, Vollständigkeit oder Aktualität
         übernommen.
+      </Paragraph>
+      <Paragraph>
+        Die Fahrplandaten (Stationen, Abfahrten und Fahrzeugpositionen) stammen
+        vom Verkehrsverbund Berlin-Brandenburg GmbH (VBB). Auch für sie gilt:
+        keine Gewähr für Richtigkeit und Aktualität, kein Anspruch auf ständige
+        Verfügbarkeit.
       </Paragraph>
       <Title level={5}>3. Urheberrecht</Title>
       <Paragraph>
@@ -192,7 +274,7 @@ const termsContent = {
   en: (
     <div style={{ maxHeight: "300px", overflow: "auto" }}>
       <Paragraph>
-        <b>Valid from:</b> May 30, 2025
+        <b>Valid from:</b> October 18, 2026
         <br />
         <b>Operator:</b> Nikolas Tsombanis –{" "}
         <a href="mailto:weilsiedichlieben@posteo.de">
@@ -208,6 +290,12 @@ const termsContent = {
       <Paragraph>
         The content on this website is provided for informational purposes only.
         No liability is assumed for accuracy, completeness or timeliness.
+      </Paragraph>
+      <Paragraph>
+        The timetable data (stations, departures and vehicle positions) is
+        provided by Verkehrsverbund Berlin-Brandenburg GmbH (VBB). The same
+        applies to it: no guarantee of accuracy or timeliness, and no claim to
+        constant availability.
       </Paragraph>
       <Title level={5}>3. Copyright</Title>
       <Paragraph>
