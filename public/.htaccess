@@ -1,14 +1,10 @@
-# Origin lock (only Cloudflare may reach this host): disabled.
-#
-# Since about 2026-09-30 the host rewrites the client address of requests
-# coming through Cloudflare to the visitor's IP, so "Require ip" with
-# Cloudflare's ranges rejected every visitor. Matching on CONN_REMOTE_ADDR
-# (as suggested by the host) rejected every visitor as well. Until a working
-# way is found, the site is reachable without the lock, as it was since the
-# outage. History: git log -- public/.htaccess
+<IfModule mod_authz_core.c>
+  <RequireAny>
+    Require expr "%{REQUEST_URI} =~ m#^/\.well-known/#"
+    Require expr "%{HTTP:X-HOS-CDN} == 'cloudflare'"
+  </RequireAny>
+</IfModule>
 
-# The FTP deploy keeps its sync state next to the files. It lists every
-# uploaded file with a hash; nobody needs to download it.
 <Files ".ftp-deploy-sync-state.json">
   Require all denied
 </Files>
