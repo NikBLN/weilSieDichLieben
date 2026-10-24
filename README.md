@@ -85,7 +85,7 @@ npm run build
 ```
 The output will be placed in the `build/` directory. The repository contains a GitHub Actions workflow that deploys this folder via FTP whenever changes are pushed to the `main` branch.
 
-To try changes first, push them to the `testing` branch (`git push origin HEAD:testing`); they are deployed to `testing.weilsiedichlieben.de`. Once the workflow is on `main`, any branch can also be deployed there via "Run workflow" in the Actions tab.
+To try a branch first, deploy it to `testing.weilsiedichlieben.de` with `gh workflow run deploy-testing.yml --ref <branch>` or via "Run workflow" in the Actions tab.
 
 ### Testing
 This project uses **Jest** together with **React Testing Library**. To run the
