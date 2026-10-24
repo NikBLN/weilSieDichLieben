@@ -12,7 +12,7 @@ volunteers. Thanks to [Jannis](https://github.com/derhuerst) for providing it.
 ## Where to change things
 
 All data access lives in [`src/api/index.js`](../src/api/index.js). The
-components only use four functions and expect the formats below. Rewrite
+components only use three functions and expect the formats below. Rewrite
 these functions to call transport.rest and convert its responses; nothing
 else needs to change.
 
@@ -20,7 +20,6 @@ else needs to change.
 |---|---|
 | `searchStations(query, { language, signal })` | `[{ id, name, lat, lon }]` |
 | `getDepartures(station, { language, standardRemarks, signal })` | `[{ tripId, line, product, direction, stop: { id, name, lat, lon }, plannedWhen, when, cancelled, platform, remarks: [{ type, summary?, text }] }]` |
-| `getVehicles({ latitude, longitude, trips, signal })` | `[{ tripId, line, product, direction, lat, lon }]` |
 | `isAlive({ signal })` | `true` or `false` |
 
 Set `REACT_APP_API_BASE_URL` in `.env.development.local` and
@@ -34,7 +33,6 @@ history, before the switch to the own API:
 ```bash
 git show 32b7670:src/Components/StationFinder.js
 git show 32b7670:src/Components/DepartureDisplay.js
-git show 32b7670:src/Components/RadarMap.js
 ```
 
 ## Mapping
@@ -72,18 +70,6 @@ station settings).
   `GET /journeys?from={id}&to={destination.id}` and took the first leg of each
   journey, see `convertJourneyResultToDepartureData` in the old
   `DepartureDisplay.js`.
-
-**`getVehicles`** → `GET /radar?north=…&south=…&west=…&east=…&results=100`
-with a box of about 2 km around the station.
-
-| This app | transport.rest |
-|---|---|
-| `tripId` | `tripId` |
-| `line`, `product` | `line.name`, `line.product` |
-| `direction` | `direction` |
-| `lat`, `lon` | `location.latitude`, `location.longitude` |
-
-Keep only the movements whose `tripId` is in `trips`.
 
 **`isAlive`** → any request that returns 200, e.g.
 `GET /stops/900100003/departures?results=1`.

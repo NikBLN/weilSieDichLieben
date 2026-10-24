@@ -46,7 +46,7 @@ App (main state manager)
 │   └── StationFinder (station search/add)
 ├── Notice (header notice from notice.json)
 ├── DepartureDisplay (main view)
-│   └── DepartureTable (departure list with RadarMap popover)
+│   └── DepartureTable (departure list)
 ├── DonationDisplay, CookieBanner, LegalModals
 ```
 
@@ -59,9 +59,9 @@ App (main state manager)
 ### Key APIs and Endpoints
 
 **weilsiedichlieben API** (`https://api.weilsiedichlieben.de/v1`):
-- All calls go through `src/api/` (`searchStations`, `getDepartures`, `getVehicles`, `isAlive`). Components never call `fetch` for timetable data.
+- All calls go through `src/api/` (`searchStations`, `getDepartures`, `isAlive`). Components never call `fetch` for timetable data.
 - Base URL from `REACT_APP_API_BASE_URL`: `.env.development` points to a local API on `http://localhost:8787/v1`, `.env.production` to the deployed one.
-- Endpoints: `/health`, `/stations?q&lang`, `/departures?stop&products&offset&results&direction&remarks&lang`, `/vehicles?lat&lon&radius&trips`.
+- Endpoints: `/health`, `/stations?q&lang`, `/departures?stop&products&offset&results&direction&remarks&lang`.
 - Always build query parameters in the fixed order used in `src/api/index.js`; the API caches by full URL.
 - Errors are `{ error: { code, message } }`. `isUnavailableError` (network, 429, 503) drives the "API not available" hint in `App`.
 - Station IDs are 9 digits (`900100003`). A cancelled departure becomes `when: null` in the table rows.
@@ -100,7 +100,7 @@ Uses `dictionary.js` with `getTranslation(language, "key")` function. Supports G
 ### Testing Approach
 
 - Component tests using React Testing Library
-- Mocks for external dependencies (react-leaflet, matchMedia)
+- Mocks for external dependencies (matchMedia)
 - Components mock `../api` instead of `fetch`; `src/api/index.test.js` covers URLs and the row conversion
 - CRA resets mocks before each test, so set mock implementations in `beforeEach`
 - Test files follow `ComponentName.test.js` naming
@@ -117,6 +117,5 @@ The app implements GDPR-compliant cookie consent:
 ### Real-time Features
 
 - Departure countdowns update every minute
-- Vehicle radar shows live positions within 2km radius
 - Auto-hide UI for kiosk mode (mouse movement detection)
 - Pulse animation on header logo every 5 seconds

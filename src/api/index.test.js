@@ -1,7 +1,6 @@
 import {
   ApiError,
   getDepartures,
-  getVehicles,
   isAlive,
   isUnavailableError,
   searchStations,
@@ -125,22 +124,6 @@ describe("searchStations", () => {
   });
 });
 
-describe("getVehicles", () => {
-  test("rounds coordinates and sorts trip ids", async () => {
-    global.fetch = jest.fn(() => jsonResponse({ vehicles: [] }));
-    await getVehicles({
-      latitude: 52.521508,
-      longitude: 13.411267,
-      trips: ["1|3030|0|86|27092026", "1|1198|0|86|27092026", "1|3030|0|86|27092026"],
-    });
-    const params = requestedUrl().searchParams;
-    expect(params.get("lat")).toBe("52.522");
-    expect(params.get("lon")).toBe("13.411");
-    expect(params.get("radius")).toBe("2000");
-    expect(params.get("trips")).toBe("1|1198|0|86|27092026,1|3030|0|86|27092026");
-  });
-});
-
 describe("isAlive", () => {
   test("is true only for ok responses", async () => {
     global.fetch = jest.fn(() => jsonResponse({ ok: true }));
@@ -181,13 +164,7 @@ describe("toColumnData", () => {
         departureName: "S+U Alexanderplatz Bhf (Berlin)",
         when: 6,
         remarks: [{ type: "hint", text: "Fahrradmitnahme möglich" }],
-        tripId: "1|3030|0|86|27092026",
         stopId: "900100003",
-        stopLocation: {
-          id: "900100003",
-          latitude: 52.521508,
-          longitude: 13.411267,
-        },
       },
     ]);
   });
@@ -205,13 +182,5 @@ describe("toColumnData", () => {
       "0_900100003_1",
       "1_900120003_0",
     ]);
-  });
-
-  test("has no location without coordinates", () => {
-    const [row] = toColumnData(
-      [[{ ...departure, stop: { id: "1", name: "x" } }]],
-      now,
-    );
-    expect(row.stopLocation).toBeNull();
   });
 });

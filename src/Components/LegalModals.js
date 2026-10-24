@@ -88,28 +88,14 @@ const privacyContent = {
       <Title level={5}>7. Fahrplandaten</Title>
       <Paragraph>
         Die Fahrplandaten stammen vom Verkehrsverbund Berlin-Brandenburg GmbH
-        (VBB), Hardenbergplatz 2, 10623 Berlin. Für Stationssuche, Abfahrten
-        und Fahrzeugpositionen fragt Ihr Browser die Schnittstelle
-        api.weilsiedichlieben.de ab. Diese leitet die Anfrage an den VBB
+        (VBB), Hardenbergplatz 2, 10623 Berlin. Für Stationssuche und Abfahrten
+        fragt Ihr Browser die Schnittstelle api.weilsiedichlieben.de ab. Diese leitet die Anfrage an den VBB
         beziehungsweise dessen technischen Dienstleister weiter. Übermittelt
-        werden nur die Inhalte der Anfrage, also Suchbegriffe, Stationen, die
-        gewählten Verkehrsmittel und bei der Fahrzeugkarte die Koordinaten der
-        Station. Ihre IP-Adresse wird nicht an den VBB weitergegeben.
+        werden nur die Inhalte der Anfrage, also Suchbegriffe, Stationen und die
+        gewählten Verkehrsmittel. Ihre IP-Adresse wird nicht an den VBB
+        weitergegeben.
       </Paragraph>
-      <Title level={5}>8. Kartenkacheln von OpenStreetMap</Title>
-      <Paragraph>
-        Wenn Sie die Fahrzeugkarte öffnen, lädt Ihr Browser Kartenkacheln
-        direkt von den Servern der OpenStreetMap Foundation (St John’s
-        Innovation Centre, Cowley Road, Cambridge, CB4 0WS, Vereinigtes
-        Königreich). Dabei werden Ihre IP-Adresse und der gezeigte
-        Kartenausschnitt an die OpenStreetMap Foundation übermittelt. Weitere
-        Informationen finden Sie in der{" "}
-        <a href="https://osmfoundation.org/wiki/Privacy_Policy">
-          Datenschutzerklärung der OpenStreetMap Foundation
-        </a>
-        .
-      </Paragraph>
-      <Title level={5}>9. Kontakt zum Datenschutz</Title>
+      <Title level={5}>8. Kontakt zum Datenschutz</Title>
       <Paragraph>
         Bei Fragen zur Erhebung, Verarbeitung oder Nutzung Ihrer
         personenbezogenen Daten wenden Sie sich bitte an:
@@ -191,27 +177,14 @@ const privacyContent = {
       <Title level={5}>7. Timetable data</Title>
       <Paragraph>
         Timetable data is provided by Verkehrsverbund Berlin-Brandenburg GmbH
-        (VBB), Hardenbergplatz 2, 10623 Berlin, Germany. For station search,
-        departures and vehicle positions, your browser queries the interface
+        (VBB), Hardenbergplatz 2, 10623 Berlin, Germany. For station search
+        and departures, your browser queries the interface
         api.weilsiedichlieben.de, which forwards the request to VBB or its
         technical service provider. Only the content of the request is
-        transmitted: search terms, stations, the selected means of transport
-        and, for the vehicle map, the coordinates of the station. Your IP
-        address is not passed on to VBB.
+        transmitted: search terms, stations and the selected means of
+        transport. Your IP address is not passed on to VBB.
       </Paragraph>
-      <Title level={5}>8. Map tiles from OpenStreetMap</Title>
-      <Paragraph>
-        When you open the vehicle map, your browser loads map tiles directly
-        from the servers of the OpenStreetMap Foundation (St John’s Innovation
-        Centre, Cowley Road, Cambridge, CB4 0WS, United Kingdom). Your IP
-        address and the map section shown are transmitted to the OpenStreetMap
-        Foundation. For more information, see the{" "}
-        <a href="https://osmfoundation.org/wiki/Privacy_Policy">
-          OpenStreetMap Foundation Privacy Policy
-        </a>
-        .
-      </Paragraph>
-      <Title level={5}>9. Contact</Title>
+      <Title level={5}>8. Contact</Title>
       <Paragraph>
         For questions related to your data, contact:
         <br /> <b>Nikolas Tsombanis</b> –{" "}
@@ -246,7 +219,7 @@ const termsContent = {
         übernommen.
       </Paragraph>
       <Paragraph>
-        Die Fahrplandaten (Stationen, Abfahrten und Fahrzeugpositionen) stammen
+        Die Fahrplandaten (Stationen und Abfahrten) stammen
         vom Verkehrsverbund Berlin-Brandenburg GmbH (VBB). Auch für sie gilt:
         keine Gewähr für Richtigkeit und Aktualität, kein Anspruch auf ständige
         Verfügbarkeit.
@@ -292,7 +265,7 @@ const termsContent = {
         No liability is assumed for accuracy, completeness or timeliness.
       </Paragraph>
       <Paragraph>
-        The timetable data (stations, departures and vehicle positions) is
+        The timetable data (stations and departures) is
         provided by Verkehrsverbund Berlin-Brandenburg GmbH (VBB). The same
         applies to it: no guarantee of accuracy or timeliness, and no claim to
         constant availability.

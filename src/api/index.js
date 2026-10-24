@@ -13,17 +13,11 @@ export const PRODUCTS = [
   "regional",
 ];
 
-const RADAR_RADIUS_METERS = 2000;
-const MAX_TRIPS = 40;
-
 const clampInt = (value, min, max, fallback) => {
   const n = Math.round(Number(value));
   if (!Number.isFinite(n)) return fallback;
   return Math.min(max, Math.max(min, n));
 };
-
-// Rounded to about 100 m so the same map produces the same URL.
-const roundCoord = (value) => Math.round(Number(value) * 1000) / 1000;
 
 export async function searchStations(query, { language, signal } = {}) {
   const data = await apiGet(
@@ -61,21 +55,6 @@ export async function getDepartures(
   return data?.departures ?? [];
 }
 
-export async function getVehicles({ latitude, longitude, trips = [], signal }) {
-  const tripIds = [...new Set(trips.filter(Boolean))].sort().slice(0, MAX_TRIPS);
-  const data = await apiGet(
-    "/vehicles",
-    [
-      ["lat", roundCoord(latitude)],
-      ["lon", roundCoord(longitude)],
-      ["radius", RADAR_RADIUS_METERS],
-      ["trips", tripIds.length ? tripIds.join(",") : null],
-    ],
-    { signal },
-  );
-  return data?.vehicles ?? [];
-}
-
 export async function isAlive({ signal } = {}) {
   try {
     const data = await apiGet("/health", [], { signal });
@@ -105,12 +84,7 @@ export function toColumnData(departuresPerStation, now = new Date()) {
         departureName: stop.name,
         when: minutes,
         remarks: departure.remarks ?? [],
-        tripId: departure.tripId,
         stopId: stop.id,
-        stopLocation:
-          stop.lat != null && stop.lon != null
-            ? { id: stop.id, latitude: stop.lat, longitude: stop.lon }
-            : null,
       });
     });
   });

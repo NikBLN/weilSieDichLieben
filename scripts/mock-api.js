@@ -6,8 +6,7 @@
 //   npm start          # in a second terminal
 //
 // Responses follow the public API format described in README.md. The data is
-// invented: times are generated relative to now, lines and vehicles are
-// examples.
+// invented: times are generated relative to now, lines are examples.
 
 const http = require("http");
 
@@ -110,24 +109,6 @@ function departures(params) {
   });
 }
 
-function vehicles(params) {
-  const lat = Number(params.get("lat")) || 52.52;
-  const lon = Number(params.get("lon")) || 13.405;
-  const trips = params.get("trips")?.split(",") ?? LINES.map((l, i) => `mock|${l.line}|${i}`);
-  return trips.slice(0, 10).map((tripId, i) => {
-    const l = LINES.find((x) => tripId.includes(`|${x.line}|`)) || LINES[i % LINES.length];
-    const angle = (i / 10) * 2 * Math.PI;
-    return {
-      tripId,
-      line: l.line,
-      product: l.product,
-      direction: l.direction,
-      lat: lat + 0.006 * Math.sin(angle),
-      lon: lon + 0.009 * Math.cos(angle),
-    };
-  });
-}
-
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   if (req.method === "OPTIONS") return json(res, 204, {});
@@ -148,8 +129,6 @@ const server = http.createServer((req, res) => {
     case "/v1/departures":
       if (!p.get("stop")) return error(res, 400, "invalid_parameter", "Missing parameter: stop");
       return json(res, 200, { departures: departures(p) });
-    case "/v1/vehicles":
-      return json(res, 200, { vehicles: vehicles(p) });
     default:
       return error(res, 404, "not_found", "Not found");
   }
