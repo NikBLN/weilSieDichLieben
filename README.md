@@ -85,6 +85,8 @@ npm run build
 ```
 The output will be placed in the `build/` directory. The repository contains a GitHub Actions workflow that deploys this folder via FTP whenever changes are pushed to the `main` branch.
 
+To try a branch first, deploy it to `testing.weilsiedichlieben.de` with `gh workflow run deploy-testing.yml --ref <branch>` or via "Run workflow" in the Actions tab.
+
 ### Testing
 This project uses **Jest** together with **React Testing Library**. To run the
 test suite execute:
@@ -108,7 +110,6 @@ directly.
 | `GET /health` | – | `{ ok }` |
 | `GET /stations` | `q`, `lang` | `{ stations: [{ id, name, lat, lon, products }] }`, `products` lists the means of transport that stop there (e.g. `["subway", "bus"]`) |
 | `GET /departures` | `stop`, `products`, `offset`, `results`, `direction`, `remarks` (`all` or `disruptions`), `lang` | `{ departures: [{ tripId, line, product, direction, stop, plannedWhen, when, cancelled, platform, remarks }] }` |
-| `GET /vehicles` | `lat`, `lon`, `radius`, `trips` | `{ vehicles: [{ tripId, line, product, direction, lat, lon }] }` |
 
 Errors come as `{ error: { code, message } }`. Station IDs are 9 digits
 (e.g. `900100003`); older 12-digit IDs are accepted as well.

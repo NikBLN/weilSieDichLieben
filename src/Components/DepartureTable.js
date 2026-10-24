@@ -1,9 +1,7 @@
-import { Row, Col, Popover, Modal } from "antd";
+import { Row, Col } from "antd";
 import React, { useState } from "react";
 import Marquee from "react-fast-marquee";
 import { getTranslation } from "../dictionary";
-import radarIcon from "../images/radar.png";
-import RadarMap from "./RadarMap";
 import StatusRow from "./StatusRow";
 import useIsMobile from "../hooks/useIsMobile";
 
@@ -11,8 +9,6 @@ const DepartureTable = (props) => {
   const [isPaused, setIsPaused] = useState(false);
   const [sortOrder, setSortOrder] = useState("off");
   const [sortField, setSortField] = useState("departureName");
-  const [radarModalOpen, setRadarModalOpen] = useState(false);
-  const [selectedStopLocation, setSelectedStopLocation] = useState(null);
   const isMobile = useIsMobile();
   const FONTSIZE = props.fontSize;
   const FONTFAMILYNAME = "DotMatrix";
@@ -278,38 +274,8 @@ const DepartureTable = (props) => {
         Object.entries(getGroupedData()).map(([groupName, items]) => (
           <div key={groupName}>
             {/* Group Header */}
-            <div
-              style={styles.groupHeader}
-              onClick={() => {
-                const firstItemWithTrip = items.find((item) => item.tripId);
-                if (firstItemWithTrip) {
-                  setSelectedStopLocation(firstItemWithTrip.stopLocation);
-                  setRadarModalOpen(true);
-                }
-              }}
-            >
-              <span
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  width: "100%",
-                }}
-              >
-                <span>
-                  {getTranslation(props.language, "departure")}: {groupName}
-                </span>
-                {items.some((item) => item.tripId) && (
-                  <img
-                    src={radarIcon}
-                    alt="radar"
-                    style={{
-                      width: mobileFontSize * 0.8,
-                      height: mobileFontSize * 0.8,
-                    }}
-                  />
-                )}
-              </span>
+            <div style={styles.groupHeader}>
+              {getTranslation(props.language, "departure")}: {groupName}
             </div>
             {items.map(renderMobileRow)}
           </div>
@@ -340,45 +306,7 @@ const DepartureTable = (props) => {
                 </Col>
                 {!props.hideDepartureCol && (
                   <Col style={styles.column} span={9}>
-                    {data.tripId ? (
-                      <Popover
-                        content={
-                          <RadarMap
-                            stopLocation={data.stopLocation}
-                            dataSource={props.dataSource}
-                            language={props.language}
-                          />
-                        }
-                        trigger="click"
-                        placement="right"
-                        overlayStyle={{
-                          width: 520,
-                          backgroundColor: "lightGray",
-                          borderRadius: "8px",
-                        }}
-                      >
-                        <span
-                          style={{
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}
-                        >
-                          {data.departureName}
-                          <img
-                            src={radarIcon}
-                            alt="radar"
-                            style={{
-                              width: FONTSIZE,
-                              height: FONTSIZE,
-                            }}
-                          />
-                        </span>
-                      </Popover>
-                    ) : (
-                      data.departureName
-                    )}
+                    {data.departureName}
                   </Col>
                 )}
                 <Col
@@ -414,29 +342,6 @@ const DepartureTable = (props) => {
             </div>
           );
         })}
-
-      {/* Mobile Radar Modal */}
-      {isMobile && (
-        <Modal
-          open={radarModalOpen}
-          onCancel={() => setRadarModalOpen(false)}
-          footer={null}
-          width="100%"
-          centered
-          styles={{
-            body: { padding: 0 },
-            content: { padding: 0 },
-          }}
-          className="mobile-fullscreen-modal"
-        >
-          <RadarMap
-            stopLocation={selectedStopLocation}
-            dataSource={props.dataSource}
-            language={props.language}
-            isMobile={true}
-          />
-        </Modal>
-      )}
     </div>
   );
 };

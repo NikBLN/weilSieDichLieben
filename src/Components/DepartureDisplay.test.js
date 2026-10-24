@@ -21,13 +21,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import DepartureDisplay from "./DepartureDisplay";
 import { ApiError, getDepartures } from "../api";
 
-jest.mock("react-leaflet", () => ({
-  MapContainer: ({ children }) => <div>{children}</div>,
-  TileLayer: () => <div></div>,
-  Marker: ({ children }) => <div>{children}</div>,
-  Tooltip: ({ children }) => <div>{children}</div>,
-}));
-
 jest.mock("../api", () => {
   const actual = jest.requireActual("../api");
   return { ...actual, getDepartures: jest.fn() };

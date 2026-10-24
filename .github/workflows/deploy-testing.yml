@@ -1,9 +1,9 @@
 name: Deploy to testing.weilsiedichlieben.de
 
+# Started by hand for the branch to test:
+#   gh workflow run deploy-testing.yml --ref <branch>
 on:
-  push:
-    branches:
-      - feature/vbb-api
+  workflow_dispatch:
 
 # Only one deploy to the test system at a time; a newer push wins.
 concurrency:
