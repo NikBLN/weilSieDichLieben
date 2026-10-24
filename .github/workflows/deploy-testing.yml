@@ -3,7 +3,8 @@ name: Deploy to testing.weilsiedichlieben.de
 on:
   push:
     branches:
-      - feature/vbb-api
+      - testing
+  workflow_dispatch:
 
 # Only one deploy to the test system at a time; a newer push wins.
 concurrency:
