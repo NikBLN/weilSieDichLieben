@@ -64,19 +64,17 @@ export async function isAlive({ signal } = {}) {
   }
 }
 
-// How long a departure stays on the board as "now" after its time has
-// passed. The loaded time can be outdated (a delay that grew since the last
-// fetch) and the clock of the device can be off, so the row is not removed
-// right away. The board updates every 10 seconds, so the row is gone at
-// most 60 seconds after its time.
-const DEPARTED_GRACE_MS = 50000;
-
 // Converts the departures of several stations into the row format of
 // DepartureTable. `when` is the number of minutes until departure at `now`,
 // null for cancelled departures ("Fällt aus"). The board calls this again
 // with a newer `now` to keep the countdown running between two fetches.
-// A departure that left more than DEPARTED_GRACE_MS ago gets no row.
-export function toColumnData(departuresPerStation, now = new Date()) {
+// With `departedGraceMs`, a departure that left longer ago than that gets no
+// row; without it every departure keeps its row.
+export function toColumnData(
+  departuresPerStation,
+  now = new Date(),
+  { departedGraceMs = Infinity } = {},
+) {
   const msUntil = (time) =>
     time ? new Date(time).getTime() - now.getTime() : null;
 
@@ -84,7 +82,7 @@ export function toColumnData(departuresPerStation, now = new Date()) {
   departuresPerStation.forEach((departures, i) => {
     departures.forEach((departure, j) => {
       const left = msUntil(departure.when ?? departure.plannedWhen);
-      if (left !== null && left < -DEPARTED_GRACE_MS) return;
+      if (left !== null && left < -departedGraceMs) return;
       const untilDeparture = departure.cancelled
         ? null
         : msUntil(departure.when);

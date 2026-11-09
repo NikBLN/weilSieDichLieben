@@ -14,6 +14,13 @@ import { getTranslation } from "../dictionary";
 const REFRESH_INTERVAL_MS = 120000;
 // Between fetches the minutes are recomputed from the loaded departures.
 const COUNTDOWN_INTERVAL_MS = 10000;
+// A departure that has left is gone from the board after a minute at most.
+// Until then it stays as "now": the loaded time can be outdated (a delay
+// that grew since the last fetch) and the clock of the device can be off.
+// The row is removed on a countdown update, so its grace ends one update
+// earlier.
+const DEPARTED_MAX_MS = 60000;
+const DEPARTED_GRACE_MS = DEPARTED_MAX_MS - COUNTDOWN_INTERVAL_MS;
 
 // Why a station's departures could not be loaded, as a dictionary key.
 const classifyFetchError = (error) => {
@@ -35,7 +42,10 @@ const DepartureDisplay = (props) => {
   const lastResultsRef = useRef([]);
 
   const columnData = useMemo(
-    () => toColumnData(departures, new Date(now)),
+    () =>
+      toColumnData(departures, new Date(now), {
+        departedGraceMs: DEPARTED_GRACE_MS,
+      }),
     [departures, now],
   );
 

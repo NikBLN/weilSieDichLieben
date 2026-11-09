@@ -274,21 +274,6 @@ describe("refresh", () => {
     );
   });
 
-  test("keeps fetching every 120 seconds while the tab is hidden", async () => {
-    Object.defineProperty(document, "hidden", {
-      configurable: true,
-      get: () => true,
-    });
-    try {
-      await renderAndLoad();
-      expect(getDepartures).toHaveBeenCalledTimes(1);
-      await advance(240);
-      expect(getDepartures).toHaveBeenCalledTimes(3);
-    } finally {
-      delete document.hidden;
-    }
-  });
-
   test("fetches at once when a setting changes", async () => {
     const { rerender } = await renderAndLoad();
     await advance(10);

@@ -196,8 +196,19 @@ describe("toColumnData", () => {
     }
   });
 
-  test("keeps a departure as 0 or less for 50 seconds after its time", () => {
-    const rowsAt = (time) => toColumnData([[departure]], new Date(time));
+  test("keeps departed rows unless a grace period is given", () => {
+    const [row] = toColumnData(
+      [[departure]],
+      new Date("2026-09-27T14:30:00+02:00"),
+    );
+    expect(row.when).toBe(-23);
+  });
+
+  const grace = { departedGraceMs: 50000 };
+
+  test("keeps a departure as 0 or less for the grace period after its time", () => {
+    const rowsAt = (time) =>
+      toColumnData([[departure]], new Date(time), grace);
     // The table shows 0 and negative minutes as "now".
     expect(rowsAt("2026-09-27T14:07:01+02:00")[0].when).toBe(-1);
     expect(rowsAt("2026-09-27T14:07:50+02:00")[0].when).toBe(-1);
@@ -213,15 +224,16 @@ describe("toColumnData", () => {
     const rows = toColumnData(
       [[departure, later]],
       new Date("2026-09-27T14:08:00+02:00"),
+      grace,
     );
     expect(rows.map((r) => r.key)).toEqual(["0_900100003_1"]);
     expect(rows[0].when).toBe(4);
   });
 
-  test("drops a cancelled departure 50 seconds after its time", () => {
+  test("drops a cancelled departure after the grace period as well", () => {
     const cancelled = { ...departure, cancelled: true };
     const rowsAt = (rowDeparture, time) =>
-      toColumnData([[rowDeparture]], new Date(time));
+      toColumnData([[rowDeparture]], new Date(time), grace);
     expect(rowsAt(cancelled, "2026-09-27T14:07:50+02:00")).toEqual([
       expect.objectContaining({ when: null }),
     ]);
