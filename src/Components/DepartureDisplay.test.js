@@ -232,20 +232,46 @@ describe("refresh", () => {
     expect(getDepartures).toHaveBeenCalledTimes(1);
   });
 
-  test("removes a departure that has left before the next fetch", async () => {
+  test("keeps a departure as Now shortly after its time, then removes it", async () => {
     getDepartures.mockResolvedValue([
-      departure({ when: at(45) }),
+      departure({ when: at(40) }),
       departure({ tripId: "2", direction: "Erkner", when: at(600) }),
     ]);
     await renderAndLoad();
     expect(screen.getByText("Now")).toBeTruthy();
 
-    await advance(50);
+    // 40 s after its time the row is still there ...
+    await advance(80);
+    expect(screen.getByText("S Ahrensfelde Bhf (Berlin)")).toBeTruthy();
+    expect(screen.getByText("Now")).toBeTruthy();
+
+    // ... and gone within a minute, before the next fetch.
+    await advance(20);
     expect(screen.queryByText("S Ahrensfelde Bhf (Berlin)")).toBeNull();
     expect(screen.queryByText("Now")).toBeNull();
     expect(screen.getByText("Erkner")).toBeTruthy();
-    expect(screen.getByText("9 min")).toBeTruthy();
+    expect(screen.getByText("8 min")).toBeTruthy();
     expect(getDepartures).toHaveBeenCalledTimes(1);
+  });
+
+  test("does not say 'no departures' when the loaded ones have all left", async () => {
+    getDepartures.mockResolvedValue([departure({ when: at(10) })]);
+    await renderAndLoad();
+
+    await advance(70);
+    expect(screen.queryByText("S Ahrensfelde Bhf (Berlin)")).toBeNull();
+    expect(screen.getByRole("status").textContent).toContain(
+      "Loading departures",
+    );
+    expect(getDepartures).toHaveBeenCalledTimes(1);
+
+    // The next fetch brings an empty answer: now there really are none.
+    getDepartures.mockResolvedValue([]);
+    await advance(50);
+    expect(getDepartures).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole("status").textContent).toContain(
+      "No departures for the selected stations and filters.",
+    );
   });
 
   test("keeps fetching every 120 seconds while the tab is hidden", async () => {

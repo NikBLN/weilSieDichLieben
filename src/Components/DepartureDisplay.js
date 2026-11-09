@@ -118,7 +118,12 @@ const DepartureDisplay = (props) => {
       if (failures.length === total) return reasons;
       return `${failures.length}/${total} ${t("statusSomeStationsFailed")}: ${reasons}`;
     }
-    return columnData.length === 0 ? t("statusNoDepartures") : null;
+    if (columnData.length > 0) return null;
+    // "No departures" only if the API returned none. If the loaded ones
+    // have all left by now, the next fetch brings new ones.
+    return departures.some((list) => list.length > 0)
+      ? t("statusLoading")
+      : t("statusNoDepartures");
   };
 
   return (

@@ -64,20 +64,30 @@ export async function isAlive({ signal } = {}) {
   }
 }
 
+// How long a departure stays on the board as "now" after its time has
+// passed. The loaded time can be outdated (a delay that grew since the last
+// fetch) and the clock of the device can be off, so the row is not removed
+// right away. The board updates every 10 seconds, so the row is gone at
+// most 60 seconds after its time.
+const DEPARTED_GRACE_MS = 50000;
+
 // Converts the departures of several stations into the row format of
 // DepartureTable. `when` is the number of minutes until departure at `now`,
 // null for cancelled departures ("Fällt aus"). The board calls this again
 // with a newer `now` to keep the countdown running between two fetches.
-// A departure whose time has passed gets no row: the table would show it as
-// "now" until the next fetch, long after it has left.
+// A departure that left more than DEPARTED_GRACE_MS ago gets no row.
 export function toColumnData(departuresPerStation, now = new Date()) {
-  const minutesUntil = (time) =>
-    time ? Math.floor((new Date(time).getTime() - now.getTime()) / 60000) : null;
+  const msUntil = (time) =>
+    time ? new Date(time).getTime() - now.getTime() : null;
 
   const rows = [];
   departuresPerStation.forEach((departures, i) => {
     departures.forEach((departure, j) => {
-      if (minutesUntil(departure.when ?? departure.plannedWhen) < 0) return;
+      const left = msUntil(departure.when ?? departure.plannedWhen);
+      if (left !== null && left < -DEPARTED_GRACE_MS) return;
+      const untilDeparture = departure.cancelled
+        ? null
+        : msUntil(departure.when);
       const stop = departure.stop ?? {};
       rows.push({
         // The position in the response, so a row keeps its key when the
@@ -86,7 +96,7 @@ export function toColumnData(departuresPerStation, now = new Date()) {
         lineName: departure.line,
         direction: departure.direction,
         departureName: stop.name,
-        when: departure.cancelled ? null : minutesUntil(departure.when),
+        when: untilDeparture === null ? null : Math.floor(untilDeparture / 60000),
         remarks: departure.remarks ?? [],
         stopId: stop.id,
       });
