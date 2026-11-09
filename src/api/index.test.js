@@ -174,6 +174,60 @@ describe("toColumnData", () => {
     expect(row.when).toBeNull();
   });
 
+  test("counts down as time passes, without new data", () => {
+    const minutesAt = (time) =>
+      toColumnData([[departure]], new Date(time))[0].when;
+    expect(minutesAt("2026-09-27T14:05:01+02:00")).toBe(1);
+    expect(minutesAt("2026-09-27T14:06:00+02:00")).toBe(1);
+    // Less than a minute left: the table shows this as "now".
+    expect(minutesAt("2026-09-27T14:06:01+02:00")).toBe(0);
+    expect(minutesAt("2026-09-27T14:07:00+02:00")).toBe(0);
+  });
+
+  test("uses the current time by default", () => {
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(now);
+      expect(toColumnData([[departure]])[0].when).toBe(6);
+      jest.advanceTimersByTime(120000);
+      expect(toColumnData([[departure]])[0].when).toBe(4);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  test("drops a departure once its time has passed", () => {
+    const later = {
+      ...departure,
+      tripId: "2",
+      when: "2026-09-27T14:12:00+02:00",
+    };
+    const rows = toColumnData(
+      [[departure, later]],
+      new Date("2026-09-27T14:07:01+02:00"),
+    );
+    // The remaining row keeps its key.
+    expect(rows.map((r) => r.key)).toEqual(["0_900100003_1"]);
+    expect(rows[0].when).toBe(4);
+  });
+
+  test("drops a cancelled departure once its time has passed", () => {
+    const cancelled = { ...departure, cancelled: true };
+    expect(
+      toColumnData([[cancelled]], new Date("2026-09-27T14:06:59+02:00")),
+    ).toHaveLength(1);
+    expect(
+      toColumnData([[cancelled]], new Date("2026-09-27T14:07:01+02:00")),
+    ).toHaveLength(0);
+    // Without a real-time value the planned time counts.
+    expect(
+      toColumnData(
+        [[{ ...cancelled, when: null }]],
+        new Date("2026-09-27T14:05:01+02:00"),
+      ),
+    ).toHaveLength(0);
+  });
+
   test("keeps rows of several stations apart", () => {
     const other = { ...departure, stop: { ...departure.stop, id: "900120003" } };
     const rows = toColumnData([[departure, departure], [other]], now);
