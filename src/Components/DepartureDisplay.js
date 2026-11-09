@@ -14,8 +14,6 @@ import { getTranslation } from "../dictionary";
 const REFRESH_INTERVAL_MS = 120000;
 // Between fetches the minutes are recomputed from the loaded departures.
 const COUNTDOWN_INTERVAL_MS = 10000;
-// A tab that becomes visible again fetches at once if its data is older.
-const RESUME_MAX_AGE_MS = 30000;
 
 // Why a station's departures could not be loaded, as a dictionary key.
 const classifyFetchError = (error) => {
@@ -35,9 +33,6 @@ const DepartureDisplay = (props) => {
   const controllerRef = useRef(null);
   // Last successful departures per station, used when a single station fails.
   const lastResultsRef = useRef([]);
-  // When the last round started and when a round last delivered departures.
-  const lastAttemptRef = useRef(-Infinity);
-  const lastSuccessRef = useRef(-Infinity);
 
   const columnData = useMemo(
     () => toColumnData(departures, new Date(now)),
@@ -49,71 +44,27 @@ const DepartureDisplay = (props) => {
     setFetchStatus(null);
   }, [props.selectedStations]);
 
-  // Fetches at once and then every REFRESH_INTERVAL_MS, but only while the
-  // tab is visible. A hidden tab sends no requests.
   useEffect(() => {
-    if (props.selectedStations.length === 0) {
-      setDepartures([]);
-      return undefined;
-    }
-
-    let timer;
-    const refresh = () => {
-      clearTimeout(timer);
-      timer = setTimeout(refresh, REFRESH_INTERVAL_MS);
+    let interval;
+    if (props.selectedStations.length > 0) {
       fetchDataForSelectedStations();
-    };
-    const handleVisibilityChange = () => {
-      clearTimeout(timer);
-      if (document.hidden) return;
-      // Fetch at once if the departures are too old, otherwise stay on the
-      // rhythm of the last fetch. A failed round counts as well, so that
-      // switching tabs quickly never causes a burst of requests.
-      const current = Date.now();
-      const age =
-        current - Math.max(lastAttemptRef.current, lastSuccessRef.current);
-      if (age > RESUME_MAX_AGE_MS) {
-        refresh();
-      } else {
-        const sinceAttempt = current - lastAttemptRef.current;
-        timer = setTimeout(
-          refresh,
-          Math.max(0, REFRESH_INTERVAL_MS - sinceAttempt),
-        );
-      }
-    };
-
-    // Changed stations or settings always need new departures; a hidden tab
-    // fetches them as soon as it becomes visible.
-    lastAttemptRef.current = -Infinity;
-    lastSuccessRef.current = -Infinity;
-    if (!document.hidden) refresh();
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
+      interval = setInterval(fetchDataForSelectedStations, REFRESH_INTERVAL_MS);
+    } else {
+      setDepartures([]);
+    }
     return () => {
-      clearTimeout(timer);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      clearInterval(interval);
       controllerRef.current?.abort();
     };
   }, [props.selectedStations, props.language, props.standardRemarksVisibility]);
 
-  // Keeps the countdown running between fetches without any request, and
-  // brings it up to date as soon as the tab becomes visible again.
+  // Keeps the countdown running between fetches without any request.
   useEffect(() => {
-    let interval;
-    const start = () => {
-      clearInterval(interval);
-      if (document.hidden) return;
-      setNow(Date.now());
-      interval = setInterval(() => setNow(Date.now()), COUNTDOWN_INTERVAL_MS);
-    };
-
-    start();
-    document.addEventListener("visibilitychange", start);
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener("visibilitychange", start);
-    };
+    const interval = setInterval(
+      () => setNow(Date.now()),
+      COUNTDOWN_INTERVAL_MS,
+    );
+    return () => clearInterval(interval);
   }, []);
 
   const fetchDataForSelectedStations = async () => {
@@ -121,7 +72,6 @@ const DepartureDisplay = (props) => {
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;
-    lastAttemptRef.current = Date.now();
 
     const results = await Promise.allSettled(
       props.selectedStations.map((station) =>
@@ -146,9 +96,6 @@ const DepartureDisplay = (props) => {
       r.status === "fulfilled" ? r.value : lastResultsRef.current[i] ?? [],
     );
     lastResultsRef.current = loaded;
-    if (results.some((r) => r.status === "fulfilled")) {
-      lastSuccessRef.current = Date.now();
-    }
 
     props.onApiAvailabilityChange?.(!errors.some(isUnavailableError));
     setDepartures(loaded);

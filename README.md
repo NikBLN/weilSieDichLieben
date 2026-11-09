@@ -116,8 +116,7 @@ Errors come as `{ error: { code, message } }`. Station IDs are 9 digits
 
 The board asks for new departures every two minutes, which reduces load on
 the API. In between it counts the minutes down itself from the departures it
-has already loaded. A tab that is not visible sends no requests; it catches
-up as soon as it is shown again.
+has already loaded.
 
 ## Header notice
 A short notice can be shown in the header, e.g. to announce changes. The app

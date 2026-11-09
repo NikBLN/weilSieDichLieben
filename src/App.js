@@ -42,8 +42,6 @@ import { getTranslation } from "./dictionary";
 import { isAlive } from "./api";
 import { fetchNotice, getActiveNotice } from "./notice";
 
-const API_CHECK_INTERVAL_MS = 300000;
-
 const App = () => {
   const [language, setLanguage] = useState("de");
   const [messageApi, contextHolder] = message.useMessage();
@@ -84,7 +82,6 @@ const App = () => {
   const autoHideTimeoutRef = useRef(null);
   const lastMousePosition = useRef({ x: null, y: null });
   const instanceIdCounter = useRef(0);
-  const lastApiCheckRef = useRef(-Infinity);
   // Measure the shell bars so the content area can reserve their real height.
   const headerRef = useRef(null);
   const footerRef = useRef(null);
@@ -158,28 +155,10 @@ const App = () => {
 
   useEffect(() => {
     // Init the app
-    // The availability check runs every 5 minutes, but only while the tab
-    // is visible. A tab that becomes visible again checks at once if it
-    // missed a check, otherwise it stays on its rhythm.
-    let apiAvailableTimer;
-    const checkApi = () => {
-      clearTimeout(apiAvailableTimer);
-      apiAvailableTimer = setTimeout(checkApi, API_CHECK_INTERVAL_MS);
-      lastApiCheckRef.current = Date.now();
+    checkIfApiIsAvailable();
+    const apiAvailableInterval = setInterval(() => {
       checkIfApiIsAvailable();
-    };
-    const handleVisibilityChange = () => {
-      clearTimeout(apiAvailableTimer);
-      if (document.hidden) return;
-      const age = Date.now() - lastApiCheckRef.current;
-      if (age >= API_CHECK_INTERVAL_MS) {
-        checkApi();
-      } else {
-        apiAvailableTimer = setTimeout(checkApi, API_CHECK_INTERVAL_MS - age);
-      }
-    };
-    if (!document.hidden) checkApi();
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    }, 300000);
 
     fetchStationData();
     fetchAutoHideFromCookie();
@@ -191,8 +170,7 @@ const App = () => {
     fetchNoticeVersionFromCookie();
 
     return () => {
-      clearTimeout(apiAvailableTimer);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      clearInterval(apiAvailableInterval);
     };
   }, [cookieConsent]);
 

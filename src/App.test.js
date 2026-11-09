@@ -211,67 +211,6 @@ describe("App auto-hide layout", () => {
     expect(screen.queryByTestId("notice")).toBeNull();
   });
 
-  describe("availability check", () => {
-    const setHidden = (hidden) => {
-      Object.defineProperty(document, "hidden", {
-        configurable: true,
-        get: () => hidden,
-      });
-      act(() => {
-        document.dispatchEvent(new Event("visibilitychange"));
-      });
-    };
-
-    const advanceMinutes = async (minutes) => {
-      await act(async () => {
-        jest.advanceTimersByTime(minutes * 60000);
-      });
-    };
-
-    afterEach(() => {
-      delete document.hidden;
-    });
-
-    test("runs on load and every 5 minutes", async () => {
-      render(<App />);
-      await screen.findByTestId("app-content");
-      expect(isAlive).toHaveBeenCalledTimes(1);
-
-      await advanceMinutes(5);
-      expect(isAlive).toHaveBeenCalledTimes(2);
-    });
-
-    test("pauses while the tab is hidden", async () => {
-      render(<App />);
-      await screen.findByTestId("app-content");
-      setHidden(true);
-
-      await advanceMinutes(30);
-      expect(isAlive).toHaveBeenCalledTimes(1);
-
-      // A missed check is made up for once the tab is visible again.
-      setHidden(false);
-      expect(isAlive).toHaveBeenCalledTimes(2);
-      await advanceMinutes(5);
-      expect(isAlive).toHaveBeenCalledTimes(3);
-    });
-
-    test("does not check again on a quick return", async () => {
-      render(<App />);
-      await screen.findByTestId("app-content");
-      await advanceMinutes(1);
-
-      for (let i = 0; i < 5; i += 1) {
-        setHidden(true);
-        setHidden(false);
-      }
-      expect(isAlive).toHaveBeenCalledTimes(1);
-
-      await advanceMinutes(4);
-      expect(isAlive).toHaveBeenCalledTimes(2);
-    });
-  });
-
   test("removes reserved header and footer space after auto-hide", async () => {
     render(<App />);
 
