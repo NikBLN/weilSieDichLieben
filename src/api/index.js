@@ -65,24 +65,36 @@ export async function isAlive({ signal } = {}) {
 }
 
 // Converts the departures of several stations into the row format of
-// DepartureTable. `when` is the number of minutes until departure, null for
-// cancelled departures ("Fällt aus").
-export function toColumnData(departuresPerStation, now = new Date()) {
+// DepartureTable. `when` is the number of minutes until departure at `now`,
+// null for cancelled departures ("Fällt aus"). The board calls this again
+// with a newer `now` to keep the countdown running between two fetches.
+// With `departedGraceMs`, a departure that left longer ago than that gets no
+// row; without it every departure keeps its row.
+export function toColumnData(
+  departuresPerStation,
+  now = new Date(),
+  { departedGraceMs = Infinity } = {},
+) {
+  const msUntil = (time) =>
+    time ? new Date(time).getTime() - now.getTime() : null;
+
   const rows = [];
   departuresPerStation.forEach((departures, i) => {
     departures.forEach((departure, j) => {
-      const whenDate = departure.when ? new Date(departure.when) : null;
-      const minutes =
-        departure.cancelled || !whenDate
-          ? null
-          : Math.floor((whenDate.getTime() - now.getTime()) / 60000);
+      const left = msUntil(departure.when ?? departure.plannedWhen);
+      if (left !== null && left < -departedGraceMs) return;
+      const untilDeparture = departure.cancelled
+        ? null
+        : msUntil(departure.when);
       const stop = departure.stop ?? {};
       rows.push({
+        // The position in the response, so a row keeps its key when the
+        // departures before it have left.
         key: `${i}_${stop.id}_${j}`,
         lineName: departure.line,
         direction: departure.direction,
         departureName: stop.name,
-        when: minutes,
+        when: untilDeparture === null ? null : Math.floor(untilDeparture / 60000),
         remarks: departure.remarks ?? [],
         stopId: stop.id,
       });

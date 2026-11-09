@@ -174,6 +174,76 @@ describe("toColumnData", () => {
     expect(row.when).toBeNull();
   });
 
+  test("counts down as time passes, without new data", () => {
+    const minutesAt = (time) =>
+      toColumnData([[departure]], new Date(time))[0].when;
+    expect(minutesAt("2026-09-27T14:05:01+02:00")).toBe(1);
+    expect(minutesAt("2026-09-27T14:06:00+02:00")).toBe(1);
+    // Less than a minute left: the table shows this as "now".
+    expect(minutesAt("2026-09-27T14:06:01+02:00")).toBe(0);
+    expect(minutesAt("2026-09-27T14:07:00+02:00")).toBe(0);
+  });
+
+  test("uses the current time by default", () => {
+    jest.useFakeTimers();
+    try {
+      jest.setSystemTime(now);
+      expect(toColumnData([[departure]])[0].when).toBe(6);
+      jest.advanceTimersByTime(120000);
+      expect(toColumnData([[departure]])[0].when).toBe(4);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  test("keeps departed rows unless a grace period is given", () => {
+    const [row] = toColumnData(
+      [[departure]],
+      new Date("2026-09-27T14:30:00+02:00"),
+    );
+    expect(row.when).toBe(-23);
+  });
+
+  const grace = { departedGraceMs: 50000 };
+
+  test("keeps a departure as 0 or less for the grace period after its time", () => {
+    const rowsAt = (time) =>
+      toColumnData([[departure]], new Date(time), grace);
+    // The table shows 0 and negative minutes as "now".
+    expect(rowsAt("2026-09-27T14:07:01+02:00")[0].when).toBe(-1);
+    expect(rowsAt("2026-09-27T14:07:50+02:00")[0].when).toBe(-1);
+    expect(rowsAt("2026-09-27T14:07:51+02:00")).toHaveLength(0);
+  });
+
+  test("drops a departed row and keeps the keys of the others", () => {
+    const later = {
+      ...departure,
+      tripId: "2",
+      when: "2026-09-27T14:12:00+02:00",
+    };
+    const rows = toColumnData(
+      [[departure, later]],
+      new Date("2026-09-27T14:08:00+02:00"),
+      grace,
+    );
+    expect(rows.map((r) => r.key)).toEqual(["0_900100003_1"]);
+    expect(rows[0].when).toBe(4);
+  });
+
+  test("drops a cancelled departure after the grace period as well", () => {
+    const cancelled = { ...departure, cancelled: true };
+    const rowsAt = (rowDeparture, time) =>
+      toColumnData([[rowDeparture]], new Date(time), grace);
+    expect(rowsAt(cancelled, "2026-09-27T14:07:50+02:00")).toEqual([
+      expect.objectContaining({ when: null }),
+    ]);
+    expect(rowsAt(cancelled, "2026-09-27T14:07:51+02:00")).toHaveLength(0);
+    // Without a real-time value the planned time counts.
+    const planned = { ...cancelled, when: null };
+    expect(rowsAt(planned, "2026-09-27T14:05:50+02:00")).toHaveLength(1);
+    expect(rowsAt(planned, "2026-09-27T14:05:51+02:00")).toHaveLength(0);
+  });
+
   test("keeps rows of several stations apart", () => {
     const other = { ...departure, stop: { ...departure.stop, id: "900120003" } };
     const rows = toColumnData([[departure, departure], [other]], now);

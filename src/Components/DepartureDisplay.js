@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import DepartureTable from "./DepartureTable";
 import {
   ApiError,
@@ -10,7 +10,17 @@ import {
 } from "../api";
 import { getTranslation } from "../dictionary";
 
-const REFRESH_INTERVAL_MS = 60000;
+// Departures are fetched every two minutes; this reduces load on the API.
+const REFRESH_INTERVAL_MS = 120000;
+// Between fetches the minutes are recomputed from the loaded departures.
+const COUNTDOWN_INTERVAL_MS = 10000;
+// A departure that has left is gone from the board after a minute at most.
+// Until then it stays as "now": the loaded time can be outdated (a delay
+// that grew since the last fetch) and the clock of the device can be off.
+// The row is removed on a countdown update, so its grace ends one update
+// earlier.
+const DEPARTED_MAX_MS = 60000;
+const DEPARTED_GRACE_MS = DEPARTED_MAX_MS - COUNTDOWN_INTERVAL_MS;
 
 // Why a station's departures could not be loaded, as a dictionary key.
 const classifyFetchError = (error) => {
@@ -21,12 +31,23 @@ const classifyFetchError = (error) => {
 };
 
 const DepartureDisplay = (props) => {
-  const [columnData, setColumnData] = useState([]);
+  // Departures per station as the API returned them.
+  const [departures, setDepartures] = useState([]);
+  // The time the minutes on the board are computed for.
+  const [now, setNow] = useState(() => Date.now());
   // null until the first round of fetches settles; then { failures, total }.
   const [fetchStatus, setFetchStatus] = useState(null);
   const controllerRef = useRef(null);
   // Last successful departures per station, used when a single station fails.
   const lastResultsRef = useRef([]);
+
+  const columnData = useMemo(
+    () =>
+      toColumnData(departures, new Date(now), {
+        departedGraceMs: DEPARTED_GRACE_MS,
+      }),
+    [departures, now],
+  );
 
   useEffect(() => {
     lastResultsRef.current = [];
@@ -39,13 +60,22 @@ const DepartureDisplay = (props) => {
       fetchDataForSelectedStations();
       interval = setInterval(fetchDataForSelectedStations, REFRESH_INTERVAL_MS);
     } else {
-      setColumnData([]);
+      setDepartures([]);
     }
     return () => {
       clearInterval(interval);
       controllerRef.current?.abort();
     };
   }, [props.selectedStations, props.language, props.standardRemarksVisibility]);
+
+  // Keeps the countdown running between fetches without any request.
+  useEffect(() => {
+    const interval = setInterval(
+      () => setNow(Date.now()),
+      COUNTDOWN_INTERVAL_MS,
+    );
+    return () => clearInterval(interval);
+  }, []);
 
   const fetchDataForSelectedStations = async () => {
     // A new round aborts the previous one if it is still running.
@@ -72,13 +102,14 @@ const DepartureDisplay = (props) => {
 
     // Each station on its own: a failing station keeps its last departures,
     // the others are updated.
-    const departures = results.map((r, i) =>
+    const loaded = results.map((r, i) =>
       r.status === "fulfilled" ? r.value : lastResultsRef.current[i] ?? [],
     );
-    lastResultsRef.current = departures;
+    lastResultsRef.current = loaded;
 
     props.onApiAvailabilityChange?.(!errors.some(isUnavailableError));
-    setColumnData(toColumnData(departures));
+    setDepartures(loaded);
+    setNow(Date.now());
     setFetchStatus({
       failures: errors.map(classifyFetchError),
       total: results.length,
@@ -97,7 +128,12 @@ const DepartureDisplay = (props) => {
       if (failures.length === total) return reasons;
       return `${failures.length}/${total} ${t("statusSomeStationsFailed")}: ${reasons}`;
     }
-    return columnData.length === 0 ? t("statusNoDepartures") : null;
+    if (columnData.length > 0) return null;
+    // "No departures" only if the API returned none. If the loaded ones
+    // have all left by now, the next fetch brings new ones.
+    return departures.some((list) => list.length > 0)
+      ? t("statusLoading")
+      : t("statusNoDepartures");
   };
 
   return (

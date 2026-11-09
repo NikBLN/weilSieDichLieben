@@ -36,7 +36,7 @@ This is a React 18 application that creates a customizable BVG (Berlin public tr
 - All critical state lives in `App.js` (stations, settings, UI visibility)
 - Cookie-based persistence for user preferences (with GDPR consent)
 - URL parameters for shareable configurations
-- Real-time updates via 60-second intervals
+- Departures are fetched every 120 seconds; the countdown runs locally in between (see "Real-time Features")
 
 **Component Hierarchy:**
 ```
@@ -116,6 +116,7 @@ The app implements GDPR-compliant cookie consent:
 
 ### Real-time Features
 
-- Departure countdowns update every minute
+- `DepartureDisplay` fetches departures on load, when stations, language or remark settings change, and then every 120 seconds. This reduces load on the API; do not shorten the interval or add further periodic requests.
+- Between fetches the countdown is recomputed every 10 seconds from the departures already loaded (`toColumnData(departures, now)`), without a request. A departure whose time has passed stays as "now" for 50 seconds (`DEPARTED_GRACE_MS`) and is then removed without waiting for the next fetch. If all loaded departures have left, the board shows the loading text; "no departures" only appears when the API returned none.
 - Auto-hide UI for kiosk mode (mouse movement detection)
 - Pulse animation on header logo every 5 seconds

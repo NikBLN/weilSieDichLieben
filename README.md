@@ -114,6 +114,10 @@ directly.
 Errors come as `{ error: { code, message } }`. Station IDs are 9 digits
 (e.g. `900100003`); older 12-digit IDs are accepted as well.
 
+The board asks for new departures every two minutes, which reduces load on
+the API. In between it counts the minutes down itself from the departures it
+has already loaded.
+
 ## Header notice
 A short notice can be shown in the header, e.g. to announce changes. The app
 reads it from `/notice.json` on the web server on every page load and again

@@ -17,7 +17,7 @@ beforeAll(() => {
     };
   }
 });
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import DepartureDisplay from "./DepartureDisplay";
 import { ApiError, getDepartures } from "../api";
 
@@ -179,4 +179,118 @@ test("shows the stations that loaded and reports the ones that failed", async ()
   expect(screen.getByRole("status").textContent).toContain(
     "1/2 stations could not be loaded: Too many requests",
   );
+});
+
+describe("refresh", () => {
+  const START = new Date("2026-09-27T14:00:00+02:00").getTime();
+  const at = (seconds) => new Date(START + seconds * 1000).toISOString();
+
+  // Moves the clock forward and lets running fetches settle.
+  const advance = async (seconds) => {
+    await act(async () => {
+      jest.advanceTimersByTime(seconds * 1000);
+    });
+  };
+
+  const renderAndLoad = async (props) => {
+    const view = renderDisplay(props);
+    await advance(0);
+    return view;
+  };
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(START);
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
+  test("fetches on load and then every 120 seconds", async () => {
+    await renderAndLoad();
+    expect(getDepartures).toHaveBeenCalledTimes(1);
+
+    await advance(119);
+    expect(getDepartures).toHaveBeenCalledTimes(1);
+    await advance(1);
+    expect(getDepartures).toHaveBeenCalledTimes(2);
+    await advance(120);
+    expect(getDepartures).toHaveBeenCalledTimes(3);
+  });
+
+  test("counts down between fetches without a request", async () => {
+    getDepartures.mockResolvedValue([departure({ when: at(100) })]);
+    await renderAndLoad();
+    expect(screen.getByText("1 min")).toBeTruthy();
+
+    // 50 s later less than a minute is left.
+    await advance(50);
+    expect(screen.queryByText("1 min")).toBeNull();
+    expect(screen.getByText("Now")).toBeTruthy();
+    expect(getDepartures).toHaveBeenCalledTimes(1);
+  });
+
+  test("keeps a departure as Now shortly after its time, then removes it", async () => {
+    getDepartures.mockResolvedValue([
+      departure({ when: at(40) }),
+      departure({ tripId: "2", direction: "Erkner", when: at(600) }),
+    ]);
+    await renderAndLoad();
+    expect(screen.getByText("Now")).toBeTruthy();
+
+    // 40 s after its time the row is still there ...
+    await advance(80);
+    expect(screen.getByText("S Ahrensfelde Bhf (Berlin)")).toBeTruthy();
+    expect(screen.getByText("Now")).toBeTruthy();
+
+    // ... and gone within a minute, before the next fetch.
+    await advance(20);
+    expect(screen.queryByText("S Ahrensfelde Bhf (Berlin)")).toBeNull();
+    expect(screen.queryByText("Now")).toBeNull();
+    expect(screen.getByText("Erkner")).toBeTruthy();
+    expect(screen.getByText("8 min")).toBeTruthy();
+    expect(getDepartures).toHaveBeenCalledTimes(1);
+  });
+
+  test("does not say 'no departures' when the loaded ones have all left", async () => {
+    getDepartures.mockResolvedValue([departure({ when: at(10) })]);
+    await renderAndLoad();
+
+    await advance(70);
+    expect(screen.queryByText("S Ahrensfelde Bhf (Berlin)")).toBeNull();
+    expect(screen.getByRole("status").textContent).toContain(
+      "Loading departures",
+    );
+    expect(getDepartures).toHaveBeenCalledTimes(1);
+
+    // The next fetch brings an empty answer: now there really are none.
+    getDepartures.mockResolvedValue([]);
+    await advance(50);
+    expect(getDepartures).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole("status").textContent).toContain(
+      "No departures for the selected stations and filters.",
+    );
+  });
+
+  test("fetches at once when a setting changes", async () => {
+    const { rerender } = await renderAndLoad();
+    await advance(10);
+    rerender(
+      <DepartureDisplay
+        selectedStations={[baseStation]}
+        fontSize={16}
+        remarksVisibility={false}
+        standardRemarksVisibility={false}
+        language="de"
+      />,
+    );
+    await advance(0);
+    expect(getDepartures).toHaveBeenCalledTimes(2);
+    expect(getDepartures).toHaveBeenLastCalledWith(
+      baseStation,
+      expect.objectContaining({ language: "de" }),
+    );
+  });
 });
